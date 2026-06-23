@@ -1,0 +1,62 @@
+# Dependencies
+node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Build/output folders
+dist/
+build/
+out/
+
+# Cache
+.cache/
+.parcel-cache/
+.npm/
+.eslintcache
+
+# Coverage reports
+coverage/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE/Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+tmp/
+temp/
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Bootstrap source maps (optional)
+*.map
+
+# Package lock files (optional - usually keep them)
+# package-lock.json
+# yarn.lock
+
+# Netlify/Vercel
+.netlify/
+.vercel/
+
+# Local configuration
+config.local.js
