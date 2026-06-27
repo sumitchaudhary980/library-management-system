@@ -1,4 +1,3 @@
-/* Global Styles & Variables */
 :root {
     --primary-dark: #002147;
     --accent-gold: #C5A059;
@@ -30,6 +29,7 @@ body {
 }
 
 /* Navbar */
+
 .navbar-brand {
     font-size: 1.75rem;
     color: var(--primary-dark) !important;
@@ -41,6 +41,7 @@ body {
 }
 
 /* Landing Page Hero */
+
 .hero-section {
     flex: 1;
     display: flex;
@@ -142,6 +143,7 @@ body {
 }
 
 /* Admin Login */
+
 .login-section {
     flex: 1;
     display: flex;
@@ -162,9 +164,6 @@ body {
     padding: 40px;
     border-radius: 24px;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
-    width: 100%;
-    position: relative;
-    z-index: 2;
 }
 
 .icon-badge {
@@ -212,11 +211,10 @@ body {
     border: 1.5px solid #e2e8f0;
     border-radius: 10px;
     color: var(--text-main);
-    transition: all 0.3s ease;
 }
 
 .input-password-field {
-    padding-right: 110px;
+    padding-right: 50px;
 }
 
 .input-field:focus {
@@ -228,20 +226,14 @@ body {
 
 .password-toggle-wrapper {
     position: absolute;
-    right: 74px;
+    right: 16px;
     z-index: 6;
-    display: flex;
-    align-items: center;
 }
 
 .forgot-link-inline {
-    position: absolute;
-    right: 16px;
     color: var(--accent-gold);
     font-size: 0.85rem;
     font-weight: 600;
-    z-index: 6;
-    transition: color 0.2s ease;
 }
 
 .forgot-link-inline:hover {
@@ -257,43 +249,31 @@ body {
     border-radius: 10px;
     font-weight: 600;
     font-size: 1rem;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
 }
 
 .btn-submit:hover {
     background-color: #001229;
-    transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(0, 33, 71, 0.2);
 }
 
 .back-link {
     color: var(--text-muted);
     font-size: 0.9rem;
     font-weight: 500;
-    transition: color 0.2s ease;
 }
 
 .back-link:hover {
     color: var(--primary-dark);
 }
 
-@media (max-width: 576px) {
-    .login-card {
-        padding: 30px 24px;
-        border-radius: 16px;
-    }
-}
-
 /* Footer */
+
 .main-footer {
     background-color: #ffffff;
     border-top: 1px solid #e2e8f0;
     padding: 30px 0 20px 0;
     margin-top: auto;
     width: 100%;
+    color: var(--text-main);
 }
 
 .footer-top-row {
@@ -302,15 +282,12 @@ body {
     align-items: center;
     justify-content: space-between;
     gap: 20px;
-    width: 100%;
-    padding-bottom: 20px;
 }
 
 .footer-brand {
     font-size: 1.5rem;
     color: var(--primary-dark) !important;
     text-decoration: none;
-    letter-spacing: -0.5px;
 }
 
 .footer-links {
@@ -326,7 +303,6 @@ body {
     text-decoration: none;
     font-size: 0.9rem;
     font-weight: 500;
-    transition: color 0.2s ease;
 }
 
 .footer-links a:hover {
@@ -338,7 +314,6 @@ body {
     height: 4px;
     background-color: #cbd5e1;
     border-radius: 50%;
-    display: inline-block;
 }
 
 .footer-bottom-row {
@@ -357,5 +332,12 @@ body {
 @media (min-width: 768px) {
     .footer-top-row {
         flex-direction: row;
+    }
+}
+
+@media (max-width: 576px) {
+    .login-card {
+        padding: 30px 24px;
+        border-radius: 16px;
     }
 }
