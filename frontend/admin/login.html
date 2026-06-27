@@ -24,7 +24,6 @@
     <main class="login-section">
         <div class="container d-flex justify-content-center align-items-center">
             <div class="login-container">
-                <div class="bg-blob login-blob"></div>
                 <div class="login-card">
                     <div class="text-center mb-4">
                         <div class="icon-badge mb-3">
@@ -44,13 +43,14 @@
                         </div>
 
                         <div class="mb-4">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <label class="form-label fw-medium mb-0" for="admin-password">Password</label>
-                                <a href="#" class="forgot-link text-decoration-none">Forgot?</a>
-                            </div>
+                            <label class="form-label fw-medium" for="admin-password">Password</label>
                             <div class="input-group-custom">
                                 <span class="input-icon"><i class="fas fa-lock"></i></span>
-                                <input id="admin-password" type="password" class="form-control input-field" placeholder="Password" autocomplete="current-password" required>
+                                <input id="admin-password" type="password" class="form-control input-field input-password-field" placeholder="Password" autocomplete="current-password" required>
+                                <span class="password-toggle-wrapper">
+                                    <i class="far fa-eye text-muted" style="cursor: pointer;" onclick="const p = document.getElementById('admin-password'); if(p.type==='password'){p.type='text'; this.classList.replace('fa-eye','fa-eye-slash');}else{p.type='password'; this.classList.replace('fa-eye-slash','fa-eye');}"></i>
+                                </span>
+                                <a href="#" class="forgot-link-inline text-decoration-none">Forgot?</a>
                             </div>
                         </div>
 
@@ -71,20 +71,20 @@
 
     <footer class="main-footer">
         <div class="container">
-            <div class="footer-content">
+            <div class="footer-top-row">
                 <a class="footer-brand font-serif fw-bold" href="../index.html">
                     <i class="fas fa-book-open brand-icon me-2"></i>Kaiser Library
                 </a>
-                <div class="footer-meta">
-                    <div class="footer-links">
-                        <a href="#">Privacy Policy</a>
-                        <span class="link-divider"></span>
-                        <a href="#">Terms of Service</a>
-                        <span class="link-divider"></span>
-                        <a href="#">Contact Support</a>
-                    </div>
-                    <p class="copyright-text">&copy; 2026 Kaiser Library. All rights reserved.</p>
+                <div class="footer-links">
+                    <a href="#">Privacy Policy</a>
+                    <span class="link-divider"></span>
+                    <a href="#">Terms of Service</a>
+                    <span class="link-divider"></span>
+                    <a href="#">Contact Support</a>
                 </div>
+            </div>
+            <div class="footer-bottom-row">
+                <p class="copyright-text">&copy; 2026 Kaiser Library. All rights reserved.</p>
             </div>
         </div>
     </footer>
