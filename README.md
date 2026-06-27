@@ -173,11 +173,13 @@ Copyright © 2026 Sumit Kumar Chaudhary.
 
 ---
 
-# 👨‍💻 Developer
+## 👨‍💻 Developed By
 
-Developed by **Sumit Kumar Chaudhary**
+**Sumit Kumar Chaudhary**
 
-GitHub: https://github.com/sumitchaudhary980
+GitHub: [@sumitchaudhary980](https://github.com/sumitchaudhary980)
+
+Email: jaiswalsumit1010@gmail.com
 
 Built using:
 
