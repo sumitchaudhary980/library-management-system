@@ -4,7 +4,7 @@ A full-stack **Library Management System** developed using **HTML, CSS, JavaScri
 
 This project aims to provide a digital platform for managing library operations, including book management, author management, genre organization, user access, and book borrowing activities.
 
-The system is designed with separate **frontend** and **backend** applications to maintain a clean and scalable project structure.
+The system is designed with separate **frontend** and **backend** applications to maintain a clean, scalable, and maintainable project structure.
 
 ---
 
@@ -57,27 +57,24 @@ Library-Management-System/
 ├── backend/
 │   ├── src/
 │   │   ├── routes/
-│   │   │   ├── adminRoute.js
-│   │   │   ├── authRoute.js
-│   │   │   ├── pageRoute.js
-│   │   │   └── userRoute.js
-│   │   │
+│   │   ├── controllers/
+│   │   ├── models/
+│   │   ├── middleware/
+│   │   ├── config/
 │   │   └── server.js
 │   │
+│   ├── uploads/
+│   ├── .env
 │   └── package.json
 │
 ├── frontend/
 │   ├── admin/
-│   │   └── login.html
-│   │
 │   ├── user/
-│   │   └── login.html
-│   │
 │   ├── assets/
-│   ├── index.html
-│   └── style.css
+│   └── index.html
 │
 ├── README.md
+├── LICENSE
 └── .gitignore
 ```
 
@@ -87,7 +84,7 @@ Library-Management-System/
 
 ## Admin Module
 
-The admin side will provide features for managing library resources and maintaining system operations.
+The admin module will provide features for managing library resources and maintaining system operations.
 
 Planned functionalities:
 
@@ -101,7 +98,7 @@ Planned functionalities:
 
 ## User Module
 
-The user side will allow library members to interact with the system.
+The user module will allow library members to interact with the system.
 
 Planned functionalities:
 
@@ -161,10 +158,22 @@ Installation instructions will be updated after the project setup is finalized.
 
 # 📄 License
 
-This project is developed for educational purposes.
+This project is licensed under the **MIT License**.
+
+Copyright © 2026 Sumit Kumar Chaudhary.
 
 ---
 
 # 👨‍💻 Developer
 
-Developed using **HTML, CSS, JavaScript, Node.js, and Express.js**.
+Developed by **Sumit Kumar Chaudhary**
+
+GitHub: https://github.com/sumitchaudhary980
+
+Built using:
+
+* HTML
+* CSS
+* JavaScript
+* Node.js
+* Express.js
