@@ -1,0 +1,136 @@
+:root {
+    --primary-dark: #002147;
+    --accent-gold: #C5A059;
+    --bg-light: #F9F8F6;
+    --text-main: #2D3748;
+    --text-muted: #4A5568;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-main);
+    overflow-x: hidden;
+}
+
+.font-serif {
+    font-family: 'Playfair Display', serif;
+}
+
+.text-primary-dark {
+    color: var(--primary-dark);
+}
+
+.text-muted-custom {
+    color: var(--text-muted);
+}
+
+.navbar-brand {
+    font-size: 1.75rem;
+    color: var(--primary-dark) !important;
+}
+
+.brand-icon {
+    color: var(--accent-gold);
+}
+
+.hero-section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding-top: 100px;
+    padding-bottom: 60px;
+}
+
+.hero-subtitle {
+    color: var(--accent-gold);
+    letter-spacing: 2px;
+    font-size: 0.85rem;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+@media (min-width: 992px) {
+    .action-buttons {
+        justify-content: flex-start;
+    }
+}
+
+.btn-portal {
+    padding: 14px 32px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    flex: 1 1 auto;
+    min-width: 220px;
+    max-width: 280px;
+}
+
+.btn-admin {
+    background-color: var(--primary-dark);
+    color: #ffffff;
+}
+
+.btn-admin:hover {
+    background-color: #001229;
+    color: #ffffff;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 33, 71, 0.2);
+}
+
+.btn-user {
+    background-color: var(--accent-gold);
+    color: #ffffff;
+}
+
+.btn-user:hover {
+    background-color: #a88544;
+    color: #ffffff;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(197, 160, 89, 0.25);
+}
+
+.hero-image-wrapper {
+    position: relative;
+    max-width: 540px;
+    margin: 0 auto;
+}
+
+.hero-image {
+    width: 100%;
+    max-height: 450px;
+    object-fit: cover;
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2);
+}
+
+.bg-blob {
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    width: 100%;
+    height: 100%;
+    background-color: #eaddc4;
+    border-radius: 24px;
+    z-index: -1;
+}
+
+@media (max-width: 991px) {
+    .hero-section {
+        padding-top: 120px;
+    }
+    .hero-image-wrapper {
+        margin-bottom: 1rem;
+    }
+}
