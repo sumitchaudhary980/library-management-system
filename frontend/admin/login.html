@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kaiser Library | Admin Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+    <nav class="navbar fixed-top bg-white shadow-sm">
+        <div class="container py-2">
+            <a class="navbar-brand font-serif fw-bold" href="../index.html">
+                <i class="fas fa-book-open brand-icon me-2"></i>
+                Kaiser Library
+            </a>
+        </div>
+    </nav>
+
+    <main class="login-section">
+        <div class="container d-flex justify-content-center align-items-center">
+            <div class="login-container">
+                <div class="bg-blob login-blob"></div>
+                <div class="login-card">
+                    <div class="text-center mb-4">
+                        <div class="icon-badge mb-3">
+                            <i class="fas fa-user-shield text-white fa-lg"></i>
+                        </div>
+                        <span class="text-uppercase fw-bold login-subtitle d-block mb-1">Library Management Portal</span>
+                        <h2 class="font-serif fw-bold text-primary-dark">Admin Sign In</h2>
+                    </div>
+
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label fw-medium" for="admin-email">Username or Email</label>
+                            <div class="input-group-custom">
+                                <span class="input-icon"><i class="far fa-envelope"></i></span>
+                                <input id="admin-email" type="text" class="form-control input-field" placeholder="admin@kaiserlibrary.com" autocomplete="username" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label fw-medium mb-0" for="admin-password">Password</label>
+                                <a href="#" class="forgot-link text-decoration-none">Forgot?</a>
+                            </div>
+                            <div class="input-group-custom">
+                                <span class="input-icon"><i class="fas fa-lock"></i></span>
+                                <input id="admin-password" type="password" class="form-control input-field" placeholder="Password" autocomplete="current-password" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-submit mb-3">
+                            Secure Login <i class="fas fa-arrow-right ms-2"></i>
+                        </button>
+
+                        <div class="text-center">
+                            <a href="../index.html" class="back-link text-decoration-none">
+                                <i class="fas fa-long-arrow-alt-left me-2"></i> Back to Home
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <a class="footer-brand font-serif fw-bold" href="../index.html">
+                    <i class="fas fa-book-open brand-icon me-2"></i>Kaiser Library
+                </a>
+                <div class="footer-meta">
+                    <div class="footer-links">
+                        <a href="#">Privacy Policy</a>
+                        <span class="link-divider"></span>
+                        <a href="#">Terms of Service</a>
+                        <span class="link-divider"></span>
+                        <a href="#">Contact Support</a>
+                    </div>
+                    <p class="copyright-text">&copy; 2026 Kaiser Library. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
