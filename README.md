@@ -7,6 +7,15 @@ This project aims to provide a digital platform for managing library operations,
 The system is designed with separate **frontend** and **backend** applications to maintain a clean, scalable, and maintainable project structure.
 
 ---
+---
+
+# 🚧 Project Status
+
+**Status:** Under Development
+
+This project is currently under active development. The initial structure, frontend, and backend setup are being developed, with additional features and improvements planned for future updates.
+
+---
 
 # ✨ Project Overview
 
