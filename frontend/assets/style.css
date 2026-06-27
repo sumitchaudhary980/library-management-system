@@ -110,6 +110,27 @@ body {
     box-shadow: 0 10px 20px rgba(0, 33, 71, 0.2);
 }
 
+.btn-login {
+    width: 100%;
+    padding: 14px;
+    background-color: var(--primary-dark);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.btn-login:hover {
+    background-color: #001229;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0,33,71,0.2);
+}
+
 .btn-user {
     background-color: var(--accent-gold);
     color: #ffffff !important;
