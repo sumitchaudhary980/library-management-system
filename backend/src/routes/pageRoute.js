@@ -10,15 +10,21 @@ router.get("/", (req, res) => {
 });
 
 router.get("/login", (req, res) => {
-    res.sendFile(path.join(frontendPath, "login.html"));
+    res.sendFile(
+        path.join(frontendPath, "user/login.html")
+    );
 });
 
 router.get("/admin/login", (req, res) => {
-    res.sendFile(path.join(frontendPath, "admin/login.html"));
+    res.sendFile(
+        path.join(frontendPath, "admin/login.html")
+    );
 });
 
-router.get("/user/login", (req, res) => {
-    res.sendFile(path.join(frontendPath, "user/login.html"));
+router.get("/dashboard", (req, res) => {
+    res.sendFile(
+        path.join(frontendPath, "admin/dashboard.html")
+    );
 });
 
 module.exports = router;

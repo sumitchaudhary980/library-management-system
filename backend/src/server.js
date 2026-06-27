@@ -21,6 +21,7 @@ app.use("/api/auth", authRoute);
 app.use("/api/admin", adminRoute);
 app.use("/api/user", userRoute);
 
+
 app.listen(3000, () => {
     console.log("Server running on port 3000");
 });
