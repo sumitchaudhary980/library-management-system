@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 
+require("./config/initDb");
+
 const pageRoute = require("./routes/pageRoute");
 const authRoute = require("./routes/authRoute");
 const adminRoute = require("./routes/adminRoute");

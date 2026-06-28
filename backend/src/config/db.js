@@ -1,7 +1,7 @@
-// const Database = require("better-sqlite3");
+const Database = require("better-sqlite3");
 
-// const db = new Database("kaiserlibrary.sqlite");
+const db = new Database("kaiserlibrary.sqlite");
 
-// console.log("SQLite connected");
+console.log("SQLite connected");
 
-// module.exports = db;
+module.exports = db;
