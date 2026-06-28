@@ -1,5 +1,4 @@
 const express = require("express");
-const cors = require("cors");
 const path = require("path");
 const session = require("express-session");
 
@@ -12,25 +11,24 @@ const userRoute = require("./routes/userRoute");
 
 const app = express();
 
-app.use(cors());
-
 app.use(express.json());
 
 app.use(
   session({
-    secret: "library-secret-key",
+    secret: "Herald@12345",
     resave: false,
     saveUninitialized: false,
     cookie: {
+      httpOnly: true,       // prevents JS from reading the cookie
       maxAge: 1000 * 60 * 60,
     },
-  }),
+  })
 );
 
-app.use(express.static(path.join(__dirname, "../../frontend")));
+// Only expose assets, not raw HTML files
+app.use('/assets', express.static(path.join(__dirname, '../../frontend/assets')));
 
 app.use("/", pageRoute);
-
 app.use("/api/auth", authRoute);
 app.use("/admin", adminRoute);
 app.use("/user", userRoute);

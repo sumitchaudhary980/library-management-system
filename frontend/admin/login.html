@@ -149,19 +149,81 @@
     </footer>
 
     <script>
-      function togglePassword(id, icon) {
-        const password = document.getElementById(id);
+      // Toast setup
+      const toastWrapper = document.createElement("div");
+      toastWrapper.className = "toast-wrapper";
+      document.body.appendChild(toastWrapper);
 
-        if (password.type === "password") {
-          password.type = "text";
+      function showToast(message, type = "error") {
+        const icons = { error: "fa-circle-xmark", success: "fa-circle-check" };
+
+        const toast = document.createElement("div");
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+    <i class="fas ${icons[type]} toast-icon"></i>
+    <span>${message}</span>
+    <i class="fas fa-xmark toast-close" onclick="removeToast(this.parentElement)"></i>
+  `;
+
+        toastWrapper.appendChild(toast);
+
+        // Auto remove after 4s
+        setTimeout(() => removeToast(toast), 4000);
+      }
+
+      function removeToast(toast) {
+        toast.classList.add("hide");
+        toast.addEventListener("animationend", () => toast.remove(), {
+          once: true,
+        });
+      }
+
+      // Password toggle
+      function togglePassword(id, icon) {
+        const input = document.getElementById(id);
+        if (input.type === "password") {
+          input.type = "text";
           icon.classList.replace("fa-eye", "fa-eye-slash");
         } else {
-          password.type = "password";
+          input.type = "password";
           icon.classList.replace("fa-eye-slash", "fa-eye");
         }
       }
 
-      
+      // Login form
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const email = document.getElementById("email").value.trim();
+          const password = document.getElementById("admin-password").value;
+
+          if (!email || !password) {
+            showToast("Please fill in all fields.");
+            return;
+          }
+
+          try {
+            const res = await fetch("/api/auth/login", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "include",
+              body: JSON.stringify({ email, password }),
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+              showToast("Login successful! Redirecting...", "success");
+              setTimeout(() => (window.location.href = data.redirect), 1000);
+            } else {
+              showToast(data.message);
+            }
+          } catch (err) {
+            showToast("Something went wrong. Try again.");
+          }
+        });
     </script>
   </body>
 </html>
