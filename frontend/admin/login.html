@@ -86,10 +86,14 @@
                     type="password"
                     class="form-control input-field input-password-field"
                     placeholder="Password"
+                    style="padding-right: 44px !important"
                     required
                   />
 
-                  <span class="password-toggle-wrapper">
+                  <span
+                    class="password-toggle-wrapper"
+                    style="right: 16px !important"
+                  >
                     <i
                       class="far fa-eye text-muted"
                       style="cursor: pointer"
@@ -100,7 +104,15 @@
                 </div>
 
                 <div class="text-end mt-2">
-                  <a href="#" class="forgot-link-inline text-decoration-none">
+                  <a
+                    href="#"
+                    class="text-decoration-none"
+                    style="
+                      color: var(--accent-gold);
+                      font-size: 0.85rem;
+                      font-weight: 600;
+                    "
+                  >
                     Forgot password?
                   </a>
                 </div>
@@ -148,82 +160,7 @@
       </div>
     </footer>
 
-    <script>
-      // Toast setup
-      const toastWrapper = document.createElement("div");
-      toastWrapper.className = "toast-wrapper";
-      document.body.appendChild(toastWrapper);
-
-      function showToast(message, type = "error") {
-        const icons = { error: "fa-circle-xmark", success: "fa-circle-check" };
-
-        const toast = document.createElement("div");
-        toast.className = `toast ${type}`;
-        toast.innerHTML = `
-    <i class="fas ${icons[type]} toast-icon"></i>
-    <span>${message}</span>
-    <i class="fas fa-xmark toast-close" onclick="removeToast(this.parentElement)"></i>
-  `;
-
-        toastWrapper.appendChild(toast);
-
-        // Auto remove after 4s
-        setTimeout(() => removeToast(toast), 4000);
-      }
-
-      function removeToast(toast) {
-        toast.classList.add("hide");
-        toast.addEventListener("animationend", () => toast.remove(), {
-          once: true,
-        });
-      }
-
-      // Password toggle
-      function togglePassword(id, icon) {
-        const input = document.getElementById(id);
-        if (input.type === "password") {
-          input.type = "text";
-          icon.classList.replace("fa-eye", "fa-eye-slash");
-        } else {
-          input.type = "password";
-          icon.classList.replace("fa-eye-slash", "fa-eye");
-        }
-      }
-
-      // Login form
-      document
-        .getElementById("loginForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
-
-          const email = document.getElementById("email").value.trim();
-          const password = document.getElementById("admin-password").value;
-
-          if (!email || !password) {
-            showToast("Please fill in all fields.");
-            return;
-          }
-
-          try {
-            const res = await fetch("/api/auth/login", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              credentials: "include",
-              body: JSON.stringify({ email, password }),
-            });
-
-            const data = await res.json();
-
-            if (res.ok) {
-              showToast("Login successful! Redirecting...", "success");
-              setTimeout(() => (window.location.href = data.redirect), 1000);
-            } else {
-              showToast(data.message);
-            }
-          } catch (err) {
-            showToast("Something went wrong. Try again.");
-          }
-        });
-    </script>
+    <script src="/assets/js/auth.js"></script>
+    <script src="/assets/js/login.js"></script>
   </body>
 </html>

@@ -32,8 +32,4 @@ router.get("/dashboard", requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/dashboard.html"));
 });
 
-router.get("/user/dashboard", requireReader, (req, res) => {
-  res.sendFile(path.join(frontendPath, "user/dashboard.html"));
-});
-
 module.exports = router;

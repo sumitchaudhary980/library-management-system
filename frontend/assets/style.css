@@ -29,6 +29,9 @@ body {
 }
 
 /* Navbar */
+.navbar {
+  background-color: #ffffff !important;
+}
 
 .navbar-brand {
   font-size: 1.75rem;
@@ -40,8 +43,7 @@ body {
   color: var(--accent-gold);
 }
 
-/* Landing Page Hero */
-
+/* Hero Section */
 .hero-section {
   flex: 1;
   display: flex;
@@ -164,7 +166,6 @@ body {
 }
 
 /* Admin Login */
-
 .login-section {
   flex: 1;
   display: flex;
@@ -235,7 +236,7 @@ body {
 }
 
 .input-password-field {
-  padding-right: 50px;
+  padding-right: 110px;
 }
 
 .input-field:focus {
@@ -247,14 +248,20 @@ body {
 
 .password-toggle-wrapper {
   position: absolute;
-  right: 16px;
+  right: 74px;
   z-index: 6;
+  display: flex;
+  align-items: center;
 }
 
 .forgot-link-inline {
+  position: absolute;
+  right: 16px;
   color: var(--accent-gold);
   font-size: 0.85rem;
   font-weight: 600;
+  z-index: 6;
+  transition: color 0.2s ease;
 }
 
 .forgot-link-inline:hover {
@@ -286,8 +293,178 @@ body {
   color: var(--primary-dark);
 }
 
-/* Footer */
+/* Admin Dashboard */
+.dashboard-body {
+  background-color: #f4f5f7;
+  min-height: 100vh;
+}
 
+.mobile-header {
+  height: 60px;
+  z-index: 1030;
+}
+
+.dashboard-wrapper {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.admin-sidebar {
+  width: 260px;
+  background-color: var(--primary-dark);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1040;
+  transition: all 0.3s ease;
+}
+
+.sidebar-header {
+  height: 75px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sidebar-brand {
+  font-size: 1.4rem;
+  color: #ffffff !important;
+  text-decoration: none;
+}
+
+.sidebar-menu-wrapper {
+  flex: 1;
+  padding: 24px 16px;
+  overflow-y: auto;
+}
+
+.menu-category {
+  display: block;
+  font-size: 0.725rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #718096;
+  margin-bottom: 12px;
+  padding-left: 12px;
+}
+
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px 0;
+}
+
+.sidebar-menu li {
+  margin-bottom: 4px;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  color: #a0aec0;
+  text-decoration: none !important;
+  font-size: 0.925rem;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+/* Base reset for <button> using .menu-item so it looks exactly like <a> tags */
+button.menu-item {
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+button.menu-item:focus {
+  outline: none;
+}
+
+.menu-item:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.04);
+}
+
+.menu-item.active {
+  color: #ffffff !important;
+  background-color: var(--accent-gold);
+}
+
+.menu-icon {
+  width: 20px;
+  margin-right: 12px;
+  font-size: 1.05rem;
+  text-align: center;
+}
+
+/* Sidebar Footer (Profile / Logout Container) */
+.sidebar-footer-nav {
+  background-color: rgba(0, 0, 0, 0.15);
+}
+
+.dashboard-content {
+  flex: 1;
+  padding: 40px;
+  margin-left: 260px;
+  min-width: 0;
+}
+
+.stat-card {
+  border-radius: 16px;
+}
+
+.stat-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.bg-primary-light {
+  background-color: rgba(0, 33, 71, 0.08);
+}
+
+.bg-gold-light {
+  background-color: rgba(197, 160, 89, 0.12);
+}
+
+@media (max-width: 991.98px) {
+  .admin-sidebar {
+    top: 60px;
+    width: 100%;
+    bottom: auto;
+    max-height: calc(100vh - 60px);
+    overflow-y: auto;
+  }
+
+  .sidebar-menu-wrapper {
+    overflow-y: visible;
+  }
+
+  .dashboard-content {
+    margin-left: 0;
+    padding: 90px 20px 40px 20px;
+  }
+
+  .dashboard-wrapper {
+    flex-direction: column;
+  }
+}
+
+/* Footer Section */
 .main-footer {
   background-color: #ffffff;
   border-top: 1px solid #e2e8f0;
@@ -363,14 +540,10 @@ body {
   }
 }
 
-
-
-
-
-/* Toast */
+/* Toast Notification Component */
 .toast-wrapper {
   position: fixed;
-  bottom: 24px;
+  top: 24px;
   right: 24px;
   z-index: 9999;
   display: flex;
@@ -378,7 +551,7 @@ body {
   gap: 10px;
 }
 
-.toast {
+.custom-toast {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -390,27 +563,27 @@ body {
   max-width: 340px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
   animation: slideIn 0.3s ease forwards;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
-.toast.success {
-  background: #f0fdf4;
-  color: #166534;
-  border: 1px solid #bbf7d0;
+.custom-toast.success {
+  background: #fffbf2;
+  color: #7a5c1e;
+  border: 1px solid var(--accent-gold);
 }
 
-.toast.error {
-  background: #fef2f2;
-  color: #991b1b;
-  border: 1px solid #fecaca;
+.custom-toast.error {
+  background: #f8f0f0;
+  color: var(--primary-dark);
+  border: 1px solid #c0392b;
 }
 
-.toast .toast-icon {
+.custom-toast .toast-icon {
   font-size: 1rem;
   flex-shrink: 0;
 }
 
-.toast .toast-close {
+.custom-toast .toast-close {
   margin-left: auto;
   cursor: pointer;
   opacity: 0.5;
@@ -418,20 +591,20 @@ body {
   flex-shrink: 0;
 }
 
-.toast .toast-close:hover {
+.custom-toast .toast-close:hover {
   opacity: 1;
 }
 
-.toast.hide {
+.custom-toast.hide {
   animation: slideOut 0.3s ease forwards;
 }
 
 @keyframes slideIn {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(-16px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slideOut {
   from { opacity: 1; transform: translateY(0); }
-  to   { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 0; transform: translateY(-16px); }
 }

@@ -83,10 +83,14 @@
                     type="password"
                     class="form-control input-field input-password-field"
                     placeholder="Password"
+                    style="padding-right: 44px !important"
                     required
                   />
 
-                  <span class="password-toggle-wrapper">
+                  <span
+                    class="password-toggle-wrapper"
+                    style="right: 16px !important"
+                  >
                     <i
                       class="far fa-eye text-muted"
                       style="cursor: pointer"
@@ -97,7 +101,16 @@
                 </div>
 
                 <div class="text-end mt-2">
-                  <a href="#" class="forgot-link-inline text-decoration-none">
+                  <a
+                    href="#"
+                    class="text-decoration-none"
+                    style="
+                      color: var(--accent-gold);
+                      font-size: 0.85rem;
+                      font-weight: 600;
+                      display: inline-block;
+                    "
+                  >
                     Forgot password?
                   </a>
                 </div>
@@ -145,18 +158,7 @@
       </div>
     </footer>
 
-    <script>
-      function togglePassword(id, icon) {
-        const password = document.getElementById(id);
-
-        if (password.type === "password") {
-          password.type = "text";
-          icon.classList.replace("fa-eye", "fa-eye-slash");
-        } else {
-          password.type = "password";
-          icon.classList.replace("fa-eye-slash", "fa-eye");
-        }
-      }
-    </script>
+    <script src="/assets/js/auth.js"></script>
+    <script src="/assets/js/login.js"></script>
   </body>
 </html>
