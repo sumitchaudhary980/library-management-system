@@ -49,7 +49,7 @@ The system is planned to include:
 
 ## Database
 
-* MySQL
+* SQLite
 
 ## Additional Technologies
 
