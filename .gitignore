@@ -60,3 +60,8 @@ pids/
 
 # Local configuration
 config.local.js
+
+#Database files
+*.sqlite
+*.sqlite3
+*.db
