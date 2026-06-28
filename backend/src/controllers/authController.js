@@ -31,13 +31,13 @@ const login = async (req, res) => {
     // Tell frontend where to redirect based on role
     const redirectMap = {
       admin: '/dashboard',
-      reader: '/user/dashboard',
+      reader: '/home',
     };
 
     return res.json({
       message: 'Login successful',
       role: user.role,
-      redirect: redirectMap[user.role] ?? '/user/dashboard',
+      redirect: redirectMap[user.role] ?? '/home'
     });
 
   } catch (err) {

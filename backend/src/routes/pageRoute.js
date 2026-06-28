@@ -22,6 +22,11 @@ router.get("/login", (req, res) => {
   res.sendFile(path.join(frontendPath, "user/login.html"));
 });
 
+//User Pages — protected, live at root level URLs
+router.get('/home', requireReader, (req, res) => {
+  res.sendFile(path.join(frontendPath, 'user/home.html'));
+});
+
 // Dashboards — protected, live at root level URLs
 router.get("/dashboard", requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/dashboard.html"));
