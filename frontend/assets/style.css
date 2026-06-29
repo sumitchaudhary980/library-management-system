@@ -43,7 +43,6 @@ body {
   color: var(--accent-gold);
 }
 
-
 .features-section {
   background-color: #ffffff;
   border-top: 1px solid #f1f5f9;
@@ -516,6 +515,109 @@ button.menu-item:focus {
   }
 }
 
+/* Authors */
+
+.search-box input {
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 33, 71, 0.15) !important;
+  color: var(--text-main);
+  transition: all 0.25s ease;
+}
+
+.search-box input:focus {
+  border-color: var(--accent-gold) !important;
+  box-shadow:
+    0 10px 25px -10px rgba(0, 33, 71, 0.08),
+    0 0 0 3px rgba(197, 160, 89, 0.2) !important;
+  outline: none;
+}
+
+.table {
+  background-color: #ffffff;
+}
+
+.table thead {
+  background-color: rgba(0, 33, 71, 0.03) !important;
+  border-bottom: 2px solid rgba(0, 33, 71, 0.08) !important;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid rgba(0, 33, 71, 0.05) !important;
+  transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+  background-color: var(--bg-light) !important;
+}
+
+.bg-gold-light {
+  background-color: rgba(197, 160, 89, 0.1) !important;
+  color: var(--accent-gold) !important;
+}
+
+.bg-primary-light {
+  background-color: rgba(0, 33, 71, 0.05) !important;
+  color: var(--primary-dark) !important;
+}
+
+.table .btn-light {
+  background-color: #ffffff;
+  border: 1px solid rgba(0, 33, 71, 0.1);
+  border-radius: 8px;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.table .btn-light.text-primary-dark:hover {
+  background-color: var(--primary-dark) !important;
+  border-color: var(--primary-dark) !important;
+  color: #ffffff !important;
+  transform: translateY(-2px);
+}
+
+.table .btn-light.text-danger:hover {
+  background-color: #dc3545 !important;
+  border-color: #dc3545 !important;
+  color: #ffffff !important;
+  transform: translateY(-2px);
+}
+
+.pagination .page-link {
+  border-radius: 6px !important;
+  margin: 0 3px;
+  border-color: rgba(0, 33, 71, 0.1);
+  color: var(--primary-dark);
+  background-color: #ffffff;
+  padding: 6px 12px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: var(--primary-dark) !important;
+  border-color: var(--primary-dark) !important;
+  color: #ffffff !important;
+}
+
+.pagination .page-item:not(.active):not(.disabled) .page-link:hover {
+  background-color: var(--bg-light);
+  color: var(--accent-gold);
+  border-color: var(--accent-gold);
+}
+
+a[href="/authors/add"]:hover {
+  background-color: #001229;
+  color: #ffffff !important;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 33, 71, 0.2);
+}
+
 /* footer section */
 .main-footer {
   background-color: #ffffff;
@@ -634,11 +736,23 @@ button.menu-item:focus {
 }
 
 @keyframes slideIn {
-  from { opacity: 0; transform: translateY(-16px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes slideOut {
-  from { opacity: 1; transform: translateY(0); }
-  to   { opacity: 0; transform: translateY(-16px); }
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
 }

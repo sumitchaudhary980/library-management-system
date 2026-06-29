@@ -36,5 +36,9 @@ router.get("/dashboard", requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/dashboard.html"));
 });
 
+router.get('/authors', requireAdmin, (req, res) => {
+  res.sendFile(path.join(frontendPath, 'admin/author.html'));
+});
+
 
 module.exports = router;
