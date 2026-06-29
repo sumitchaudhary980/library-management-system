@@ -1,7 +1,7 @@
 const db = require("../config/db");
 const bcrypt = require("bcrypt");
 
-const createAdmin = async () => {
+const createAdminSeeder = async () => {
   const admin = db
     .prepare("SELECT * FROM users WHERE email = ?")
     .get("jaiswalsumit1010@gmail.com");
@@ -39,4 +39,4 @@ const createAdmin = async () => {
   }
 };
 
-module.exports = createAdmin;
+module.exports = { createAdminSeeder };
