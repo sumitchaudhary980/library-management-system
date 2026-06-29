@@ -43,6 +43,58 @@ body {
   color: var(--accent-gold);
 }
 
+
+.features-section {
+  background-color: #ffffff;
+  border-top: 1px solid #f1f5f9;
+  flex: 1;
+}
+
+.feature-card {
+  background-color: var(--bg-light);
+  border-radius: 20px;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px -15px rgba(0, 33, 71, 0.1) !important;
+  border-color: rgba(197, 160, 89, 0.3);
+  background-color: #ffffff;
+}
+
+.feature-icon-wrapper {
+  width: 72px;
+  height: 72px;
+  background-color: rgba(0, 33, 71, 0.04);
+  color: var(--accent-gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+  transition: all 0.4s ease;
+}
+
+.feature-card:hover .feature-icon-wrapper {
+  background-color: var(--primary-dark);
+  color: #ffffff;
+  transform: scale(1.1);
+}
+
+.font-sm {
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* Adjust the original hero section class so it aligns well above the features */
+.hero-section {
+  padding-top: 140px;
+  padding-bottom: 80px;
+  min-height: auto;
+}
+
 /* Hero Section */
 .hero-section {
   flex: 1;

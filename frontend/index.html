@@ -30,48 +30,95 @@
       </div>
     </nav>
 
-    <main class="hero-section">
-      <div class="container">
-        <div
-          class="row align-items-center gy-5 flex-column-reverse flex-lg-row"
-        >
-          <div class="col-lg-6 text-center text-lg-start pe-lg-5">
-            <span class="text-uppercase fw-bold mb-3 d-block hero-subtitle"
-              >Welcome to the digital portal</span
-            >
-            <h1
-              class="display-4 font-serif fw-bold mb-4 text-primary-dark line-height-tight"
-            >
-              Empowering your pursuit of knowledge.
-            </h1>
-            <p class="lead mb-5 text-muted-custom">
-              Access a world of literature, academic resources, and community
-              archives. Please select your role below to enter the management
-              system.
-            </p>
-            <div class="action-buttons">
-              <a href="admin/login" class="btn-portal btn-admin">
-                <i class="fas fa-user-shield me-2"></i> Admin Portal
-              </a>
-              <a href="/login" class="btn-portal btn-user">
-                <i class="fas fa-user text-blank me-2"></i> User Portal
-              </a>
+    <main style="flex: 1; display: flex; flex-direction: column;">
+      
+      <section class="hero-section">
+        <div class="container">
+          <div class="row align-items-center gy-5 flex-column-reverse flex-lg-row">
+            <div class="col-lg-6 text-center text-lg-start pe-lg-5">
+              <span class="text-uppercase fw-bold mb-3 d-block hero-subtitle">
+                Welcome to the digital portal
+              </span>
+              <h1 class="display-4 font-serif fw-bold mb-4 text-primary-dark line-height-tight">
+                Empowering your pursuit of knowledge.
+              </h1>
+              <p class="lead mb-5 text-muted-custom">
+                Access a world of literature, academic resources, and community
+                archives. Please select your role below to enter the management
+                system.
+              </p>
+              <div class="action-buttons">
+                <a href="admin/login" class="btn-portal btn-admin">
+                  <i class="fas fa-user-shield me-2"></i> Admin Portal
+                </a>
+                <a href="/login" class="btn-portal btn-user">
+                  <i class="fas fa-user text-blank me-2"></i> User Portal
+                </a>
+              </div>
             </div>
-          </div>
-          <div class="col-lg-6 text-center">
-            <div class="hero-image-wrapper">
-              <img
-                src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=1000"
-                alt="Kaiser Library Bookshelf"
-                class="hero-image img-fluid"
-              />
+            <div class="col-lg-6 text-center">
+              <div class="hero-image-wrapper">
+                <img
+                  src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=1000"
+                  alt="Kaiser Library Bookshelf"
+                  class="hero-image img-fluid"
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      <section class="features-section py-5">
+        <div class="container py-4 py-md-5">
+          <div class="text-center mb-5">
+            <span class="text-uppercase fw-bold hero-subtitle d-block mb-2">Why Choose Us</span>
+            <h2 class="font-serif fw-bold text-primary-dark mb-0">Discover the Kaiser Advantage</h2>
+          </div>
+          
+          <div class="row g-4">
+            <div class="col-12 col-md-4">
+              <div class="feature-card h-100 p-4 p-lg-5 text-center shadow-sm">
+                <div class="feature-icon-wrapper mb-4 mx-auto">
+                  <i class="fas fa-book-reader"></i>
+                </div>
+                <h4 class="font-serif fw-bold text-primary-dark mb-3">Vast Collection</h4>
+                <p class="text-muted-custom mb-0 font-sm">
+                  Access thousands of physical and digital resources across diverse academic, historical, and literary genres.
+                </p>
+              </div>
+            </div>
+            
+            <div class="col-12 col-md-4">
+              <div class="feature-card h-100 p-4 p-lg-5 text-center shadow-sm">
+                <div class="feature-icon-wrapper mb-4 mx-auto">
+                  <i class="fas fa-laptop-house"></i>
+                </div>
+                <h4 class="font-serif fw-bold text-primary-dark mb-3">Digital Access</h4>
+                <p class="text-muted-custom mb-0 font-sm">
+                  Manage your borrowing history, reserve books, and explore our dynamic catalogs directly from any device.
+                </p>
+              </div>
+            </div>
+            
+            <div class="col-12 col-md-4">
+              <div class="feature-card h-100 p-4 p-lg-5 text-center shadow-sm">
+                <div class="feature-icon-wrapper mb-4 mx-auto">
+                  <i class="fas fa-users"></i>
+                </div>
+                <h4 class="font-serif fw-bold text-primary-dark mb-3">Community Hub</h4>
+                <p class="text-muted-custom mb-0 font-sm">
+                  Join a vibrant community of scholars, researchers, and avid readers in our collaborative physical and online spaces.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
     </main>
 
-    <footer class="main-footer">
+    <footer class="main-footer mt-auto">
       <div class="container">
         <div class="footer-top-row">
           <a class="footer-brand font-serif fw-bold" href="/">
