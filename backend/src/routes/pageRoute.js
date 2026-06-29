@@ -9,11 +9,6 @@ router.get("/", (req, res) => {
   res.sendFile(path.join(frontendPath, "index.html"));
 });
 
-// Admin login — public but skip if already logged in
-router.get("/admin/login", (req, res) => {
-  if (req.session.user?.role === "admin") return res.redirect("/dashboard");
-  res.sendFile(path.join(frontendPath, "admin/login.html"));
-});
 
 // User login — public but skip if already logged in
 router.get("/login", (req, res) => {
@@ -27,9 +22,19 @@ router.get('/home', requireReader, (req, res) => {
   res.sendFile(path.join(frontendPath, 'user/home.html'));
 });
 
+
+
+// Admin Routes
+
+router.get("/admin/login", (req, res) => {
+  if (req.session.user?.role === "admin") return res.redirect("/dashboard");
+  res.sendFile(path.join(frontendPath, "admin/login.html"));
+});
+
 // Dashboards — protected, live at root level URLs
 router.get("/dashboard", requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/dashboard.html"));
 });
+
 
 module.exports = router;
