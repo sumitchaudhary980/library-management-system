@@ -4,8 +4,15 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("admin-password").value;
 
+  const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+
   if (!email || !password) {
     showToast("Please fill in all fields.");
+    return;
+  }
+
+  if (!gmailRegex.test(email)) {
+    showToast("Please enter a valid Gmail address.");
     return;
   }
 
@@ -21,7 +28,10 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
 
     if (res.ok) {
       showToast("Login successful! Redirecting...", "success");
-      setTimeout(() => (window.location.href = data.redirect), 1000);
+
+      setTimeout(() => {
+        window.location.href = data.redirect;
+      }, 1000);
     } else {
       showToast(data.message || "Invalid credentials.");
     }
