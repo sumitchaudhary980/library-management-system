@@ -516,22 +516,11 @@ button.menu-item:focus {
   }
 }
 
-/* Footer Section */
+/* footer section */
 .main-footer {
   background-color: #ffffff;
   border-top: 1px solid #e2e8f0;
-  padding: 30px 0 20px 0;
-  margin-top: auto;
-  width: 100%;
   color: var(--text-main);
-}
-
-.footer-top-row {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
 }
 
 .footer-brand {
@@ -540,56 +529,49 @@ button.menu-item:focus {
   text-decoration: none;
 }
 
-.footer-links {
+/* List Links with smooth slide-right hover effect */
+.footer-link-list a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: inline-block;
+}
+
+.footer-link-list a:hover {
+  color: var(--accent-gold);
+  transform: translateX(5px);
+}
+
+/* Modern Circular Social Icons */
+.social-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: var(--primary-dark);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  flex-wrap: wrap;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  text-decoration: none !important;
 }
 
-.footer-links a {
-  color: var(--text-muted);
-  text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.footer-links a:hover {
-  color: var(--accent-gold);
-}
-
-.link-divider {
-  width: 4px;
-  height: 4px;
-  background-color: #cbd5e1;
-  border-radius: 50%;
-}
-
-.footer-bottom-row {
-  width: 100%;
-  border-top: 1px solid #f1f5f9;
-  padding-top: 15px;
-  text-align: center;
+.social-icon:hover {
+  background-color: var(--accent-gold);
+  border-color: var(--accent-gold);
+  color: #ffffff;
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px -5px rgba(197, 160, 89, 0.4);
 }
 
 .copyright-text {
   color: #94a3b8;
   font-size: 0.85rem;
-  margin-bottom: 0;
-}
-
-@media (min-width: 768px) {
-  .footer-top-row {
-    flex-direction: row;
-  }
-}
-
-@media (max-width: 576px) {
-  .login-card {
-    padding: 30px 24px;
-    border-radius: 16px;
-  }
+  font-weight: 500;
 }
 
 /* Toast Notification Component */
