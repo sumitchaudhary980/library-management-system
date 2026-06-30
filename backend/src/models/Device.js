@@ -1,7 +1,7 @@
 const db = require("../config/db");
 
 const createApprovedDeviceTable = () => {
-    db.exec(`
+  db.exec(`
         CREATE TABLE IF NOT EXISTS approved_devices (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             device_id TEXT UNIQUE NOT NULL,
@@ -12,7 +12,7 @@ const createApprovedDeviceTable = () => {
         )
     `);
 
-    db.exec(`
+  db.exec(`
         CREATE TRIGGER IF NOT EXISTS update_approved_devices_updated_at
         AFTER UPDATE ON approved_devices
         FOR EACH ROW
@@ -25,5 +25,5 @@ const createApprovedDeviceTable = () => {
 };
 
 module.exports = {
-    createApprovedDeviceTable
+  createApprovedDeviceTable,
 };

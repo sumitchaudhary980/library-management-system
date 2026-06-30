@@ -1,14 +1,13 @@
 const express = require("express");
 const path = require("path");
 const { requireAdmin, requireReader } = require("../middleware/authMiddleware");
-const deviceGate = require("../middleware/deviceGate"); 
+const deviceGate = require("../middleware/deviceGate");
 const router = express.Router();
 const frontendPath = path.join(__dirname, "../../../frontend");
 
 router.get("/", (req, res) => {
   res.sendFile(path.join(frontendPath, "index.html"));
 });
-
 
 // User login — public but skip if already logged in
 router.get("/login", (req, res) => {
@@ -18,11 +17,9 @@ router.get("/login", (req, res) => {
 });
 
 //User Pages — protected, live at root level URLs
-router.get('/home', requireReader, (req, res) => {
-  res.sendFile(path.join(frontendPath, 'user/home.html'));
+router.get("/home", requireReader, (req, res) => {
+  res.sendFile(path.join(frontendPath, "user/home.html"));
 });
-
-
 
 // Admin Routes
 
@@ -36,9 +33,8 @@ router.get("/dashboard", requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/dashboard.html"));
 });
 
-router.get('/authors', requireAdmin, (req, res) => {
-  res.sendFile(path.join(frontendPath, 'admin/author.html'));
+router.get("/authors", requireAdmin, (req, res) => {
+  res.sendFile(path.join(frontendPath, "admin/author.html"));
 });
-
 
 module.exports = router;

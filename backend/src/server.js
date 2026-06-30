@@ -34,8 +34,8 @@ app.use('/errors', express.static(path.join(frontendPath, 'errors')));
 
 app.use("/", pageRoute);
 app.use("/api/auth", authRoute);
-app.use("/admin", adminRoute);
-app.use("/user", userRoute);
+app.use("/api/admin", adminRoute);
+app.use("/api/user", userRoute);
 
 // ── 404 ──
 app.use((req, res) => {
