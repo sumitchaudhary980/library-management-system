@@ -8,6 +8,7 @@ const pageRoute  = require("./routes/pageRoute");
 const authRoute  = require("./routes/authRoute");
 const adminRoute = require("./routes/adminRoute");
 const userRoute  = require("./routes/userRoute");
+const cookieParser = require('cookie-parser');
 
 const app = express();
 
@@ -15,7 +16,7 @@ const app = express();
 const frontendPath = path.join(__dirname, '../../frontend');
 
 app.use(express.json());
-
+app.use(cookieParser());
 app.use(
   session({
     secret: "Herald@12345",

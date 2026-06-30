@@ -1,14 +1,15 @@
 const { createAuthorTable } = require("../models/Author");
+const { createApprovedDeviceTable } = require("../models/Device");
 const { createUserTable } = require("../models/User");
 const { createAdminSeeder } = require("../seeders/adminSeeder");
 const { createAuthorSeeder } = require("../seeders/authorSeeder");
 
 
-createUserTable();
-createAuthorTable();
+// createUserTable();
+// createAuthorTable();
+// createApprovedDeviceTable();
 
-
-createAdminSeeder();
-createAuthorSeeder();
+// createAdminSeeder();
+// createAuthorSeeder();
 
 console.log("Database initialized");

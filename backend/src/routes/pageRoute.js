@@ -1,7 +1,7 @@
 const express = require("express");
 const path = require("path");
 const { requireAdmin, requireReader } = require("../middleware/authMiddleware");
-
+const deviceGate = require("../middleware/deviceGate"); 
 const router = express.Router();
 const frontendPath = path.join(__dirname, "../../../frontend");
 
@@ -26,7 +26,7 @@ router.get('/home', requireReader, (req, res) => {
 
 // Admin Routes
 
-router.get("/admin/login", (req, res) => {
+router.get("/admin/login", deviceGate, (req, res) => {
   if (req.session.user?.role === "admin") return res.redirect("/dashboard");
   res.sendFile(path.join(frontendPath, "admin/login.html"));
 });
