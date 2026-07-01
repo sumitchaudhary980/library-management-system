@@ -151,6 +151,12 @@ body {
   }
 }
 
+
+
+
+
+/* Admins Css */
+
 .btn-admin {
   background-color: var(--primary-dark);
   color: #ffffff !important;
@@ -676,6 +682,86 @@ a[href="/authors/add"]:hover {
   }
 
 }
+
+/* add-author */
+
+.author-form-card {
+  border-radius: 16px;
+}
+
+
+.author-input,
+.author-textarea {
+  background-color: #fcfbfa !important;
+  border: 1.5px solid #e2e8f0 !important;
+  border-radius: 10px !important;
+  color: var(--text-main);
+  transition: all 0.25s ease;
+}
+
+
+.author-input {
+  height: 46px;
+}
+
+
+.author-textarea {
+  min-height: 140px;
+  resize: vertical;
+  padding: 14px;
+}
+
+
+.author-input:hover,
+.author-textarea:hover {
+  border-color: rgba(0,33,71,0.25) !important;
+}
+
+
+.author-input:focus,
+.author-textarea:focus {
+  background-color: #ffffff !important;
+  border-color: var(--accent-gold) !important;
+  box-shadow: 0 0 0 4px rgba(197,160,89,0.15) !important;
+}
+
+
+.author-input.is-invalid,
+.author-textarea.is-invalid {
+  border-color: #dc3545 !important;
+}
+
+
+.author-input.is-invalid:focus,
+.author-textarea.is-invalid:focus {
+  border-color: #dc3545 !important;
+  box-shadow: 0 0 0 0.25rem rgba(220,53,69,.25) !important;
+}
+
+
+.invalid-feedback {
+  font-size: 0.875rem;
+}
+
+
+.author-submit-btn {
+  background-color: var(--primary-dark);
+  border-radius: 10px;
+  padding: 12px 24px;
+  font-weight: 600;
+}
+
+
+.author-submit-btn:hover {
+  background-color: #001229;
+}
+
+
+.author-cancel-btn {
+  border-radius: 10px;
+  padding: 12px 24px;
+}
+
 /* footer section */
 .main-footer {
   background-color: #ffffff;

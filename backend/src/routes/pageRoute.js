@@ -21,6 +21,11 @@ router.get("/home", requireReader, (req, res) => {
   res.sendFile(path.join(frontendPath, "user/home.html"));
 });
 
+
+
+
+
+
 // Admin Routes
 
 router.get("/admin/login", deviceGate, (req, res) => {
@@ -37,4 +42,11 @@ router.get("/authors", requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/author.html"));
 });
 
+router.get('/add-author', requireAdmin, (req, res) => {
+  res.sendFile(path.join(frontendPath, 'admin/add-author.html'));
+});
+
+router.get("/authors/edit/:id", requireAdmin, (req, res) => {
+  res.sendFile(path.join(frontendPath, "admin/edit-author.html"));
+});
 module.exports = router;
