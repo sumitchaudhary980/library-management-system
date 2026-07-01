@@ -617,7 +617,65 @@ a[href="/authors/add"]:hover {
   transform: translateY(-3px);
   box-shadow: 0 10px 20px rgba(0, 33, 71, 0.2);
 }
+.biography-box {
+  max-width: 420px;
+  line-height: 1.6;
+  color: #64748b;
+  white-space: normal;
+  word-break: break-word;
+}
 
+.action-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
+
+.action-btn {
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  padding: 0;
+}
+
+.edit-btn {
+  color: var(--primary-dark);
+}
+
+.delete-btn {
+  color: #dc3545;
+}
+
+
+@media(max-width:768px) {
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  .biography-box {
+    min-width: 220px;
+    max-width: 260px;
+  }
+
+  .action-wrapper {
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .action-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+}
 /* footer section */
 .main-footer {
   background-color: #ffffff;

@@ -4,9 +4,7 @@ let searchTimer;
 async function loadAuthors(page = 1, search = currentSearch) {
   currentSearch = search;
 
-  const response = await fetch(
-    `/api/admin/authors?page=${page}&search=${search}`,
-  );
+  const response = await fetch(`/api/admin/authors?page=${page}&search=${search}`);
   const data = await response.json();
 
   const table = document.getElementById("authorTable");
@@ -25,28 +23,28 @@ async function loadAuthors(page = 1, search = currentSearch) {
       <tr>
         <td class="py-3 px-4">
           <div class="d-flex align-items-center">
-            <div class="stat-icon-wrapper bg-primary-light me-3">
+            <div class="stat-icon-wrapper bg-primary-light me-3 flex-shrink-0">
               <i class="fas fa-user"></i>
             </div>
             <div>
-              <h6 class="mb-0 fw-bold text-primary-dark text-truncate" style="max-width:220px">
-                ${author.name}
-              </h6>
+              <h6 class="mb-0 fw-bold text-primary-dark">${author.name}</h6>
             </div>
           </div>
         </td>
-        <td class="py-3 px-4 text-muted">
-          <span class="text-truncate d-block" style="max-width:320px">
+        <td class="py-3 px-4">
+          <div class="biography-box">
             ${author.biography || "No biography available"}
-          </span>
+          </div>
         </td>
-        <td class="py-3 px-4 text-end">
-          <a href="/authors/edit/${author.id}" class="btn btn-light me-1 text-primary-dark shadow-sm" title="Edit">
-            <i class="fas fa-pen"></i>
-          </a>
-          <button onclick="deleteAuthor(${author.id})" class="btn btn-light text-danger shadow-sm" title="Delete">
-            <i class="fas fa-trash"></i>
-          </button>
+        <td class="py-3 px-4">
+          <div class="action-wrapper">
+            <a href="/authors/edit/${author.id}" class="action-btn edit-btn" title="Edit">
+              <i class="fas fa-pen"></i>
+            </a>
+            <button onclick="deleteAuthor(${author.id})" class="action-btn delete-btn" title="Delete">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
         </td>
       </tr>
     `;
@@ -96,9 +94,7 @@ async function deleteAuthor(id) {
   if (!result.isConfirmed) return;
 
   try {
-    const response = await fetch(`/api/admin/authors/${id}`, {
-      method: "DELETE",
-    });
+    const response = await fetch(`/api/admin/authors/${id}`, { method: "DELETE" });
     const data = await response.json();
 
     if (response.ok) {
