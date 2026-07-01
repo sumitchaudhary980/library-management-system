@@ -49,4 +49,19 @@ router.get('/add-author', requireAdmin, (req, res) => {
 router.get("/authors/edit/:id", requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/edit-author.html"));
 });
+
+// Genres page
+router.get("/genres", requireAdmin, (req, res) => {
+  res.sendFile(path.join(frontendPath, "admin/genre.html"));
+});
+
+// Add genre page
+router.get("/add-genre", requireAdmin, (req, res) => {
+  res.sendFile(path.join(frontendPath, "admin/add-genre.html"));
+});
+
+router.get("/genres/edit/:id", requireAdmin, (req, res) => {
+  res.sendFile(path.join(frontendPath, "admin/edit-genre.html"));
+});
+
 module.exports = router;
