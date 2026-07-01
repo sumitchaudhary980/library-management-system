@@ -48,7 +48,7 @@ exports.getAuthors = (req, res) => {
     });
 
 
-  } catch(err){
+  } catch (err) {
 
     res.status(500).json({
       message: err.message
@@ -60,7 +60,7 @@ exports.getAuthors = (req, res) => {
 
 
 
-exports.deleteAuthor = (req,res)=>{
+exports.deleteAuthor = (req, res) => {
 
 
   const id = req.params.id;
@@ -78,12 +78,10 @@ exports.deleteAuthor = (req,res)=>{
       )
       .run(id);
 
-
-
-    if(result.changes === 0){
+    if (result.changes === 0) {
 
       return res.status(404).json({
-        message:"Author not found"
+        message: "Author not found"
       });
 
     }
@@ -91,14 +89,14 @@ exports.deleteAuthor = (req,res)=>{
 
 
     res.json({
-      message:"Author deleted successfully"
+      message: "Author deleted successfully"
     });
 
 
-  } catch(err){
+  } catch (err) {
 
     res.status(500).json({
-      message:err.message
+      message: err.message
     });
 
   }
