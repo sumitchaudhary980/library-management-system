@@ -7,12 +7,11 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
 
   if (!email || !password) {
-    showToast("Please fill in all fields.");
-    return;
+    showToast("Please fill in all fields.", "error");
   }
 
   if (!gmailRegex.test(email)) {
-    showToast("Please enter a valid Gmail address.");
+    showToast("Please enter a valid gmail address.", "error");
     return;
   }
 
@@ -33,10 +32,10 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
         window.location.href = data.redirect;
       }, 1000);
     } else {
-      showToast(data.message || "Invalid credentials.");
+      showToast(data.message || "Invalid credentials.", "error");
     }
   } catch (err) {
     console.error("Login error:", err);
-    showToast("Something went wrong. Try again.");
+    showToast("Something went wrong. Try again.", "error");
   }
 });

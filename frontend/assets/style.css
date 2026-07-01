@@ -676,83 +676,40 @@ a[href="/authors/add"]:hover {
   font-weight: 500;
 }
 
-/* Toast Notification Component */
-.toast-wrapper {
-  position: fixed;
-  top: 24px;
-  right: 24px;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+/* SweetAlert Toast */
+.small-toast {
+  padding: 10px 14px !important;
+  border-radius: 10px !important;
+  width: auto !important;
+  min-width: 300px !important;
+  max-width: 400px !important;
+  display: flex !important;
+  align-items: center !important;
 }
 
-.custom-toast {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 18px;
-  border-radius: 10px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  min-width: 260px;
-  max-width: 340px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-  animation: slideIn 0.3s ease forwards;
-  font-family: "Inter", sans-serif;
+.small-toast .swal2-icon {
+  margin: 0 10px 0 0 !important;
+  flex-shrink: 0 !important;
 }
 
-.custom-toast.success {
-  background: #fffbf2;
-  color: #7a5c1e;
-  border: 1px solid var(--accent-gold);
+.small-toast .swal2-title {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+  flex: 1 !important;
+  text-align: left !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  order: 2 !important;
 }
 
-.custom-toast.error {
-  background: #f8f0f0;
-  color: var(--primary-dark);
-  border: 1px solid #c0392b;
+.small-toast .swal2-icon {
+  order: 1 !important;
 }
 
-.custom-toast .toast-icon {
-  font-size: 1rem;
-  flex-shrink: 0;
-}
-
-.custom-toast .toast-close {
-  margin-left: auto;
-  cursor: pointer;
-  opacity: 0.5;
-  font-size: 0.8rem;
-  flex-shrink: 0;
-}
-
-.custom-toast .toast-close:hover {
-  opacity: 1;
-}
-
-.custom-toast.hide {
-  animation: slideOut 0.3s ease forwards;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideOut {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(-16px);
-  }
+.small-toast .swal2-close {
+  order: 3 !important;
+  margin-left: auto !important;
+  font-size: 18px !important;
 }
