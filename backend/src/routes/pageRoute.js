@@ -34,33 +34,33 @@ router.get("/admin/login", deviceGate, (req, res) => {
 });
 
 // Dashboards — protected, live at root level URLs
-router.get("/dashboard", requireAdmin, (req, res) => {
+router.get("/dashboard", deviceGate,requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/dashboard.html"));
 });
 
-router.get("/authors", requireAdmin, (req, res) => {
+router.get("/authors", deviceGate,requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/author.html"));
 });
 
-router.get('/add-author', requireAdmin, (req, res) => {
+router.get('/add-author', deviceGate, requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, 'admin/add-author.html'));
 });
 
-router.get("/authors/edit/:id", requireAdmin, (req, res) => {
+router.get("/authors/edit/:id", deviceGate, requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/edit-author.html"));
 });
 
 // Genres page
-router.get("/genres", requireAdmin, (req, res) => {
+router.get("/genres", deviceGate, requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/genre.html"));
 });
 
 // Add genre page
-router.get("/add-genre", requireAdmin, (req, res) => {
+router.get("/add-genre", deviceGate, requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/add-genre.html"));
 });
 
-router.get("/genres/edit/:id", requireAdmin, (req, res) => {
+router.get("/genres/edit/:id", deviceGate, requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/edit-genre.html"));
 });
 
