@@ -2,12 +2,14 @@ const Database = require("better-sqlite3");
 const path = require("path");
 
 const dbPath = path.join(
-    __dirname,
-    "../database/kaiserlibrary.sqlite"
+  __dirname,
+  "..",
+  "database",
+  "kaiserlibrary.sqlite"
 );
 
 const db = new Database(dbPath);
 
-console.log("SQLite connected");
+console.log("SQLite connected at:", dbPath);
 
 module.exports = db;
