@@ -121,7 +121,15 @@ app.use((err, req, res, next) => {
 
 });
 
+app.use((err, req, res, next) => {
+  if (err.message) {
+    return res.status(400).json({
+      message: err.message,
+    });
+  }
 
+  next(err);
+});
 
 app.listen(3000, () => {
   console.log("Server running on port 300");

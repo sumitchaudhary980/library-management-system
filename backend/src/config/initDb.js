@@ -5,6 +5,7 @@ const { createGenreTable } = require("../models/Genre");
 const { createUserTable } = require("../models/User");
 const { createAdminSeeder } = require("../seeders/adminSeeder");
 const { createAuthorSeeder } = require("../seeders/authorSeeder");
+const { createBookSeeder } = require("../seeders/bookSeeder");
 const { createGenreSeeder } = require("../seeders/genreSeeder");
 
 // createApprovedDeviceTable();
@@ -19,5 +20,6 @@ const { createGenreSeeder } = require("../seeders/genreSeeder");
 // createAdminSeeder();
 // createAuthorSeeder();
 // createGenreSeeder();
+// createBookSeeder();
 
 console.log("Database initialized");
