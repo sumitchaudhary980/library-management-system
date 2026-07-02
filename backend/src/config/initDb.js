@@ -1,4 +1,5 @@
 const { createAuthorTable } = require("../models/Author");
+const { createBookTable } = require("../models/Book");
 const { createApprovedDeviceTable } = require("../models/Device");
 const { createGenreTable } = require("../models/Genre");
 const { createUserTable } = require("../models/User");
@@ -13,6 +14,7 @@ const { createGenreSeeder } = require("../seeders/genreSeeder");
 // createUserTable();
 // createAuthorTable();
 // createGenreTable();
+// createBookTable();
 
 // createAdminSeeder();
 // createAuthorSeeder();

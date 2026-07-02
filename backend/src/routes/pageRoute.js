@@ -64,4 +64,8 @@ router.get("/genres/edit/:id", deviceGate, requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/edit-genre.html"));
 });
 
+router.get("/books", deviceGate, requireAdmin, (req, res) => {
+  res.sendFile(path.join(frontendPath, "admin/book.html"));
+});
+
 module.exports = router;
