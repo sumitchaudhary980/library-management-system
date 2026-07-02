@@ -68,6 +68,10 @@ router.get("/books", deviceGate, requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/book.html"));
 });
 
+router.get("/books/:id", deviceGate, requireAdmin, (req, res) => {
+  res.sendFile(path.join(frontendPath, "admin/view-book.html"));
+});
+
 router.get("/add-book", deviceGate, requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/add-book.html"));
 });

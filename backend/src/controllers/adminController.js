@@ -475,6 +475,38 @@ exports.createBook = async (req, res) => {
     });
   }
 };
+
+// view book
+exports.viewBook = (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const book = db.prepare(`
+      SELECT 
+        books.*,
+        authors.name AS author,
+        genres.name AS genre
+      FROM books
+      INNER JOIN authors ON books.author_id = authors.id
+      INNER JOIN genres ON books.genre_id = genres.id
+      WHERE books.id = ?
+    `).get(id);
+
+    if (!book) {
+      return res.status(404).json({
+        message: "Book not found",
+      });
+    }
+
+      return res.json(book);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
+};
+
 // delete book
 exports.deleteBook = async (req, res) => {
   const id = req.params.id;

@@ -27,6 +27,7 @@ router.delete("/genres/:id", deviceGate, requireAdmin, adminController.deleteGen
 // BOOKS
 router.get("/books", deviceGate, requireAdmin, adminController.getBooks);
 router.post("/books", deviceGate, requireAdmin, upload.single("cover"), adminController.createBook);
+router.get("/books/:id", requireAdmin, adminController.viewBook);
 // router.get("/books/:id", deviceGate, requireAdmin, adminController.getBook);
 // router.put("/books/:id", deviceGate, requireAdmin, upload.single("cover"), adminController.updateBook);
 router.delete("/books/:id", deviceGate, requireAdmin, adminController.deleteBook);
