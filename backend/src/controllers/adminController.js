@@ -350,46 +350,39 @@ exports.getBooks = (req, res) => {
 };
 
 // create books
+
 exports.createBook = async (req, res) => {
   const { title, authorId, genreId, stock } = req.body;
 
+  let errors = {};
+
   if (!title || !title.trim()) {
-    return res.status(400).json({
-      message: "Book title is required",
-    });
+    errors.title = "Book title is required";
   }
 
   if (!authorId) {
-    return res.status(400).json({
-      message: "Author is required",
-    });
+    errors.authorId = "Invalid author selected";
   }
 
   if (!genreId) {
-    return res.status(400).json({
-      message: "Genre is required",
-    });
+    errors.genreId = "Invalid genre selected";
   }
 
-  if (stock === undefined || stock === "") {
-    return res.status(400).json({
-      message: "Stock quantity is required",
-    });
-  }
-
-  const stockQuantity = parseInt(stock);
-
-  if (Number.isNaN(stockQuantity) || stockQuantity < 0) {
-    return res.status(400).json({
-      message: "Stock quantity must be 0 or greater",
-    });
+  if (stock === "") {
+    errors.stock = "Stock quantity is required";
+  } else if (Number(stock) < 0 || Number.isNaN(Number(stock))) {
+    errors.stock = "Stock cannot be negative";
   }
 
   if (!req.file) {
-    return res.status(400).json({
-      message: "Cover image is required",
-    });
+    errors.cover = "Cover image is required";
   }
+
+  if (Object.keys(errors).length > 0) {
+    return res.status(400).json({ errors });
+  }
+
+  const stockQuantity = parseInt(stock);
 
   try {
     const author = db
@@ -397,8 +390,10 @@ exports.createBook = async (req, res) => {
       .get(authorId);
 
     if (!author) {
-      return res.status(404).json({
-        message: "Selected author does not exist",
+      return res.status(400).json({
+        errors: {
+          authorId: "Invalid author selected",
+        },
       });
     }
 
@@ -407,23 +402,28 @@ exports.createBook = async (req, res) => {
       .get(genreId);
 
     if (!genre) {
-      return res.status(404).json({
-        message: "Selected genre does not exist",
+      return res.status(400).json({
+        errors: {
+          genreId: "Invalid genre selected",
+        },
       });
     }
 
     const duplicate = db
-      .prepare(`
-        SELECT id
-        FROM books
+      .prepare(
+        `
+        SELECT id FROM books
         WHERE LOWER(title) = LOWER(?)
         AND author_id = ?
-      `)
+      `
+      )
       .get(title.trim(), authorId);
 
     if (duplicate) {
       return res.status(400).json({
-        message: "Book already exists for this author",
+        errors: {
+          title: "Book already exists for this author",
+        },
       });
     }
 
@@ -434,32 +434,27 @@ exports.createBook = async (req, res) => {
           resource_type: "image",
         },
         (error, result) => {
-          if (error) {
-            return reject(error);
-          }
-
+          if (error) return reject(error);
           resolve(result);
         }
       );
 
-      streamifier
-        .createReadStream(req.file.buffer)
-        .pipe(uploadStream);
+      streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
     });
 
     const result = db
-      .prepare(`
-        INSERT INTO books
-        (
+      .prepare(
+        `
+        INSERT INTO books (
           title,
           author_id,
           genre_id,
           stock_quantity,
           cover_image,
           cover_public_id
-        )
-        VALUES (?, ?, ?, ?, ?, ?)
-      `)
+        ) VALUES (?, ?, ?, ?, ?, ?)
+      `
+      )
       .run(
         title.trim(),
         authorId,
@@ -475,14 +470,11 @@ exports.createBook = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-
     return res.status(500).json({
       message: "Failed to add book",
     });
   }
 };
-
-
 // delete book
 exports.deleteBook = async (req, res) => {
   const id = req.params.id;
