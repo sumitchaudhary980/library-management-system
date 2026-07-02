@@ -361,11 +361,11 @@ exports.createBook = async (req, res) => {
   }
 
   if (!authorId) {
-    errors.authorId = "Invalid author selected";
+    errors.authorId = "Author is required";
   }
 
   if (!genreId) {
-    errors.genreId = "Invalid genre selected";
+    errors.genreId = "Genre is required";
   }
 
   if (stock === "") {
@@ -392,7 +392,7 @@ exports.createBook = async (req, res) => {
     if (!author) {
       return res.status(400).json({
         errors: {
-          authorId: "Invalid author selected",
+          authorId: "Author is required",
         },
       });
     }
@@ -404,7 +404,7 @@ exports.createBook = async (req, res) => {
     if (!genre) {
       return res.status(400).json({
         errors: {
-          genreId: "Invalid genre selected",
+          genreId: "Genre is required",
         },
       });
     }
@@ -477,18 +477,52 @@ exports.createBook = async (req, res) => {
 };
 
 // view book
-exports.viewBook = (req, res) => {
+// exports.viewBook = (req, res) => {
+//   const id = req.params.id;
+
+//   try {
+//     const book = db.prepare(`
+//       SELECT 
+//         books.*,
+//         authors.name AS author,
+//         genres.name AS genre
+//       FROM books
+//       INNER JOIN authors ON books.author_id = authors.id
+//       INNER JOIN genres ON books.genre_id = genres.id
+//       WHERE books.id = ?
+//     `).get(id);
+
+//     if (!book) {
+//       return res.status(404).json({
+//         message: "Book not found",
+//       });
+//     }
+
+//     return res.json(book);
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).json({
+//       message: "Server error",
+//     });
+//   }
+// };
+
+
+//get book
+exports.getBook = (req, res) => {
   const id = req.params.id;
 
   try {
     const book = db.prepare(`
-      SELECT 
+      SELECT
         books.*,
-        authors.name AS author,
-        genres.name AS genre
+        authors.name AS author_name,
+        genres.name AS genre_name
       FROM books
-      INNER JOIN authors ON books.author_id = authors.id
-      INNER JOIN genres ON books.genre_id = genres.id
+      JOIN authors
+      ON books.author_id = authors.id
+      JOIN genres
+      ON books.genre_id = genres.id
       WHERE books.id = ?
     `).get(id);
 
@@ -498,13 +532,194 @@ exports.viewBook = (req, res) => {
       });
     }
 
-      return res.json(book);
+    res.json(book);
+
   } catch (err) {
     console.log(err);
+
     res.status(500).json({
       message: "Server error",
     });
   }
+};
+
+//update book
+exports.updateBook = async (req, res) => {
+
+  const id = req.params.id;
+
+  const {
+    title,
+    authorId,
+    genreId,
+    stock,
+  } = req.body;
+
+  let errors = {};
+
+  if (!title || !title.trim()) {
+    errors.title = "Book title is required";
+  }
+
+  if (!authorId) {
+    errors.authorId = "Author is required";
+  }
+
+  if (!genreId) {
+    errors.genreId = "Genre is required";
+  }
+
+  if (stock === "") {
+    errors.stock = "Stock quantity is required";
+  } else if (
+    Number(stock) < 0 ||
+    Number.isNaN(Number(stock))
+  ) {
+    errors.stock = "Stock cannot be negative";
+  }
+
+  if (Object.keys(errors).length) {
+    return res.status(400).json({
+      errors,
+    });
+  }
+
+  try {
+
+    const existingBook = db.prepare(`
+      SELECT *
+      FROM books
+      WHERE id = ?
+    `).get(id);
+
+    if (!existingBook) {
+      return res.status(404).json({
+        message: "Book not found",
+      });
+    }
+
+    const author = db.prepare(`
+      SELECT id
+      FROM authors
+      WHERE id = ?
+    `).get(authorId);
+
+    if (!author) {
+      return res.status(400).json({
+        errors: {
+          authorId: "Author is required",
+        },
+      });
+    }
+
+    const genre = db.prepare(`
+      SELECT id
+      FROM genres
+      WHERE id = ?
+    `).get(genreId);
+
+    if (!genre) {
+      return res.status(400).json({
+        errors: {
+          genreId: "Genre is required",
+        },
+      });
+    }
+
+    const duplicate = db.prepare(`
+      SELECT id
+      FROM books
+      WHERE LOWER(title)=LOWER(?)
+      AND author_id=?
+      AND id<>?
+    `).get(
+      title.trim(),
+      authorId,
+      id
+    );
+
+    if (duplicate) {
+      return res.status(400).json({
+        errors: {
+          title:
+            "Book already exists for this author",
+        },
+      });
+    }
+
+    let coverImage = existingBook.cover_image;
+    let coverPublicId = existingBook.cover_public_id;
+
+    if (req.file) {
+
+      const uploadResult =
+        await new Promise((resolve, reject) => {
+
+          const uploadStream =
+            cloudinary.uploader.upload_stream(
+              {
+                folder: "kaiser-library/books",
+              },
+              (err, result) => {
+
+                if (err) return reject(err);
+
+                resolve(result);
+
+              }
+            );
+
+          streamifier
+            .createReadStream(req.file.buffer)
+            .pipe(uploadStream);
+
+        });
+
+      if (existingBook.cover_public_id) {
+        await cloudinary.uploader.destroy(
+          existingBook.cover_public_id
+        );
+      }
+
+      coverImage = uploadResult.secure_url;
+      coverPublicId = uploadResult.public_id;
+
+    }
+
+    db.prepare(`
+      UPDATE books
+      SET
+      title=?,
+      author_id=?,
+      genre_id=?,
+      stock_quantity=?,
+      cover_image=?,
+      cover_public_id=?
+      WHERE id=?
+    `).run(
+      title.trim(),
+      authorId,
+      genreId,
+      Number(stock),
+      coverImage,
+      coverPublicId,
+      id
+    );
+
+    res.json({
+      message: "Book updated successfully",
+    });
+
+  } catch (err) {
+
+    console.log(err);
+
+    res.status(500).json({
+      message: "Failed to update book",
+    });
+
+  }
+
 };
 
 // delete book

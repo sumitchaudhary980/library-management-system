@@ -1,21 +1,3 @@
-function showToast(message, type = "error") {
-    const Toast = Swal.mixin({
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
-        showCloseButton: true,
-        timer: 4000,
-        timerProgressBar: true,
-        customClass: {
-            popup: "small-toast",
-        },
-    });
-
-    Toast.fire({
-        icon: type,
-        title: message,
-    });
-}
 
 const id = window.location.pathname.split("/").pop();
 
@@ -42,10 +24,10 @@ async function loadBook() {
             data.title;
 
         document.getElementById("bookAuthor").textContent =
-            data.author;
+            data.author_name;
 
         document.getElementById("bookGenre").textContent =
-            data.genre;
+            data.genre_name;
 
         document.getElementById("bookStock").innerHTML = `
       <span class="badge ${data.stock_quantity < 5
@@ -56,7 +38,7 @@ async function loadBook() {
       </span>
     `;
 
-       
+
     } catch (err) {
         console.log(err);
         showToast("Failed to load book");

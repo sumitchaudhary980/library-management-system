@@ -64,6 +64,8 @@ router.get("/genres/edit/:id", deviceGate, requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/edit-genre.html"));
 });
 
+//books 
+
 router.get("/books", deviceGate, requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/book.html"));
 });
@@ -74,6 +76,10 @@ router.get("/books/:id", deviceGate, requireAdmin, (req, res) => {
 
 router.get("/add-book", deviceGate, requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/add-book.html"));
+});
+
+router.get("/books/edit/:id", deviceGate, requireAdmin, (req, res) => {
+  res.sendFile(path.join(frontendPath, "admin/edit-book.html"));
 });
 
 module.exports = router;

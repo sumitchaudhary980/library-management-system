@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kaiser Library | Books</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+
+    <link rel="stylesheet" href="/assets/style.css" />
+  </head>
+
+  <body class="dashboard-body">
+    <div
+      class="mobile-header d-lg-none bg-white border-bottom px-3 py-2 d-flex align-items-center justify-content-between fixed-top"
+    >
+      <a class="navbar-brand font-serif fw-bold m-0 fs-4" href="/dashboard">
+        <i class="fas fa-book-open brand-icon me-2"></i>
+        Kaiser Library
+      </a>
+
+      <button
+        class="btn btn-outline-dark border-0 p-2"
+        data-bs-toggle="collapse"
+        data-bs-target="#sidebarCollapse"
+      >
+        <i class="fas fa-bars fa-lg"></i>
+      </button>
+    </div>
+
+    <div class="dashboard-wrapper">
+      <aside class="admin-sidebar collapse d-lg-flex" id="sidebarCollapse">
+        <div class="sidebar-header d-none d-lg-flex">
+          <a class="sidebar-brand font-serif fw-bold" href="/dashboard">
+            <i class="fas fa-book-open brand-icon me-2"></i>
+            Kaiser Library
+          </a>
+        </div>
+
+        <div class="sidebar-menu-wrapper">
+          <span class="menu-category">Core</span>
+
+          <ul class="sidebar-menu">
+            <li>
+              <a href="/dashboard" class="menu-item">
+                <i class="fas fa-chart-pie menu-icon"></i>
+                Dashboard
+              </a>
+            </li>
+          </ul>
+
+          <span class="menu-category">Management</span>
+
+          <ul class="sidebar-menu">
+            <li>
+              <a href="/books" class="menu-item active">
+                <i class="fas fa-book menu-icon"></i>
+                Books
+              </a>
+            </li>
+
+            <li>
+              <a href="/authors" class="menu-item">
+                <i class="fas fa-pen-nib menu-icon"></i>
+                Authors
+              </a>
+            </li>
+
+            <li>
+              <a href="/genres" class="menu-item">
+                <i class="fas fa-tags menu-icon"></i>
+                Genres
+              </a>
+            </li>
+          </ul>
+        </div>
+
+        <div
+          class="sidebar-footer-nav mt-auto border-top pt-3 px-2 pb-3"
+          style="border-color: rgba(255, 255, 255, 0.05) !important"
+        >
+          <ul class="sidebar-menu mb-0">
+            <li>
+              <a href="/profile" class="menu-item">
+                <i class="far fa-user menu-icon"></i>
+                View Profile
+              </a>
+            </li>
+
+            <li>
+              <button onclick="logout()" class="menu-item">
+                <i class="fas fa-sign-out-alt menu-icon"></i>
+                Logout
+              </button>
+            </li>
+          </ul>
+        </div>
+      </aside>
+
+      <main class="dashboard-content">
+        <div class="container-fluid p-0">
+          <div
+            class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4"
+          >
+            <div>
+              <h1 class="font-serif fw-bold h3 text-primary-dark mb-1">
+                Edit Book
+              </h1>
+
+              <p class="text-muted small mb-0">
+                Update book information and cover image.
+              </p>
+            </div>
+
+            <a
+              href="/books"
+              class="btn btn-light shadow-sm"
+              style="
+                height: 42px;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+              "
+            >
+              <i class="fas fa-arrow-left me-2"></i>
+              Back to Books
+            </a>
+          </div>
+
+          <div
+            class="card border-0 shadow-sm bg-white p-4 author-form-card"
+            style="border-radius: 16px"
+          >
+            <form id="bookForm" enctype="multipart/form-data" novalidate>
+              <div class="row">
+                <div class="col-lg-8">
+                  <div class="mb-4">
+                    <label class="form-label fw-semibold">
+                      Book Title
+                      <span class="text-danger">*</span>
+                    </label>
+
+                    <input
+                      type="text"
+                      id="title"
+                      class="form-control author-input"
+                      placeholder="Enter book title"
+                    />
+
+                    <div class="invalid-feedback">Book title is required.</div>
+                  </div>
+
+                  <div class="mb-4 position-relative">
+                    <label class="form-label fw-semibold">
+                      Author
+                      <span class="text-danger">*</span>
+                    </label>
+
+                    <input
+                      type="text"
+                      id="authorSearch"
+                      class="form-control author-input"
+                      placeholder="Search author..."
+                      autocomplete="off"
+                    />
+
+                    <input type="hidden" id="authorId" />
+
+                    <div
+                      id="authorSuggestions"
+                      class="list-group position-absolute w-100 shadow-sm"
+                      style="z-index: 20"
+                    ></div>
+
+                    <div class="invalid-feedback">
+                      Please select a valid author.
+                    </div>
+                  </div>
+
+                  <div class="mb-4 position-relative">
+                    <label class="form-label fw-semibold">
+                      Genre
+                      <span class="text-danger">*</span>
+                    </label>
+
+                    <input
+                      type="text"
+                      id="genreSearch"
+                      class="form-control author-input"
+                      placeholder="Search genre..."
+                      autocomplete="off"
+                    />
+
+                    <input type="hidden" id="genreId" />
+
+                    <div
+                      id="genreSuggestions"
+                      class="list-group position-absolute w-100 shadow-sm"
+                      style="z-index: 20"
+                    ></div>
+
+                    <div class="invalid-feedback">
+                      Please select a valid genre.
+                    </div>
+                  </div>
+
+                  <div class="mb-4">
+                    <label class="form-label fw-semibold">
+                      Stock Quantity
+                      <span class="text-danger">*</span>
+                    </label>
+
+                    <input
+                      type="number"
+                      id="stock"
+                      class="form-control author-input"
+                      min="0"
+                      placeholder="Enter stock quantity"
+                    />
+
+                    <div class="invalid-feedback">
+                      Stock quantity cannot be negative.
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-lg-4">
+                  <label class="form-label fw-semibold">Cover Image</label>
+
+                  <div
+                    class="border rounded-3 p-3 text-center"
+                    style="background: #fafafa"
+                  >
+                    <div class="position-relative d-inline-block mb-3">
+                      <img
+                        id="coverPreview"
+                        src=""
+                        alt="Book Cover"
+                        class="img-fluid shadow-sm"
+                        style="
+                          width: 180px;
+                          height: 240px;
+                          object-fit: cover;
+                          border-radius: 10px;
+                        "
+                      />
+
+                      <button
+                        type="button"
+                        id="removeCoverBtn"
+                        class="btn btn-danger rounded-circle position-absolute"
+                        style="
+                          width: 28px;
+                          height: 28px;
+                          top: -10px;
+                          right: -10px;
+                          display: none;
+                          padding: 0;
+                          font-size: 18px;
+                          line-height: 26px;
+                          font-weight: bold;
+                        "
+                      >
+                        &times;
+                      </button>
+                    </div>
+
+                    <input
+                      type="file"
+                      id="cover"
+                      accept="image/*"
+                      class="form-control author-input mb-2"
+                    />
+
+                    <div class="invalid-feedback">Cover image is invalid.</div>
+
+                    <small class="text-muted">
+                      Leave empty to keep the existing cover image.
+                    </small>
+                  </div>
+                </div>
+              </div>
+
+              <hr class="my-4" />
+
+              <div class="d-flex gap-2 flex-wrap">
+                <button type="submit" class="btn text-white author-submit-btn">
+                  Update Book
+                </button>
+
+                <a href="/books" class="btn btn-light author-cancel-btn">
+                  Cancel
+                </a>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/assets/js/auth.js"></script>
+    <script src="/assets/js/edit-book.js"></script>
+  </body>
+</html>
