@@ -6,6 +6,7 @@ function showToast(message, type = "error") {
     showCloseButton: true,
     timer: 4000,
     timerProgressBar: true,
+    customClass: { popup: "small-toast" },
   });
 
   Toast.fire({
@@ -69,6 +70,17 @@ function setError(input, message) {
   }
 }
 
+function clearError(input) {
+  input.classList.remove("is-invalid");
+
+  const feedback = input.parentElement.querySelector(".invalid-feedback");
+
+  if (feedback) {
+    const def = feedback.dataset.default;
+    feedback.textContent = def || "";
+  }
+}
+
 function renderSuggestions(input, hidden, list, data) {
   list.innerHTML = "";
 
@@ -89,21 +101,92 @@ function renderSuggestions(input, hidden, list, data) {
         input.value = item.name;
         hidden.value = item.id;
         list.innerHTML = "";
+        clearError(input);
       };
 
       list.appendChild(btn);
     });
 }
 
+// ---- FIELD VALIDATORS (reused by both live validation and submit) ----
+
+function validateTitle() {
+  if (!title.value.trim()) {
+    setError(title, "Book title is required");
+    return false;
+  }
+
+  clearError(title);
+  return true;
+}
+
+function validateAuthor() {
+  if (!authors.find((a) => a.id == authorId.value)) {
+    setError(authorSearch, "Invalid author selected");
+    return false;
+  }
+
+  clearError(authorSearch);
+  return true;
+}
+
+function validateGenre() {
+  if (!genres.find((g) => g.id == genreId.value)) {
+    setError(genreSearch, "Invalid genre selected");
+    return false;
+  }
+
+  clearError(genreSearch);
+  return true;
+}
+
+function validateStock() {
+  if (stock.value === "") {
+    setError(stock, "Stock quantity is required");
+    return false;
+  }
+
+  if (Number(stock.value) < 0) {
+    setError(stock, "Stock cannot be negative");
+    return false;
+  }
+
+  clearError(stock);
+  return true;
+}
+
+// ---- LIVE / DYNAMIC VALIDATION ----
+
+title.addEventListener("blur", validateTitle);
+title.addEventListener("input", () => {
+  if (title.classList.contains("is-invalid")) validateTitle();
+});
+
 authorSearch.addEventListener("input", () => {
   authorId.value = "";
   renderSuggestions(authorSearch, authorId, authorSuggestions, authors);
+
+  if (authorSearch.classList.contains("is-invalid")) validateAuthor();
+});
+authorSearch.addEventListener("blur", () => {
+  // small delay so a suggestion click can register before we validate
+  setTimeout(validateAuthor, 150);
 });
 
 genreSearch.addEventListener("input", () => {
   genreId.value = "";
   renderSuggestions(genreSearch, genreId, genreSuggestions, genres);
+
+  if (genreSearch.classList.contains("is-invalid")) validateGenre();
 });
+genreSearch.addEventListener("blur", () => {
+  setTimeout(validateGenre, 150);
+});
+
+stock.addEventListener("input", () => {
+  if (stock.classList.contains("is-invalid")) validateStock();
+});
+stock.addEventListener("blur", validateStock);
 
 document.addEventListener("click", (e) => {
   if (!authorSuggestions.contains(e.target) && e.target !== authorSearch) {
@@ -173,30 +256,14 @@ bookForm.addEventListener("submit", async (e) => {
 
   clearErrors();
 
-  let valid = true;
+  const validFlags = [
+    validateTitle(),
+    validateAuthor(),
+    validateGenre(),
+    validateStock(),
+  ];
 
-  if (!title.value.trim()) {
-    setError(title, "Book title is required");
-    valid = false;
-  }
-
-  if (!authors.find((a) => a.id == authorId.value)) {
-    setError(authorSearch, "Invalid author selected");
-    valid = false;
-  }
-
-  if (!genres.find((g) => g.id == genreId.value)) {
-    setError(genreSearch, "Invalid genre selected");
-    valid = false;
-  }
-
-  if (stock.value === "") {
-    setError(stock, "Stock quantity is required");
-    valid = false;
-  } else if (Number(stock.value) < 0) {
-    setError(stock, "Stock cannot be negative");
-    valid = false;
-  }
+  const valid = validFlags.every(Boolean);
 
   if (!valid) return;
 

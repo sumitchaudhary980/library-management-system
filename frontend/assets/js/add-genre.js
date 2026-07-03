@@ -12,17 +12,51 @@ function showToast(message, type = "error") {
   Toast.fire({ icon: type, title: message });
 }
 
+const name = document.getElementById("name");
+
+let submitted = false;
+
+function setError(input, message) {
+  input.classList.add("is-invalid");
+
+  const feedback = input.parentElement.querySelector(".invalid-feedback");
+  if (feedback) feedback.textContent = message;
+}
+
+function clearError(input) {
+  input.classList.remove("is-invalid");
+
+  const feedback = input.parentElement.querySelector(".invalid-feedback");
+  if (feedback) {
+    const def = feedback.getAttribute("data-default");
+    feedback.textContent = def || "";
+  }
+}
+
+function validateName() {
+  if (!name.value.trim()) {
+    setError(name, "Genre name is required");
+    return false;
+  }
+
+  clearError(name);
+  return true;
+}
+
+// LIVE VALIDATION — only kicks in after the first submit attempt
+name.addEventListener("input", () => {
+  if (submitted) validateName();
+});
+name.addEventListener("blur", () => {
+  if (submitted) validateName();
+});
+
 document.getElementById("genreForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const name = document.getElementById("name");
+  submitted = true;
 
-  name.classList.remove("is-invalid");
-
-  if (!name.value.trim()) {
-    name.classList.add("is-invalid");
-    return;
-  }
+  if (!validateName()) return;
 
   try {
     const response = await fetch("/api/admin/genres", {
@@ -42,9 +76,12 @@ document.getElementById("genreForm").addEventListener("submit", async (e) => {
       setTimeout(() => {
         window.location.href = "/genres";
       }, 1000);
-    } else {
-      showToast(data.message || "Something went wrong", "error");
+      return;
     }
+
+    if (data.errors?.name) setError(name, data.errors.name);
+
+    showToast(data.message || "Something went wrong", "error");
   } catch (err) {
     console.log(err);
     showToast("Server error", "error");

@@ -6,6 +6,7 @@ function showToast(message, type = "error") {
     showCloseButton: true,
     timer: 4000,
     timerProgressBar: true,
+    customClass: { popup: "small-toast" },
   });
 
   Toast.fire({
@@ -28,6 +29,9 @@ const cover = document.getElementById("cover");
 
 let authors = [];
 let genres = [];
+
+// Tracks whether the user has attempted a submit yet — live validation
+// only kicks in after that, so errors don't appear before they've tried.
 let submitted = false;
 
 async function loadLookupData() {
@@ -57,51 +61,86 @@ function setError(input, message) {
   if (feedback) feedback.textContent = message;
 }
 
+function clearError(input) {
+  input.classList.remove("is-invalid");
+  const feedback = input.parentElement.querySelector(".invalid-feedback");
+
+  if (feedback) {
+    const def = feedback.getAttribute("data-default");
+    feedback.textContent = def || "";
+  }
+}
+
+// ---- FIELD VALIDATORS (reused by both live validation and submit) ----
+
+function validateTitle() {
+  if (!title.value.trim()) {
+    setError(title, "Book title is required");
+    return false;
+  }
+
+  clearError(title);
+  return true;
+}
+
+function validateAuthor() {
+  if (!authorId.value || !authors.find((a) => a.id == authorId.value)) {
+    setError(authorSearch, "No author selected");
+    return false;
+  }
+
+  clearError(authorSearch);
+  return true;
+}
+
+function validateGenre() {
+  if (!genreId.value || !genres.find((g) => g.id == genreId.value)) {
+    setError(genreSearch, "No genre selected");
+    return false;
+  }
+
+  clearError(genreSearch);
+  return true;
+}
+
+function validateStock() {
+  if (stock.value === "") {
+    setError(stock, "Stock quantity is required");
+    return false;
+  }
+
+  if (Number(stock.value) < 0) {
+    setError(stock, "Stock cannot be negative");
+    return false;
+  }
+
+  clearError(stock);
+  return true;
+}
+
+function validateCover() {
+  if (!cover.files.length) {
+    setError(cover, "Cover image is required");
+    return false;
+  }
+
+  clearError(cover);
+  return true;
+}
+
 function validateForm() {
   clearErrors();
 
-  let ok = true;
+  const validFlags = [
+    validateTitle(),
+    validateAuthor(),
+    validateGenre(),
+    validateStock(),
+    validateCover(),
+  ];
 
-  if (!title.value.trim()) {
-    setError(title, "Book title is required");
-    ok = false;
-  }
-
-  if (!authorId.value) {
-    setError(authorSearch, "No author selected");
-    ok = false;
-  }
-
-  if (!genres.find((g) => g.id == genreId.value)) {
-    setError(genreSearch, "No genre selected");
-    ok = false;
-  }
-
-  const stockVal = Number(stock.value);
-
-  if (stock.value === "") {
-    setError(stock, "Stock quantity is required");
-    ok = false;
-  } else if (stockVal < 0) {
-    setError(stock, "Stock cannot be negative");
-    ok = false;
-  }
-
-  if (!cover.files.length) {
-    setError(cover, "Cover image is required");
-    ok = false;
-  }
-
-  return ok;
+  return validFlags.every(Boolean);
 }
-
-authorSearch.addEventListener("input", () => {
-  authorId.value = "";
-});
-
-genreSearch.addEventListener("input", () => {
-  genreId.value = "";
-});
 
 function renderSuggestions(input, hidden, list, data) {
   list.innerHTML = "";
@@ -123,18 +162,60 @@ function renderSuggestions(input, hidden, list, data) {
       input.value = item.name;
       hidden.value = item.id;
       list.innerHTML = "";
+      if (submitted) validateAuthorOrGenre(input);
     };
 
     list.appendChild(btn);
   });
 }
 
+// picks the right validator for whichever search box triggered the click
+function validateAuthorOrGenre(input) {
+  if (input === authorSearch) validateAuthor();
+  if (input === genreSearch) validateGenre();
+}
+
 authorSearch.addEventListener("input", () => {
+  authorId.value = "";
   renderSuggestions(authorSearch, authorId, authorSuggestions, authors);
+
+  if (submitted) validateAuthor();
+});
+authorSearch.addEventListener("blur", () => {
+  // small delay so a suggestion click can register before we validate
+  setTimeout(() => {
+    if (submitted) validateAuthor();
+  }, 150);
 });
 
 genreSearch.addEventListener("input", () => {
+  genreId.value = "";
   renderSuggestions(genreSearch, genreId, genreSuggestions, genres);
+
+  if (submitted) validateGenre();
+});
+genreSearch.addEventListener("blur", () => {
+  setTimeout(() => {
+    if (submitted) validateGenre();
+  }, 150);
+});
+
+title.addEventListener("blur", () => {
+  if (submitted) validateTitle();
+});
+title.addEventListener("input", () => {
+  if (submitted) validateTitle();
+});
+
+stock.addEventListener("input", () => {
+  if (submitted) validateStock();
+});
+stock.addEventListener("blur", () => {
+  if (submitted) validateStock();
+});
+
+cover.addEventListener("change", () => {
+  if (submitted) validateCover();
 });
 
 document.addEventListener("click", (e) => {
