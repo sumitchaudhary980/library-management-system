@@ -6,6 +6,7 @@ const createUserTable = () => {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             first_name TEXT NOT NULL,
             last_name TEXT NOT NULL,
+            gender TEXT CHECK(gender IN ('male', 'female', 'other')) NOT NULL,
             email TEXT UNIQUE NOT NULL,
             phone TEXT UNIQUE,
             password TEXT NOT NULL,
