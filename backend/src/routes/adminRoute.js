@@ -6,6 +6,9 @@ const upload = require("../middleware/uploadMiddleware");
 
 const router = express.Router();
 
+// DASHBOARD
+router.get("/dashboard", deviceGate, requireAdmin, adminController.getDashboardData);
+
 // AUTHORS
 router.get("/authors", deviceGate, requireAdmin, adminController.getAuthors);
 router.get("/authors/all", deviceGate, requireAdmin, adminController.getAllAuthors);

@@ -2,6 +2,24 @@ const cloudinary = require("../config/cloudinary");
 const streamifier = require("streamifier");
 const db = require("../config/db");
 
+exports.getDashboardData = (req, res) => {
+  try {
+    const totalAuthors = db.prepare(`SELECT COUNT(*) AS total FROM authors`).get().total;
+    const totalGenres = db.prepare(`SELECT COUNT(*) AS total FROM genres`).get().total;
+    const totalBooks = db.prepare(`SELECT COUNT(*) AS total FROM books`).get().total;
+
+    res.json({
+      totalAuthors,
+      totalGenres,
+      totalBooks
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Failed to load dashboard data"
+    });
+  }
+};
 
 exports.getAllAuthors = (req, res) => {
   try {
@@ -475,38 +493,6 @@ exports.createBook = async (req, res) => {
     });
   }
 };
-
-// view book
-// exports.viewBook = (req, res) => {
-//   const id = req.params.id;
-
-//   try {
-//     const book = db.prepare(`
-//       SELECT 
-//         books.*,
-//         authors.name AS author,
-//         genres.name AS genre
-//       FROM books
-//       INNER JOIN authors ON books.author_id = authors.id
-//       INNER JOIN genres ON books.genre_id = genres.id
-//       WHERE books.id = ?
-//     `).get(id);
-
-//     if (!book) {
-//       return res.status(404).json({
-//         message: "Book not found",
-//       });
-//     }
-
-//     return res.json(book);
-//   } catch (err) {
-//     console.log(err);
-//     res.status(500).json({
-//       message: "Server error",
-//     });
-//   }
-// };
-
 
 //get book
 exports.getBook = (req, res) => {
