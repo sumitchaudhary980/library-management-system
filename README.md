@@ -1,36 +1,48 @@
 # 📚 Library Management System
 
-A full-stack **Library Management System** developed using **HTML, CSS, JavaScript, Node.js, and Express.js**.
+A full-stack **Library Management System** developed using **HTML, CSS, JavaScript, Node.js, Express.js, and SQLite**.
 
-This project aims to provide a digital platform for managing library operations, including book management, author management, genre organization, user access, and book borrowing activities.
+This project provides a digital platform for managing library operations through an intuitive admin dashboard. It currently focuses on library resource management, including books, authors, genres, secure authentication, and cloud-based image management using **Cloudinary**.
 
-The system is designed with separate **frontend** and **backend** applications to maintain a clean, scalable, and maintainable project structure.
+The application follows a separate **frontend** and **backend** architecture to ensure a clean, scalable, and maintainable project structure.
 
----
 ---
 
 # 🚧 Project Status
 
 **Status:** Under Development
 
-This project is currently under active development. The initial structure, frontend, and backend setup are being developed, with additional features and improvements planned for future updates.
+This project is currently under active development. Core administration features have been implemented, while additional library modules and user-facing functionality are planned for future releases.
 
 ---
 
 # ✨ Project Overview
 
-The Library Management System will allow administrators to manage library resources and allow users to access library services.
+The Library Management System aims to simplify library management by providing administrators with tools to efficiently organize library resources.
 
-The system is planned to include:
+### Current Features
 
-* Book management
-* Author management
-* Genre management
-* User authentication
-* Book borrowing and returning
-* Due date tracking
-* Fine management
-* Secure access control
+- Admin authentication
+- Dashboard
+- Book management
+- Author management
+- Genre management
+- Book cover image upload
+- Cloudinary image management
+- Search and filtering
+- Pagination
+- Form validation
+- Responsive admin interface
+
+### Planned Features
+
+- User authentication
+- Borrow books
+- Return books
+- Due date tracking
+- Fine management
+- Borrowing history
+- Book reservation system
 
 ---
 
@@ -38,23 +50,43 @@ The system is planned to include:
 
 ## Frontend
 
-* HTML5
-* CSS3
-* JavaScript
+- HTML5
+- CSS3
+- JavaScript
 
 ## Backend
 
-* Node.js
-* Express.js
+- Node.js
+- Express.js
 
 ## Database
 
-* SQLite
+- SQLite
+
+## Cloud Storage
+
+- Cloudinary
 
 ## Additional Technologies
 
-* bcrypt for password security
-* Multer for image uploads
+- bcrypt (Password hashing)
+- Multer (Multipart form handling)
+- Better SQLite3
+- Express Sessions
+
+---
+
+# ☁️ Image Management
+
+Book cover images are securely stored using **Cloudinary**.
+
+Current image features include:
+
+- Uploading book cover images
+- Cloud-based image storage
+- Automatic image replacement
+- Automatic deletion of old images
+- Optimized image delivery
 
 ---
 
@@ -65,14 +97,16 @@ Library-Management-System/
 │
 ├── backend/
 │   ├── src/
-│   │   ├── routes/
-│   │   ├── controllers/
-│   │   ├── models/
-│   │   ├── middleware/
 │   │   ├── config/
+│   │   │   ├── cloudinary.js
+│   │   │   └── db.js
+│   │   │
+│   │   ├── controllers/
+│   │   ├── middleware/
+│   │   ├── models/
+│   │   ├── routes/
 │   │   └── server.js
 │   │
-│   ├── uploads/
 │   ├── .env
 │   └── package.json
 │
@@ -93,75 +127,91 @@ Library-Management-System/
 
 ## Admin Module
 
-The admin module will provide features for managing library resources and maintaining system operations.
+The admin dashboard currently provides:
 
-Planned functionalities:
-
-* Manage books
-* Manage authors
-* Manage genres
-* Manage users
-* Monitor library activities
-
----
-
-## User Module
-
-The user module will allow library members to interact with the system.
-
-Planned functionalities:
-
-* User authentication
-* View borrowed books
-* Track return dates
-* Renew books
-* View fines
-* View borrowing history
+- Dashboard
+- Manage books
+- Manage authors
+- Manage genres
+- Upload and update book cover images
+- Delete books and associated Cloudinary images
+- Search books
+- Pagination
+- Form validation
 
 ---
 
-## 📖 Library Operations
+## User Module (Planned)
 
-The system is designed to support:
+The user module is planned to include:
 
-* Adding and updating books
-* Managing book availability
-* Tracking borrowed books
-* Managing returns
-* Handling overdue fines
-* Maintaining library records
+- User registration
+- User login
+- Browse books
+- Borrow books
+- Return books
+- Renew borrowed books
+- Borrowing history
+- Fine management
+
+---
+
+# 📖 Library Operations
+
+The system currently supports:
+
+- Adding books
+- Updating books
+- Deleting books
+- Managing stock quantity
+- Managing authors
+- Managing genres
+- Uploading book cover images
+- Updating existing cover images
+- Automatic removal of replaced images
+- Search functionality
+- Pagination
 
 ---
 
 # 🔒 Security
 
-The application will focus on:
+The application focuses on:
 
-* Secure authentication
-* Password hashing
-* Protected routes
-* Data validation
-* Secure file uploads
+- Secure authentication
+- Password hashing using bcrypt
+- Protected admin routes
+- Server-side validation
+- Client-side validation
+- Secure file upload validation
+- Cloud-based image storage
+- Automatic cleanup of deleted images
 
 ---
 
 # 🚀 Future Enhancements
 
-Possible improvements include:
+Planned improvements include:
 
-* Dashboard and analytics
-* Email notifications
-* Report generation
-* Role-based access control
-* Activity tracking
-* Book reservation system
-* Improved user interface
+- User management
+- Borrow and return management
+- Fine calculation
+- Dashboard analytics
+- Email notifications
+- Activity logs
+- Book reservation system
+- Barcode / QR code support
+- Report generation
+- Role-based access control
+- Advanced search and filtering
 
 ---
 
 # ⚙️ Installation
 
-Installation instructions will be updated after the project setup is finalized.
+Installation instructions will be added once the project reaches a stable release.
+
+The project is currently under active development, and setup steps may change as new features and configurations are introduced.
 
 ---
 
@@ -173,18 +223,24 @@ Copyright © 2026 Sumit Kumar Chaudhary.
 
 ---
 
-## 👨‍💻 Developed By
+# 👨‍💻 Developed By
 
 **Sumit Kumar Chaudhary**
 
-GitHub: [@sumitchaudhary980](https://github.com/sumitchaudhary980)
+GitHub: https://github.com/sumitchaudhary980
 
 Email: jaiswalsumit1010@gmail.com
 
-Built using:
+---
 
-* HTML
-* CSS
-* JavaScript
-* Node.js
-* Express.js
+## Built With
+
+- HTML5
+- CSS3
+- JavaScript
+- Node.js
+- Express.js
+- SQLite
+- Cloudinary
+- Multer
+- bcrypt
