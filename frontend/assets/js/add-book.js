@@ -68,12 +68,12 @@ function validateForm() {
   }
 
   if (!authorId.value) {
-    setError(authorSearch, "Invalid author selected");
+    setError(authorSearch, "No author selected");
     ok = false;
   }
 
   if (!genres.find((g) => g.id == genreId.value)) {
-    setError(genreSearch, "Invalid genre selected");
+    setError(genreSearch, "No genre selected");
     ok = false;
   }
 
