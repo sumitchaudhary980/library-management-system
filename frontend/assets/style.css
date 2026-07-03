@@ -952,12 +952,8 @@ a[href="/authors/add"]:hover {
   border: none;
   border-radius: 18px;
   overflow: hidden;
-  transition: 0.25s ease;
 }
 
-.profile-card:hover {
-  transform: translateY(-2px);
-}
 
 .profile-header-icon {
   width: 34px;
@@ -1040,10 +1036,11 @@ a[href="/authors/add"]:hover {
 }
 
 .btn-primary-custom:hover {
-  background: #00162f;
+  background: #001229;
   color: #fff;
   transform: translateY(-2px);
 }
+
 
 @media (max-width: 991px) {
   .profile-card .card-body {

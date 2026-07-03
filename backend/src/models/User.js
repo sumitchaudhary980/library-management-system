@@ -13,6 +13,7 @@ const createUserTable = () => {
             role TEXT DEFAULT 'reader',
             address TEXT,
             profile_image TEXT,
+            profile_image_public_id TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )

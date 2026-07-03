@@ -36,5 +36,5 @@ router.delete("/books/:id", deviceGate, requireAdmin, adminController.deleteBook
 
 // PROFILE
 router.get("/profile", deviceGate, requireAdmin, adminController.getProfile);
-// router.put("/profile", deviceGate, requireAdmin, adminController.updateProfile);
+router.put("/profile", deviceGate, requireAdmin, upload.single("profileImage"), adminController.updateProfile);
 module.exports = router;

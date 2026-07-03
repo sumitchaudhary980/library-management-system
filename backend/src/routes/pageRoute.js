@@ -86,4 +86,8 @@ router.get("/profile", deviceGate, requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/profile.html"));
 });
 
+router.get('/edit-profile', deviceGate, requireAdmin, (req, res) => {
+  res.sendFile(path.join(frontendPath, 'admin/edit-profile.html'));
+});
+
 module.exports = router;
