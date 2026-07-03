@@ -15,17 +15,19 @@ const createAdminSeeder = async () => {
       (
         first_name,
         last_name,
+        gender,
         email,
         phone,
         password,
         role,
         address
       )
-      VALUES (?,?,?,?,?,?,?)
+      VALUES (?,?,?,?,?,?,?,?)
     `,
     ).run(
       "Sumit",
       "Chaudhary",
+      "male",
       "jaiswalsumit1010@gmail.com",
       "9704181697",
       hashedPassword,
