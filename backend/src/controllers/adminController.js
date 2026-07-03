@@ -740,3 +740,41 @@ exports.deleteBook = async (req, res) => {
     });
   }
 };
+
+// profile
+exports.getProfile = (req, res) => {
+  try {
+    const user = db.prepare(`
+    SELECT
+      id,
+      first_name,
+      last_name,
+      gender,
+      email,
+      phone,
+      address,
+      profile_image,
+      role,
+      created_at
+    FROM users
+    WHERE id = ?
+`).get(req.session.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "Profile not found",
+      });
+    }
+
+    res.json({
+      user,
+    });
+
+  } catch (err) {
+    console.log(err);
+
+    res.status(500).json({
+      message: "Failed to load profile",
+    });
+  }
+};

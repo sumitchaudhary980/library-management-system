@@ -151,10 +151,6 @@ body {
   }
 }
 
-
-
-
-
 /* Admins Css */
 
 .btn-admin {
@@ -647,7 +643,7 @@ a[href="/authors/add"]:hover {
   align-items: center;
   justify-content: center;
   background: #f8fafc;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
   padding: 0;
 }
 
@@ -659,9 +655,7 @@ a[href="/authors/add"]:hover {
   color: #dc3545;
 }
 
-
-@media(max-width:768px) {
-
+@media (max-width: 768px) {
   .table-responsive {
     overflow-x: auto;
   }
@@ -680,7 +674,6 @@ a[href="/authors/add"]:hover {
     width: 34px;
     height: 34px;
   }
-
 }
 
 /* add-author */
@@ -688,7 +681,6 @@ a[href="/authors/add"]:hover {
 .author-form-card {
   border-radius: 16px;
 }
-
 
 .author-input,
 .author-textarea {
@@ -699,11 +691,9 @@ a[href="/authors/add"]:hover {
   transition: all 0.25s ease;
 }
 
-
 .author-input {
   height: 46px;
 }
-
 
 .author-textarea {
   min-height: 140px;
@@ -711,38 +701,32 @@ a[href="/authors/add"]:hover {
   padding: 14px;
 }
 
-
 .author-input:hover,
 .author-textarea:hover {
-  border-color: rgba(0,33,71,0.25) !important;
+  border-color: rgba(0, 33, 71, 0.25) !important;
 }
-
 
 .author-input:focus,
 .author-textarea:focus {
   background-color: #ffffff !important;
   border-color: var(--accent-gold) !important;
-  box-shadow: 0 0 0 4px rgba(197,160,89,0.15) !important;
+  box-shadow: 0 0 0 4px rgba(197, 160, 89, 0.15) !important;
 }
-
 
 .author-input.is-invalid,
 .author-textarea.is-invalid {
   border-color: #dc3545 !important;
 }
 
-
 .author-input.is-invalid:focus,
 .author-textarea.is-invalid:focus {
   border-color: #dc3545 !important;
-  box-shadow: 0 0 0 0.25rem rgba(220,53,69,.25) !important;
+  box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25) !important;
 }
-
 
 .invalid-feedback {
   font-size: 0.875rem;
 }
-
 
 .author-submit-btn {
   background-color: var(--primary-dark);
@@ -751,11 +735,9 @@ a[href="/authors/add"]:hover {
   font-weight: 600;
 }
 
-
 .author-submit-btn:hover {
   background-color: #001229;
 }
-
 
 .author-cancel-btn {
   border-radius: 10px;
@@ -856,4 +838,239 @@ a[href="/authors/add"]:hover {
   order: 3 !important;
   margin-left: auto !important;
   font-size: 18px !important;
+}
+
+/* Profile Page */
+
+.profile-hero-card {
+  background: #fff;
+  border-radius: 18px;
+  border: 1px solid rgba(0, 33, 71, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 33, 71, 0.05);
+  overflow: hidden;
+}
+
+.profile-hero-cover {
+  height: 130px;
+  background: linear-gradient(
+    135deg,
+    var(--primary-dark) 0%,
+    #003366 60%,
+    var(--accent-gold) 150%
+  );
+}
+
+.profile-hero-body {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  padding: 0 32px 28px 32px;
+  margin-top: -50px;
+}
+
+.profile-avatar-wrap {
+  flex-shrink: 0;
+}
+
+.profile-avatar,
+.profile-avatar-placeholder {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  border: 4px solid var(--accent-gold);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.profile-avatar {
+  object-fit: cover;
+  display: block;
+}
+
+.profile-avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+  color: var(--primary-dark);
+  font-size: 2.6rem;
+  line-height: 1;
+}
+
+.profile-avatar-placeholder i {
+  display: block;
+}
+
+.profile-hero-info {
+  padding-bottom: 4px;
+  margin-top: 60px;
+}
+
+.profile-hero-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.profile-role-badge {
+  background: var(--primary-dark) !important;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  letter-spacing: 0.03em;
+}
+
+.profile-hero-email {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+@media (max-width: 767px) {
+  .profile-hero-cover {
+    height: 110px;
+  }
+
+  .profile-hero-body {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 0 24px 28px 24px;
+  }
+
+  .profile-hero-info {
+    margin-top: 12px;
+  }
+
+  .profile-hero-meta {
+    justify-content: center;
+  }
+}
+
+.profile-card {
+  border: none;
+  border-radius: 18px;
+  overflow: hidden;
+  transition: 0.25s ease;
+}
+
+.profile-card:hover {
+  transform: translateY(-2px);
+}
+
+.profile-header-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background-color: rgba(197, 160, 89, 0.12);
+  color: var(--accent-gold);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
+.profile-card .card-header {
+  border-bottom: 1px solid #edf2f7;
+}
+
+.profile-card .card-body {
+  padding: 1.75rem;
+}
+
+.profile-field {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 12px;
+  border-radius: 12px;
+  transition: background-color 0.2s ease;
+}
+
+.profile-field:hover {
+  background-color: var(--bg-light);
+}
+
+.profile-field-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background-color: rgba(0, 33, 71, 0.05);
+  color: var(--primary-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+}
+
+.profile-field-text {
+  min-width: 0;
+}
+
+.profile-label {
+  display: block;
+  margin-bottom: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #7b8794;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.profile-value {
+  color: var(--primary-dark);
+  font-weight: 600;
+  font-size: 0.97rem;
+  min-height: 24px;
+  word-break: break-word;
+}
+
+/* Edit Profile Button */
+
+.btn-primary-custom {
+  background: var(--primary-dark);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 0.7rem 1.3rem;
+  font-weight: 600;
+  transition: 0.25s ease;
+}
+
+.btn-primary-custom:hover {
+  background: #00162f;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 991px) {
+  .profile-card .card-body {
+    padding: 1.4rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .profile-avatar,
+  .profile-avatar-placeholder {
+    width: 90px;
+    height: 90px;
+  }
+
+  .profile-avatar-placeholder {
+    font-size: 2.2rem;
+  }
+
+  .profile-hero-body {
+    margin-top: -45px;
+  }
+
+  .profile-label {
+    font-size: 0.72rem;
+  }
+
+  .profile-value {
+    font-size: 0.9rem;
+  }
 }

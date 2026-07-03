@@ -33,4 +33,8 @@ router.post("/books", deviceGate, requireAdmin, upload.single("cover"), adminCon
 router.get("/books/:id", deviceGate, requireAdmin, adminController.getBook);
 router.put("/books/:id", deviceGate, requireAdmin, upload.single("cover"), adminController.updateBook);
 router.delete("/books/:id", deviceGate, requireAdmin, adminController.deleteBook);
+
+// PROFILE
+router.get("/profile", deviceGate, requireAdmin, adminController.getProfile);
+// router.put("/profile", deviceGate, requireAdmin, adminController.updateProfile);
 module.exports = router;
