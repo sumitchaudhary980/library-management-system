@@ -321,20 +321,6 @@ body {
   color: #a88544;
 }
 
-.btn-submit {
-  width: 100%;
-  padding: 14px;
-  background-color: var(--primary-dark);
-  color: #ffffff;
-  border: none;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 1rem;
-}
-
-.btn-submit:hover {
-  background-color: #001229;
-}
 
 .back-link {
   color: var(--text-muted);
@@ -613,12 +599,7 @@ button.menu-item:focus {
   border-color: var(--accent-gold);
 }
 
-a[href="/authors/add"]:hover {
-  background-color: #001229;
-  color: #ffffff !important;
-  transform: translateY(-3px);
-  box-shadow: 0 10px 20px rgba(0, 33, 71, 0.2);
-}
+
 .biography-box {
   max-width: 420px;
   line-height: 1.6;
@@ -733,6 +714,7 @@ a[href="/authors/add"]:hover {
   border-radius: 10px;
   padding: 12px 24px;
   font-weight: 600;
+  transition: all 0.3s ease;
 }
 
 .author-submit-btn:hover {
