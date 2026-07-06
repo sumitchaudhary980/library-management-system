@@ -1,12 +1,15 @@
 const Database = require("better-sqlite3");
 const path = require("path");
+const fs = require("fs");
 
-const dbPath = path.join(
-  __dirname,
-  "..",
-  "database",
-  "kaiserlibrary.sqlite"
-);
+const dbDir = path.join(__dirname, "..", "database");
+
+// Create the database directory if it doesn't exist
+if (!fs.existsSync(dbDir)) {
+    fs.mkdirSync(dbDir, { recursive: true });
+}
+
+const dbPath = path.join(dbDir, "kaiserlibrary.sqlite");
 
 const db = new Database(dbPath);
 
