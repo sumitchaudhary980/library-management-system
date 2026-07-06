@@ -12,14 +12,14 @@ const { createGenreSeeder } = require("../seeders/genreSeeder");
 
 
 
-createUserTable();
-createAuthorTable();
-createGenreTable();
-createBookTable();
+// createUserTable();
+// createAuthorTable();
+// createGenreTable();
+// createBookTable();
 
-createAdminSeeder();
-createAuthorSeeder();
-createGenreSeeder();
-createBookSeeder();
+// createAdminSeeder();
+// createAuthorSeeder();
+// createGenreSeeder();
+// createBookSeeder();
 
 console.log("Database initialized");
