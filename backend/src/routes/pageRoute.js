@@ -9,6 +9,46 @@ router.get("/", (req, res) => {
   res.sendFile(path.join(frontendPath, "index.html"));
 });
 
+//Profile
+router.get("/profile", (req, res) => {
+  if (!req.session.user) {
+    return res.redirect("/");
+  }
+
+  if (req.session.user.role === "admin") {
+    return res.sendFile(
+      path.join(frontendPath, "admin/profile.html")
+    );
+  }
+
+  if (req.session.user.role === "reader") {
+    return res.sendFile(
+      path.join(frontendPath, "user/profile.html")
+    );
+  }
+
+  return res.sendStatus(403);
+});
+
+router.get("/edit-profile", (req, res) => {
+  if (!req.session.user) {
+    return res.redirect("/");
+  }
+
+  if (req.session.user.role === "admin") {
+    return res.sendFile(
+      path.join(frontendPath, "admin/edit-profile.html")
+    );
+  }
+
+  if (req.session.user.role === "reader") {
+    return res.sendFile(
+      path.join(frontendPath, "user/edit-profile.html")
+    );
+  }
+
+  return res.sendStatus(403);
+});
 //User Routes
 
 // User login — public but skip if already logged in
@@ -23,13 +63,13 @@ router.get("/home", requireReader, (req, res) => {
   res.sendFile(path.join(frontendPath, "user/home.html"));
 });
 
-router.get('/profile', requireReader, (req, res) => {
-  res.sendFile(path.join(frontendPath, "user/profile.html"));
-});
+// router.get('/profile', requireReader, (req, res) => {
+//   res.sendFile(path.join(frontendPath, "user/profile.html"));
+// });
 
-router.get('/edit-profile',  requireReader, (req, res) => {
-  res.sendFile(path.join(frontendPath, 'user/edit-profile.html'));
-});
+// router.get('/edit-profile',  requireReader, (req, res) => {
+//   res.sendFile(path.join(frontendPath, 'user/edit-profile.html'));
+// });
 
 // Admin Routes
 
@@ -87,12 +127,12 @@ router.get("/books/edit/:id",  requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/edit-book.html"));
 });
 
-router.get("/profile",  requireAdmin, (req, res) => {
-  res.sendFile(path.join(frontendPath, "admin/profile.html"));
-});
+// router.get("/profile",  requireAdmin, (req, res) => {
+//   res.sendFile(path.join(frontendPath, "admin/profile.html"));
+// });
 
-router.get('/edit-profile',  requireAdmin, (req, res) => {
-  res.sendFile(path.join(frontendPath, 'admin/edit-profile.html'));
-});
+// router.get('/edit-profile',  requireAdmin, (req, res) => {
+//   res.sendFile(path.join(frontendPath, 'admin/edit-profile.html'));
+// });
 
 module.exports = router;
