@@ -11,38 +11,36 @@ function showToast(message, type = "error") {
     Toast.fire({ icon: type, title: message });
 }
 
-// MAP: input id -> error <small> id (matches the actual markup, not Bootstrap's
-// default ".invalid-feedback" class, which doesn't exist in this form)
-const errorFieldMap = {
-    first_name: "firstNameError",
-    last_name: "lastNameError",
-    gender: "genderError",
-    phone: "phoneError",
-    address: "addressError",
-    profileImage: "imageError",
-};
-
-// SET ERROR
 function setError(fieldId, message) {
     const input = document.getElementById(fieldId);
-    const errorEl = document.getElementById(errorFieldMap[fieldId]);
+    if (!input) return;
 
-    if (input) input.classList.add("is-invalid");
-    if (errorEl) errorEl.textContent = message;
+    input.classList.add("is-invalid");
+
+    const feedback = input.nextElementSibling;
+
+    if (feedback?.classList.contains("invalid-feedback")) {
+        feedback.textContent = message;
+    }
 }
 
-// CLEAR SINGLE ERROR
 function clearError(fieldId) {
     const input = document.getElementById(fieldId);
-    const errorEl = document.getElementById(errorFieldMap[fieldId]);
+    if (!input) return;
 
-    if (input) input.classList.remove("is-invalid");
-    if (errorEl) errorEl.textContent = "";
+    input.classList.remove("is-invalid");
+
+    const feedback = input.nextElementSibling;
+
+    if (feedback?.classList.contains("invalid-feedback")) {
+        feedback.textContent = feedback.dataset.default || "";
+    }
 }
 
-// CLEAR ALL ERRORS
 function clearErrors() {
-    Object.keys(errorFieldMap).forEach(clearError);
+    document.querySelectorAll(".author-input").forEach(input => {
+        input.classList.remove("is-invalid");
+    });
 }
 
 // PER-FIELD VALIDATORS — return an error message string, or null if valid

@@ -1053,3 +1053,17 @@ button.menu-item:focus {
     font-size: 0.9rem;
   }
 }
+
+
+.author-input.is-invalid ~ .invalid-feedback,
+.form-control.is-invalid ~ .invalid-feedback,
+.form-select.is-invalid ~ .invalid-feedback {
+  display: block !important;
+}
+
+.invalid-feedback {
+  display: none;
+  margin-top: 6px;
+  font-size: 0.875rem;
+  color: #dc3545;
+}
