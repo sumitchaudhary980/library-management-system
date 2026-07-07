@@ -2,7 +2,7 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("admin-password").value;
+  const password = document.getElementById("password").value;
 
   const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
 

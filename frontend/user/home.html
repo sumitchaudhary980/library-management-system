@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kaiser Library | Admin Panel</title>
+    <title>Kaiser Library | User Dashboard</title>
+
     <link
       rel="icon"
       type="image/png"
@@ -17,29 +18,38 @@
       href="/assets/favicon/favicon-16x16.png"
     />
     <link rel="shortcut icon" href="/assets/favicon/favicon.ico" />
+
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap"
       rel="stylesheet"
     />
+
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
     />
+
     <link rel="stylesheet" href="/assets/style.css" />
   </head>
+
   <body class="dashboard-body">
+    <!-- Mobile Header -->
     <div
       class="mobile-header d-lg-none bg-white border-bottom px-3 py-2 d-flex align-items-center justify-content-between fixed-top"
     >
-      <a class="navbar-brand font-serif fw-bold m-0 fs-4" href="/dashboard">
-        <i class="fas fa-book-open brand-icon me-2"></i>Kaiser Library
+      <a class="navbar-brand font-serif fw-bold m-0 fs-4" href="/user/dashboard">
+        <i class="fas fa-book-open brand-icon me-2"></i>
+        Kaiser Library
       </a>
+
       <button
         class="btn btn-outline-dark border-0 p-2"
         type="button"
@@ -51,148 +61,196 @@
     </div>
 
     <div class="dashboard-wrapper">
+
+      <!-- Sidebar -->
       <aside class="admin-sidebar collapse d-lg-flex" id="sidebarCollapse">
+
         <div class="sidebar-header d-none d-lg-flex">
-          <a class="sidebar-brand font-serif fw-bold" href="/dashboard">
-            <i class="fas fa-book-open brand-icon me-2"></i>Kaiser Library
+          <a class="sidebar-brand font-serif fw-bold" href="/user/dashboard">
+            <i class="fas fa-book-open brand-icon me-2"></i>
+            Kaiser Library
           </a>
         </div>
 
         <div class="sidebar-menu-wrapper">
+
           <span class="menu-category">Core</span>
+
           <ul class="sidebar-menu">
             <li>
-              <a href="/dashboard" class="menu-item active">
-                <i class="fas fa-chart-pie menu-icon"></i> Dashboard
+              <a href="/user/dashboard" class="menu-item active">
+                <i class="fas fa-chart-pie menu-icon"></i>
+                Dashboard
               </a>
             </li>
           </ul>
 
-          <span class="menu-category">Management</span>
+          <span class="menu-category">Library</span>
+
           <ul class="sidebar-menu">
             <li>
-              <a href="/books" class="menu-item">
-                <i class="fas fa-book menu-icon"></i> Books
+              <a href="/user/books" class="menu-item">
+                <i class="fas fa-book-open menu-icon"></i>
+                Browse Books
               </a>
             </li>
+
             <li>
-              <a href="/authors" class="menu-item">
-                <i class="fas fa-pen-nib menu-icon"></i> Authors
+              <a href="/user/borrowed-books" class="menu-item">
+                <i class="fas fa-book-reader menu-icon"></i>
+                My Borrowed Books
               </a>
             </li>
+
             <li>
-              <a href="/genres" class="menu-item">
-                <i class="fas fa-tags menu-icon"></i> Genres
+              <a href="/user/fines" class="menu-item">
+                <i class="fas fa-money-check-dollar menu-icon"></i>
+                Fines & Penalties
               </a>
             </li>
           </ul>
+
         </div>
 
         <div
           class="sidebar-footer-nav mt-auto border-top pt-3 px-2 pb-3"
-          style="border-color: rgba(255, 255, 255, 0.05) !important"
+          style="border-color: rgba(255,255,255,.05)!important;"
         >
           <ul class="sidebar-menu mb-0">
+
             <li>
               <a href="/profile" class="menu-item">
-                <i class="far fa-user menu-icon"></i> View Profile
+                <i class="far fa-user menu-icon"></i>
+                My Profile
               </a>
             </li>
+
             <li>
               <button onclick="logout()" class="menu-item">
-                <i class="fas fa-sign-out-alt menu-icon"></i> Logout
+                <i class="fas fa-sign-out-alt menu-icon"></i>
+                Logout
               </button>
             </li>
+
           </ul>
         </div>
+
       </aside>
 
+      <!-- Main Content -->
       <main class="dashboard-content">
+
         <div class="container-fluid p-0">
+
           <div class="mb-4">
+
             <p
               id="currentDate"
               class="text-uppercase text-muted small fw-semibold mb-2"
-              style="letter-spacing: 1px"
+              style="letter-spacing:1px"
             ></p>
 
             <h1
               id="greeting"
               class="font-serif fw-bold text-primary-dark mb-2"
-              style="font-size: 2rem"
+              style="font-size:2rem"
             >
-              Good Morning, Admin
+              Good Morning, User
             </h1>
 
             <p class="text-muted mb-0">
-              Welcome back! Here's an overview of your library management system
-              today.
+              Welcome back! Here's a summary of your library account.
             </p>
+
           </div>
 
+          <!-- Statistics -->
           <div class="row g-4">
+
             <div class="col-12 col-md-4">
               <div class="card stat-card border-0 shadow-sm p-4 bg-white">
+
                 <div class="d-flex align-items-center justify-content-between">
+
                   <div>
-                    <span class="text-muted small fw-medium d-block mb-1"
-                      >Total Books</span
-                    >
-                    <h3 id="totalBooks" class="fw-bold m-0 text-primary-dark">
+                    <span class="text-muted small fw-medium d-block mb-1">
+                      Borrowed Books
+                    </span>
+
+                    <h3 id="borrowedBooks" class="fw-bold m-0 text-primary-dark">
                       0
                     </h3>
                   </div>
+
                   <div class="stat-icon-wrapper bg-primary-light">
-                    <i class="fas fa-book text-primary-dark"></i>
+                    <i class="fas fa-book-reader text-primary-dark"></i>
                   </div>
+
                 </div>
+
               </div>
             </div>
+
             <div class="col-12 col-md-4">
               <div class="card stat-card border-0 shadow-sm p-4 bg-white">
+
                 <div class="d-flex align-items-center justify-content-between">
+
                   <div>
-                    <span class="text-muted small fw-medium d-block mb-1"
-                      >Total Authors</span
-                    >
-                    <h3 id="totalAuthors" class="fw-bold m-0 text-primary-dark">
+                    <span class="text-muted small fw-medium d-block mb-1">
+                      Books Due Soon
+                    </span>
+
+                    <h3 id="dueBooks" class="fw-bold m-0 text-primary-dark">
                       0
                     </h3>
                   </div>
+
                   <div class="stat-icon-wrapper bg-gold-light">
-                    <i
-                      class="fas fa-pen-nib"
-                      style="color: var(--accent-gold)"
-                    ></i>
+                    <i class="fas fa-clock" style="color:var(--accent-gold)"></i>
                   </div>
+
                 </div>
+
               </div>
             </div>
+
             <div class="col-12 col-md-4">
               <div class="card stat-card border-0 shadow-sm p-4 bg-white">
+
                 <div class="d-flex align-items-center justify-content-between">
+
                   <div>
-                    <span class="text-muted small fw-medium d-block mb-1"
-                      >Total Genres</span
-                    >
-                    <h3 id="totalGenres" class="fw-bold m-0 text-primary-dark">
-                      0
+                    <span class="text-muted small fw-medium d-block mb-1">
+                      Outstanding Fines
+                    </span>
+
+                    <h3 id="fineAmount" class="fw-bold m-0 text-primary-dark">
+                      Rs. 0
                     </h3>
                   </div>
+
                   <div class="stat-icon-wrapper bg-primary-light">
-                    <i class="fas fa-tags text-primary-dark"></i>
+                    <i class="fas fa-money-bill-wave text-primary-dark"></i>
                   </div>
+
                 </div>
+
               </div>
             </div>
+
           </div>
+
         </div>
+
       </main>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
     <script src="/assets/js/auth.js"></script>
-    <script src="/assets/js/dashboard.js"></script>
+    <script src="/assets/js/user/dashboard.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </body>
 </html>

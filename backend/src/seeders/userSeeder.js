@@ -21,25 +21,24 @@ const uploadToCloudinary = (filePath) => {
     });
 };
 
-const createAdminSeeder = async () => {
+const createUserSeeder = async () => {
     try {
-        const email = "jaiswalsumit1010@gmail.com";
+        const email = "john.doe@gmail.com";
 
-        const admin = db
+        const user = db
             .prepare("SELECT * FROM users WHERE email = ?")
             .get(email);
 
-        if (admin) {
-            console.log("Admin already exists");
+        if (user) {
+            console.log("User already exists");
             return;
         }
 
-        const hashedPassword = await bcrypt.hash("Herald@12345", 10);
+        const hashedPassword = await bcrypt.hash("User@12345", 10);
 
-        // Path to admin image
         const imagePath = path.join(
             __dirname,
-            "../uploads/users/admin.jpg"
+            "../uploads/users/user.png"
         );
 
         let profileImage = null;
@@ -51,7 +50,7 @@ const createAdminSeeder = async () => {
             profileImage = upload.secure_url;
             profileImagePublicId = upload.public_id;
         } else {
-            console.log("Admin profile image not found.");
+            console.log("User profile image not found.");
         }
 
         db.prepare(`
@@ -70,22 +69,22 @@ const createAdminSeeder = async () => {
             )
             VALUES (?,?,?,?,?,?,?,?,?,?)
         `).run(
-            "Sumit",
-            "Chaudhary",
+            "John",
+            "Doe",
             "male",
-            email,
-            "9704181697",
+            "john@gmail.com",
+            "9812345678",
             hashedPassword,
-            "admin",
-            "Library",
+            "reader",
+            "Kathmandu, Nepal",
             profileImage,
             profileImagePublicId
         );
 
-        console.log("✅ Admin created successfully");
+        console.log("✅ User created successfully");
     } catch (error) {
-        console.error("❌ Admin Seeder Error:", error);
+        console.error("❌ User Seeder Error:", error);
     }
 };
 
-module.exports = { createAdminSeeder };
+module.exports = { createUserSeeder };

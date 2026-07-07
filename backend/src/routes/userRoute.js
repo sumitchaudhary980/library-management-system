@@ -1,14 +1,16 @@
 const express = require('express');
-const path = require('path');
 const { requireReader } = require('../middleware/authMiddleware');
-
+const userController = require("../controllers/userController");
+const upload = require("../middleware/uploadMiddleware");
 const router = express.Router();
 
-const frontendPath = path.join(__dirname, '../../../frontend');
-
 // All user pages protected by requireReader
-// router.get('/dashboard', requireReader, (req, res) => {
-//   res.sendFile(path.join(frontendPath, 'user/dashboard.html'));
-// });
+
+
+
+//PROFILE ROUTE
+router.get("/profile", requireReader, userController.getProfile);
+router.put("/profile", requireReader, upload.single("profileImage"), userController.updateProfile);
+module.exports = router;
 
 module.exports = router;

@@ -9,10 +9,12 @@ router.get("/", (req, res) => {
   res.sendFile(path.join(frontendPath, "index.html"));
 });
 
+//User Routes
+
 // User login — public but skip if already logged in
 router.get("/login", (req, res) => {
   if (req.session.user?.role === "reader")
-    return res.redirect("/user/dashboard");
+    return res.redirect("/home");
   res.sendFile(path.join(frontendPath, "user/login.html"));
 });
 
@@ -21,10 +23,13 @@ router.get("/home", requireReader, (req, res) => {
   res.sendFile(path.join(frontendPath, "user/home.html"));
 });
 
+router.get('/profile', requireReader, (req, res) => {
+  res.sendFile(path.join(frontendPath, "user/profile.html"));
+});
 
-
-
-
+router.get('/edit-profile',  requireReader, (req, res) => {
+  res.sendFile(path.join(frontendPath, 'user/edit-profile.html'));
+});
 
 // Admin Routes
 

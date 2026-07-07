@@ -52,7 +52,7 @@
               <h2 class="font-serif fw-bold text-primary-dark">User Sign In</h2>
             </div>
 
-            <form>
+            <form id="loginForm">
               <div class="mb-3">
                 <label class="form-label fw-medium"> Username or Email </label>
 
@@ -62,6 +62,7 @@
                   </span>
 
                   <input
+                    id="email"
                     type="text"
                     class="form-control input-field"
                     placeholder="user@kaiserlibrary.com"
@@ -79,7 +80,7 @@
                   </span>
 
                   <input
-                    id="user-password"
+                    id="password"
                     type="password"
                     class="form-control input-field input-password-field"
                     placeholder="Password"
@@ -94,7 +95,7 @@
                     <i
                       class="far fa-eye text-muted"
                       style="cursor: pointer"
-                      onclick="togglePassword('user-password', this)"
+                      onclick="togglePassword('password', this)"
                     >
                     </i>
                   </span>
@@ -209,5 +210,6 @@
     </footer>
     <script src="/assets/js/auth.js"></script>
     <script src="/assets/js/login.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   </body>
 </html>
