@@ -12,6 +12,8 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.38.0",
     "bcrypt": "^6.0.0",
     "better-sqlite3": "^12.11.1",
     "cloudinary": "^2.10.0",

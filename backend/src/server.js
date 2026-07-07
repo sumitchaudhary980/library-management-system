@@ -20,8 +20,11 @@ const pageRoute = require("./routes/pageRoute");
 const authRoute = require("./routes/authRoute");
 const adminRoute = require("./routes/adminRoute");
 const userRoute = require("./routes/userRoute");
+const rateLimiter = require("./middleware/rateLimiter");
 
 const app = express();
+
+app.set("trust proxy", 1);
 
 const PORT = process.env.PORT || 3000;
 
@@ -31,6 +34,7 @@ const sessionPath = path.join(__dirname, "database");
 if (!fs.existsSync(sessionPath)) {
   fs.mkdirSync(sessionPath, { recursive: true });
 }
+
 
 app.use(
   helmet({
@@ -61,7 +65,11 @@ app.use(
           "data:"
         ],
 
-        imgSrc: ["'self'", "data:", "https:"],
+        imgSrc: [
+          "'self'",
+          "data:",
+          "https:"
+        ],
 
         connectSrc: [
           "'self'",
@@ -74,21 +82,33 @@ app.use(
   })
 );
 
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+
+// Apply rate limiter only to API routes
+app.use("/api", rateLimiter);
+
+
 app.use(
   session({
     name: "sid",
+
     store: new SQLiteStore({
       db: "sessions.sqlite",
       dir: sessionPath,
     }),
+
     secret: process.env.SESSION_SECRET,
+
     resave: false,
+
     saveUninitialized: false,
+
     rolling: true,
+
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -98,6 +118,7 @@ app.use(
   })
 );
 
+
 app.use(
   "/assets",
   express.static(path.join(frontendPath, "assets"), {
@@ -105,6 +126,7 @@ app.use(
     maxAge: "1d",
   })
 );
+
 
 app.use(
   "/errors",
@@ -114,12 +136,19 @@ app.use(
   })
 );
 
+
 app.use("/", pageRoute);
+
 app.use("/api/auth", authRoute);
+
 app.use("/api/admin", adminRoute);
+
 app.use("/api/user", userRoute);
 
+
+
 app.use((req, res) => {
+
   if (req.originalUrl.startsWith("/api")) {
     return res.status(404).json({
       message: "Resource not found",
@@ -131,32 +160,49 @@ app.use((req, res) => {
   );
 });
 
+
+
 app.use((err, req, res, next) => {
+
   console.error(err);
 
   const status = err.status || 500;
 
+
   if (req.originalUrl.startsWith("/api")) {
+
     return res.status(status).json({
       message:
         process.env.NODE_ENV === "production"
           ? "Internal server error"
           : err.message,
     });
+
   }
+
 
   res.status(status).sendFile(
     path.join(frontendPath, "errors", "500.html")
   );
+
 });
+
+
 
 const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
+
 const shutdown = () => {
-  server.close(() => process.exit(0));
+
+  server.close(() => {
+    process.exit(0);
+  });
+
 };
 
+
 process.on("SIGINT", shutdown);
+
 process.on("SIGTERM", shutdown);

@@ -28,13 +28,13 @@ const login = async (req, res) => {
     // Detect which login endpoint was used
     if (req.loginRole === "admin" && user.role !== "admin") {
       return res.status(403).json({
-        message: "Only administrators can log in here.",
+        message: "Invalid credentials",
       });
     }
 
     if (req.loginRole === "reader" && user.role !== "reader") {
       return res.status(403).json({
-        message: "Only readers can log in here.",
+        message: "Invalid credentials",
       });
     }
 
