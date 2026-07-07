@@ -3,9 +3,28 @@ const { login, logout, getSession } = require("../controllers/authController");
 const { requireAdmin } = require("../middleware/authMiddleware");
 const router = express.Router();
 
-router.post("/login", login);
+// routes
+router.post(
+    "/admin/login",
+    (req, res, next) => {
+        console.log("ADMIN LOGIN ROUTE");
+        req.loginRole = "admin";
+        next();
+    },
+    login
+);
+
+router.post(
+    "/login",
+    (req, res, next) => {
+        console.log("READER LOGIN ROUTE");
+        req.loginRole = "reader";
+        next();
+    },
+    login
+);
 router.post("/logout", logout);
-router.get("/me", getSession); // check active session from any page
+router.get("/me", getSession);
 
 
 module.exports = router;

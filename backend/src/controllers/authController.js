@@ -4,20 +4,41 @@ const db = require("../config/db");
 const login = async (req, res) => {
   const { email, password } = req.body;
 
-  if (!email || !password)
-    return res.status(400).json({ message: "Email and password are required" });
+  if (!email || !password) {
+    return res
+      .status(400)
+      .json({ message: "Email and password are required" });
+  }
 
   try {
     const user = db
       .prepare("SELECT * FROM users WHERE email = ? OR phone = ?")
       .get(email, email);
 
-    if (!user) return res.status(401).json({ message: "Invalid credentials" });
+    if (!user) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
 
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(401).json({ message: "Invalid credentials" });
 
-    // Store full session — works for both admin and user
+    if (!match) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+    
+    // Detect which login endpoint was used
+    if (req.loginRole === "admin" && user.role !== "admin") {
+      return res.status(403).json({
+        message: "Only administrators can log in here.",
+      });
+    }
+
+    if (req.loginRole === "reader" && user.role !== "reader") {
+      return res.status(403).json({
+        message: "Only readers can log in here.",
+      });
+    }
+
+    // Create session
     req.session.user = {
       id: user.id,
       first_name: user.first_name,
@@ -26,7 +47,6 @@ const login = async (req, res) => {
       role: user.role,
     };
 
-    // Tell frontend where to redirect based on role
     const redirectMap = {
       admin: "/dashboard",
       reader: "/home",
@@ -35,25 +55,44 @@ const login = async (req, res) => {
     return res.json({
       message: "Login successful",
       role: user.role,
-      redirect: redirectMap[user.role] ?? "/home",
+      redirect: redirectMap[user.role],
     });
   } catch (err) {
     console.error("Login error:", err);
-    return res.status(500).json({ message: "Server error" });
+    return res.status(500).json({
+      message: "Server error",
+    });
   }
 };
 
 const logout = (req, res) => {
   req.session.destroy((err) => {
-    if (err) return res.status(500).json({ message: "Logout failed" });
-    res.json({ message: "Logged out successfully" });
+    if (err) {
+      return res.status(500).json({
+        message: "Logout failed",
+      });
+    }
+
+    res.json({
+      message: "Logged out successfully",
+    });
   });
 };
 
 const getSession = (req, res) => {
-  if (!req.session.user)
-    return res.status(401).json({ message: "Not authenticated" });
-  res.json({ user: req.session.user });
+  if (!req.session.user) {
+    return res.status(401).json({
+      message: "Not authenticated",
+    });
+  }
+
+  res.json({
+    user: req.session.user,
+  });
 };
 
-module.exports = { login, logout, getSession };
+module.exports = {
+  login,
+  logout,
+  getSession,
+};
