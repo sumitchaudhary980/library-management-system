@@ -7,7 +7,6 @@ const router = express.Router();
 router.post(
     "/admin/login",
     (req, res, next) => {
-        console.log("ADMIN LOGIN ROUTE");
         req.loginRole = "admin";
         next();
     },
@@ -17,7 +16,6 @@ router.post(
 router.post(
     "/login",
     (req, res, next) => {
-        console.log("READER LOGIN ROUTE");
         req.loginRole = "reader";
         next();
     },

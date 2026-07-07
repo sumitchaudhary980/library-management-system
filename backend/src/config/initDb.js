@@ -7,19 +7,21 @@ const { createAdminSeeder } = require("../seeders/adminSeeder");
 const { createAuthorSeeder } = require("../seeders/authorSeeder");
 const { createBookSeeder } = require("../seeders/bookSeeder");
 const { createGenreSeeder } = require("../seeders/genreSeeder");
+const { createUserSeeder } = require("../seeders/userSeeder");
 
-createApprovedDeviceTable();
+// createApprovedDeviceTable();
 
 
 
-createUserTable();
-createAuthorTable();
-createGenreTable();
-createBookTable();
+// createUserTable();
+// createAuthorTable();
+// createGenreTable();
+// createBookTable();
 
-createAdminSeeder();
-createAuthorSeeder();
-createGenreSeeder();
-createBookSeeder();
+// createAdminSeeder();
+// createUserSeeder();
+// createAuthorSeeder();
+// createGenreSeeder();
+// createBookSeeder();
 
 console.log("Database initialized");
