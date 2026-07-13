@@ -9,6 +9,10 @@ router.get("/", (req, res) => {
   res.sendFile(path.join(frontendPath, "index.html"));
 });
 
+//user routes
+router.get('/borrowed-books', requireReader, (req, res) => {
+  res.sendFile(path.join(frontendPath, 'user/borrowed-books.html'));
+});
 
 //Profile
 router.get("/profile", (req, res) => {
@@ -67,7 +71,7 @@ router.get("/home", requireReader, (req, res) => {
 
 // Admin Routes
 
-router.get("/admin/login",  (req, res) => {
+router.get("/admin/login", (req, res) => {
   if (req.session.user?.role === "admin") return res.redirect("/dashboard");
   res.sendFile(path.join(frontendPath, "admin/login.html"));
 });
@@ -81,25 +85,25 @@ router.get("/authors", requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/author.html"));
 });
 
-router.get('/add-author',  requireAdmin, (req, res) => {
+router.get('/add-author', requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, 'admin/add-author.html'));
 });
 
-router.get("/authors/edit/:id",  requireAdmin, (req, res) => {
+router.get("/authors/edit/:id", requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/edit-author.html"));
 });
 
 // Genres page
-router.get("/genres",  requireAdmin, (req, res) => {
+router.get("/genres", requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/genre.html"));
 });
 
 // Add genre page
-router.get("/add-genre",  requireAdmin, (req, res) => {
+router.get("/add-genre", requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/add-genre.html"));
 });
 
-router.get("/genres/edit/:id",  requireAdmin, (req, res) => {
+router.get("/genres/edit/:id", requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/edit-genre.html"));
 });
 
@@ -126,7 +130,7 @@ router.get("/books", (req, res) => {
 
 
 router.get("/books/:id", (req, res) => {
-   if (!req.session.user) {
+  if (!req.session.user) {
     return res.redirect("/");
   }
   if (req.session.user.role === "admin") {
@@ -142,14 +146,14 @@ router.get("/books/:id", (req, res) => {
   }
 
   return res.sendStatus(403);
- 
+
 });
 
-router.get("/add-book",  requireAdmin, (req, res) => {
+router.get("/add-book", requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/add-book.html"));
 });
 
-router.get("/books/edit/:id",  requireAdmin, (req, res) => {
+router.get("/books/edit/:id", requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/edit-book.html"));
 });
 
