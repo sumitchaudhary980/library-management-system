@@ -495,6 +495,7 @@ exports.returnBook = (req, res) => {
   const borrowedId = parseInt(req.params.id);
 
   try {
+
     const borrowed = db.prepare(`
       SELECT *
       FROM borrowed_books
@@ -513,15 +514,33 @@ exports.returnBook = (req, res) => {
       });
     }
 
+    // Calculate fine (Rs. 10/day after due date)
+    const today = new Date();
+    const dueDate = new Date(borrowed.due_date);
+
+    let overdueDays = Math.floor(
+      (today - dueDate) / (1000 * 60 * 60 * 24)
+    );
+
+    if (overdueDays < 0) {
+      overdueDays = 0;
+    }
+
+    const fineAmount = overdueDays * 10;
+
     const transaction = db.transaction(() => {
 
       db.prepare(`
         UPDATE borrowed_books
         SET
           returned = 1,
-          returned_at = CURRENT_TIMESTAMP
+          returned_at = CURRENT_TIMESTAMP,
+          fine_amount = ?
         WHERE id = ?
-      `).run(borrowedId);
+      `).run(
+        fineAmount,
+        borrowedId
+      );
 
       db.prepare(`
         UPDATE books
@@ -534,15 +553,18 @@ exports.returnBook = (req, res) => {
     transaction();
 
     res.json({
-      message: "Book returned successfully."
+      message: "Book returned successfully.",
+      fine: fineAmount
     });
 
   } catch (err) {
+
     console.log(err);
 
     res.status(500).json({
       message: "Failed to return book."
     });
+
   }
 };
 

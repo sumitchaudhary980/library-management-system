@@ -28,13 +28,13 @@ document.getElementById("borrowedTo").max = today;
 async function loadBorrowedBooks(page = 1) {
     currentPage = page;
 
-  const params = new URLSearchParams({
-    page,
-    title: currentTitle,
-    borrowed_from: currentBorrowedFrom,
-    borrowed_to: currentBorrowedTo,
-    sort: currentSort
-});
+    const params = new URLSearchParams({
+        page,
+        title: currentTitle,
+        borrowed_from: currentBorrowedFrom,
+        borrowed_to: currentBorrowedTo,
+        sort: currentSort
+    });
 
     try {
         const response = await fetch(`/api/user/borrowed-books?${params}`);
@@ -46,7 +46,7 @@ async function loadBorrowedBooks(page = 1) {
         if (data.books.length === 0) {
             table.innerHTML = `
                 <tr>
-                    <td colspan="8" class="text-center py-5 text-muted">
+                    <td colspan="7" class="text-center py-5 text-muted">
                         No borrowed books found
                     </td>
                 </tr>
@@ -99,20 +99,19 @@ async function loadBorrowedBooks(page = 1) {
                     <td class="py-3 px-4">${new Date(book.due_date).toLocaleDateString()}</td>
                     <td class="py-3 px-4">${remainingBadge}</td>
                     <td class="py-3 px-4 text-center">
-                        ${
-                            book.renewed
-                                ? `
+                        ${book.renewed
+                    ? `
                                 <button class="btn btn-secondary btn-sm px-3" disabled
                                         style="border-radius:10px; min-width:110px;">
                                     Renewed
                                 </button>`
-                                : `
+                    : `
                                 <button class="btn btn-sm px-3 text-white"
                                         onclick="renewBook(${book.borrowed_id})"
                                         style="background:#c5a059; border-radius:10px; min-width:110px;">
                                     <i class="fas fa-rotate me-2"></i>Renew
                                 </button>`
-                        }
+                }
                     </td>
                     <td class="py-3 px-4 text-center">
                         <button class="btn btn-sm px-3 text-white"
@@ -150,6 +149,45 @@ async function loadBorrowedBooks(page = 1) {
         showToast("Failed to load borrowed books");
     }
 }
+async function renewBook(id) {
+
+    const result = await Swal.fire({
+        title: "Renew book?",
+        text: "The due date will be extended by 7 days.",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: "#002147",
+        cancelButtonColor: "#c5a059",
+        confirmButtonText: "Renew",
+        cancelButtonText: "Cancel"
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+
+        const response = await fetch(`/api/user/borrowed-books/${id}/renew`, {
+            method: "PUT"
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            return showToast(data.message || "Failed to renew book");
+        }
+
+        showToast(data.message, "success");
+        loadBorrowedBooks(currentPage);
+
+    } catch (err) {
+
+        console.error(err);
+        showToast("Something went wrong.");
+
+    }
+
+}
+
 
 function triggerSearch() {
 
