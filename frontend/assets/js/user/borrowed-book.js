@@ -11,7 +11,7 @@ function showToast(message, type = "error") {
 
     Toast.fire({ icon: type, title: message });
 }
-
+let currentSort = "due_asc";
 let currentTitle = "";
 let currentBorrowedFrom = "";
 let currentBorrowedTo = "";
@@ -28,12 +28,13 @@ document.getElementById("borrowedTo").max = today;
 async function loadBorrowedBooks(page = 1) {
     currentPage = page;
 
-    const params = new URLSearchParams({
-        page,
-        title: currentTitle,
-        borrowed_from: currentBorrowedFrom,
-        borrowed_to: currentBorrowedTo
-    });
+  const params = new URLSearchParams({
+    page,
+    title: currentTitle,
+    borrowed_from: currentBorrowedFrom,
+    borrowed_to: currentBorrowedTo,
+    sort: currentSort
+});
 
     try {
         const response = await fetch(`/api/user/borrowed-books?${params}`);
@@ -151,43 +152,83 @@ async function loadBorrowedBooks(page = 1) {
 }
 
 function triggerSearch() {
+
     clearTimeout(searchTimer);
 
     searchTimer = setTimeout(() => {
-        currentTitle = document.getElementById("searchBook").value.trim();
-        currentBorrowedFrom = document.getElementById("borrowedFrom").value;
-        currentBorrowedTo = document.getElementById("borrowedTo").value;
+
+        currentTitle =
+            document.getElementById("searchBook").value.trim();
+
+        currentBorrowedFrom =
+            document.getElementById("borrowedFrom").value;
+
+        currentBorrowedTo =
+            document.getElementById("borrowedTo").value;
+
+        currentSort =
+            document.getElementById("sortBy").value;
 
         loadBorrowedBooks(1);
+
     }, 500);
+
 }
 
 document.getElementById("borrowedFrom").addEventListener("change", () => {
+
     const from = document.getElementById("borrowedFrom").value;
-    document.getElementById("borrowedTo").min = from;
+    const borrowedTo = document.getElementById("borrowedTo");
+
+    borrowedTo.min = from || "";
+    borrowedTo.max = today;
+
+    if (borrowedTo.value && borrowedTo.value < from) {
+        borrowedTo.value = "";
+    }
 
     triggerSearch();
+
 });
+
 
 document.getElementById("borrowedTo").addEventListener("change", () => {
+
     const to = document.getElementById("borrowedTo").value;
-    document.getElementById("borrowedFrom").max = to || today;
+    const borrowedFrom = document.getElementById("borrowedFrom");
+
+    borrowedFrom.max = to || today;
+
+    if (borrowedFrom.value && borrowedFrom.value > to) {
+        borrowedFrom.value = "";
+    }
 
     triggerSearch();
-});
 
+});
+document.getElementById("sortBy").addEventListener("change", triggerSearch);
 document.getElementById("searchBook").addEventListener("input", triggerSearch);
 
 document.getElementById("clearFilters").addEventListener("click", () => {
+
     document.getElementById("searchBook").value = "";
     document.getElementById("borrowedFrom").value = "";
     document.getElementById("borrowedTo").value = "";
+    document.getElementById("sortBy").value = "due_asc";
 
     currentTitle = "";
     currentBorrowedFrom = "";
     currentBorrowedTo = "";
+    currentSort = "due_asc";
+
+    document.getElementById("borrowedFrom").max = today;
+    document.getElementById("borrowedFrom").min = "";
+
+    document.getElementById("borrowedTo").max = today;
+    document.getElementById("borrowedTo").min = "";
 
     loadBorrowedBooks(1);
+
 });
 
 loadBorrowedBooks();

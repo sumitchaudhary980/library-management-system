@@ -236,7 +236,7 @@ VALUES (?, ?, ?, 0, 0, 0)
   }
 };
 
-//get borrowed books
+
 //get borrowed books
 exports.getBorrowedBooks = (req, res) => {
   const userId = req.session.user.id;
@@ -249,8 +249,9 @@ exports.getBorrowedBooks = (req, res) => {
   const borrowedFrom = req.query.borrowed_from || "";
   const borrowedTo = req.query.borrowed_to || "";
 
-  const offset = (page - 1) * limit;
+  const sort = req.query.sort || "due_asc";
 
+  const offset = (page - 1) * limit;
 
   try {
 
@@ -262,241 +263,174 @@ exports.getBorrowedBooks = (req, res) => {
       `;
     }
 
-
     if (borrowedTo) {
       dateFilter += `
         AND DATE(borrowed_books.borrowed_at) <= DATE(?)
       `;
     }
 
+    let orderBy = `
+      CASE
+        WHEN DATE(borrowed_books.due_date) < DATE('now') THEN 0
+        ELSE 1
+      END,
+      DATE(borrowed_books.due_date) ASC
+    `;
 
+    switch (sort) {
+
+      case "due_desc":
+        orderBy = `
+          DATE(borrowed_books.due_date) DESC
+        `;
+        break;
+
+      case "borrowed_desc":
+        orderBy = `
+          borrowed_books.borrowed_at DESC
+        `;
+        break;
+
+      case "borrowed_asc":
+        orderBy = `
+          borrowed_books.borrowed_at ASC
+        `;
+        break;
+
+      default:
+        orderBy = `
+          CASE
+            WHEN DATE(borrowed_books.due_date) < DATE('now') THEN 0
+            ELSE 1
+          END,
+          DATE(borrowed_books.due_date) ASC
+        `;
+    }
 
     // TOTAL COUNT
 
     const totalQuery = `
       SELECT COUNT(*) AS total
-
       FROM borrowed_books
 
       INNER JOIN books
         ON borrowed_books.book_id = books.id
 
       WHERE
-
         borrowed_books.user_id = ?
-
         AND borrowed_books.returned = 0
-
         AND books.title LIKE ?
-
         ${dateFilter}
     `;
-
 
     const totalParams = [
       userId,
       `%${title}%`
     ];
 
-
     if (borrowedFrom) {
       totalParams.push(borrowedFrom);
     }
 
-
     if (borrowedTo) {
       totalParams.push(borrowedTo);
     }
-
-
 
     const total = db
       .prepare(totalQuery)
       .get(...totalParams)
       .total;
 
-
-
-
     // FETCH BOOKS
 
     const booksQuery = `
-
       SELECT
-
         borrowed_books.id AS borrowed_id,
-
         borrowed_books.borrowed_at,
-
         borrowed_books.due_date,
-
         borrowed_books.renewed,
 
-
         books.id,
-
         books.title,
-
         books.cover_image,
 
-
         authors.name AS author,
-
         genres.name AS genre
-
 
       FROM borrowed_books
 
-
       INNER JOIN books
-
         ON borrowed_books.book_id = books.id
 
-
-
       INNER JOIN authors
-
         ON books.author_id = authors.id
 
-
-
       INNER JOIN genres
-
         ON books.genre_id = genres.id
 
-
-
       WHERE
-
-
         borrowed_books.user_id = ?
-
         AND borrowed_books.returned = 0
-
         AND books.title LIKE ?
-
-
         ${dateFilter}
 
-
-
-      ORDER BY
-
-        CASE
-
-          WHEN DATE(borrowed_books.due_date) < DATE('now')
-
-          THEN 0
-
-          ELSE 1
-
-        END,
-
-
-        DATE(borrowed_books.due_date) ASC
-
-
+      ORDER BY ${orderBy}
 
       LIMIT ?
-
       OFFSET ?
-
     `;
-
-
 
     const booksParams = [
       userId,
       `%${title}%`
     ];
 
-
-
     if (borrowedFrom) {
       booksParams.push(borrowedFrom);
     }
-
 
     if (borrowedTo) {
       booksParams.push(borrowedTo);
     }
 
-
-
     booksParams.push(limit);
-
     booksParams.push(offset);
-
-
 
     const books = db
       .prepare(booksQuery)
       .all(...booksParams);
 
-
-
-
     const today = new Date();
-
-
 
     const formattedBooks = books.map(book => {
 
-
       const dueDate = new Date(book.due_date);
 
-
-
       const remainingDays = Math.ceil(
-
-        (dueDate - today) /
-
-        (1000 * 60 * 60 * 24)
-
+        (dueDate - today) / (1000 * 60 * 60 * 24)
       );
 
-
-
       return {
-
         ...book,
-
         remaining_days: remainingDays
-
       };
 
-
     });
-
-
-
 
     res.json({
-
       books: formattedBooks,
-
       total,
-
       page,
-
       totalPages: Math.ceil(total / limit)
-
     });
-
-
 
   } catch (err) {
 
-
     console.log(err);
 
-
     res.status(500).json({
-
       message: "Server error"
-
     });
-
 
   }
 };

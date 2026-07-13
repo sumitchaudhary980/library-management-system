@@ -180,7 +180,7 @@
 
             <div class="row g-3">
               <!-- Title -->
-              <div class="col-md-4">
+              <div class="col-lg-4 col-md-6">
                 <label
                   for="searchBook"
                   class="form-label small fw-medium text-muted mb-1"
@@ -202,7 +202,7 @@
               </div>
 
               <!-- Borrowed From -->
-              <div class="col-md-4">
+              <div class="col-lg-2 col-md-6">
                 <label
                   for="borrowedFrom"
                   class="form-label small fw-medium text-muted mb-1"
@@ -214,7 +214,6 @@
                   id="borrowedFrom"
                   type="date"
                   class="form-control shadow-sm"
-                  max=""
                   style="
                     height: 44px;
                     border-radius: 8px;
@@ -224,7 +223,7 @@
               </div>
 
               <!-- Borrowed To -->
-              <div class="col-md-4">
+              <div class="col-lg-2 col-md-6">
                 <label
                   for="borrowedTo"
                   class="form-label small fw-medium text-muted mb-1"
@@ -236,13 +235,40 @@
                   id="borrowedTo"
                   type="date"
                   class="form-control shadow-sm"
-                  max=""
                   style="
                     height: 44px;
                     border-radius: 8px;
                     border-color: #e2e8f0;
                   "
                 />
+              </div>
+
+              <!-- Sort -->
+              <div class="col-lg-4 col-md-6">
+                <label
+                  for="sortBy"
+                  class="form-label small fw-medium text-muted mb-1"
+                >
+                  Sort By
+                </label>
+
+                <select
+                  id="sortBy"
+                  class="form-select shadow-sm"
+                  style="
+                    height: 44px;
+                    border-radius: 8px;
+                    border-color: #e2e8f0;
+                  "
+                >
+                  <option value="due_asc">Due Soonest</option>
+
+                  <option value="due_desc">Due Latest</option>
+
+                  <option value="borrowed_desc">Recently Borrowed</option>
+
+                  <option value="borrowed_asc">Oldest Borrowed</option>
+                </select>
               </div>
             </div>
           </div>
