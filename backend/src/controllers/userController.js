@@ -618,12 +618,64 @@ exports.getBorrowHistory = (req, res) => {
 
   const page = parseInt(req.query.page) || 1;
   const limit = 10;
+  const offset = (page - 1) * limit;
 
   const title = req.query.title || "";
-  const author = req.query.author || "";
-  const genre = req.query.genre || "";
+  const borrowedFrom = req.query.borrowed_from || "";
+  const borrowedTo = req.query.borrowed_to || "";
+  const returnedFrom = req.query.returned_from || "";
+  const returnedTo = req.query.returned_to || "";
+  const sortBy = req.query.sort || "returned_desc";
 
-  const offset = (page - 1) * limit;
+  let whereClause = `
+    borrowed_books.user_id = ?
+    AND borrowed_books.returned = 1
+    AND books.title LIKE ?
+  `;
+
+  const params = [
+    userId,
+    `%${title}%`
+  ];
+
+  if (borrowedFrom) {
+    whereClause += ` AND DATE(borrowed_books.borrowed_at) >= DATE(?)`;
+    params.push(borrowedFrom);
+  }
+
+  if (borrowedTo) {
+    whereClause += ` AND DATE(borrowed_books.borrowed_at) <= DATE(?)`;
+    params.push(borrowedTo);
+  }
+
+  if (returnedFrom) {
+    whereClause += ` AND DATE(borrowed_books.returned_at) >= DATE(?)`;
+    params.push(returnedFrom);
+  }
+
+  if (returnedTo) {
+    whereClause += ` AND DATE(borrowed_books.returned_at) <= DATE(?)`;
+    params.push(returnedTo);
+  }
+
+  let orderBy = "borrowed_books.returned_at DESC";
+
+  switch (sortBy) {
+    case "returned_asc":
+      orderBy = "borrowed_books.returned_at ASC";
+      break;
+
+    case "borrowed_desc":
+      orderBy = "borrowed_books.borrowed_at DESC";
+      break;
+
+    case "borrowed_asc":
+      orderBy = "borrowed_books.borrowed_at ASC";
+      break;
+
+    default:
+      orderBy = "borrowed_books.returned_at DESC";
+  }
 
   try {
 
@@ -640,27 +692,13 @@ exports.getBorrowHistory = (req, res) => {
       INNER JOIN genres
         ON books.genre_id = genres.id
 
-      WHERE
-        borrowed_books.user_id = ?
-        AND borrowed_books.returned = 1
-        AND books.title LIKE ?
-        AND authors.name LIKE ?
-        AND genres.name LIKE ?
-
-    `).get(
-      userId,
-      `%${title}%`,
-      `%${author}%`,
-      `%${genre}%`
-    ).total;
-
-
+      WHERE ${whereClause}
+    `).get(...params).total;
 
     const books = db.prepare(`
       SELECT
 
         borrowed_books.id AS borrowed_id,
-
         borrowed_books.borrowed_at,
         borrowed_books.due_date,
         borrowed_books.returned_at,
@@ -672,45 +710,28 @@ exports.getBorrowHistory = (req, res) => {
         authors.name AS author,
         genres.name AS genre
 
-
       FROM borrowed_books
-
 
       INNER JOIN books
         ON borrowed_books.book_id = books.id
 
-
       INNER JOIN authors
         ON books.author_id = authors.id
-
 
       INNER JOIN genres
         ON books.genre_id = genres.id
 
+      WHERE ${whereClause}
 
-      WHERE
-        borrowed_books.user_id = ?
-        AND borrowed_books.returned = 1
-        AND books.title LIKE ?
-        AND authors.name LIKE ?
-        AND genres.name LIKE ?
-
-
-      ORDER BY borrowed_books.returned_at DESC
-
+      ORDER BY ${orderBy}
 
       LIMIT ?
       OFFSET ?
-
     `).all(
-      userId,
-      `%${title}%`,
-      `%${author}%`,
-      `%${genre}%`,
+      ...params,
       limit,
       offset
     );
-
 
     res.json({
       books,
@@ -719,10 +740,9 @@ exports.getBorrowHistory = (req, res) => {
       totalPages: Math.ceil(total / limit)
     });
 
-
   } catch (err) {
 
-    console.log(err);
+    console.error(err);
 
     res.status(500).json({
       message: "Failed to load borrow history"

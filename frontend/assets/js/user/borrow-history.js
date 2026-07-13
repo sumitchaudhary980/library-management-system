@@ -18,8 +18,12 @@ function showToast(message, type = "error") {
 }
 
 let currentTitle = "";
-let currentAuthor = "";
-let currentGenre = "";
+let currentBorrowedFrom = "";
+let currentBorrowedTo = "";
+let currentReturnedFrom = "";
+let currentReturnedTo = "";
+let currentSort = "returned_desc";
+
 let currentPage = 1;
 let searchTimer;
 
@@ -29,8 +33,11 @@ async function loadBorrowHistory(page = 1) {
     const params = new URLSearchParams({
         page,
         title: currentTitle,
-        author: currentAuthor,
-        genre: currentGenre
+        borrowed_from: currentBorrowedFrom,
+        borrowed_to: currentBorrowedTo,
+        returned_from: currentReturnedFrom,
+        returned_to: currentReturnedTo,
+        sort: currentSort
     });
 
     try {
@@ -65,7 +72,10 @@ async function loadBorrowHistory(page = 1) {
                     <td class="py-3 px-4">${new Date(book.due_date).toLocaleDateString()}</td>
                     <td class="py-3 px-4">${new Date(book.returned_at).toLocaleDateString()}</td>
                     <td class="py-3 px-4 text-center">
-                        <span class="badge bg-success">Returned</span>
+                        ${new Date(book.returned_at) <= new Date(book.due_date)
+                    ? `<span class="badge bg-success">Returned On Time</span>`
+                    : `<span class="badge bg-danger">Returned Late</span>`
+                }
                     </td>
                 </tr>
             `;
@@ -114,31 +124,105 @@ async function loadBorrowHistory(page = 1) {
 }
 
 function triggerSearch() {
+
     clearTimeout(searchTimer);
 
     searchTimer = setTimeout(() => {
+
         currentTitle = document.getElementById("searchBook").value.trim();
-        currentAuthor = document.getElementById("searchAuthor").value.trim();
-        currentGenre = document.getElementById("searchGenre").value.trim();
+
+        currentBorrowedFrom =
+            document.getElementById("borrowedFrom").value;
+
+        currentBorrowedTo =
+            document.getElementById("borrowedTo").value;
+
+        currentReturnedFrom =
+            document.getElementById("returnedFrom").value;
+
+        currentReturnedTo =
+            document.getElementById("returnedTo").value;
+
+        currentSort =
+            document.getElementById("sortBy").value;
 
         loadBorrowHistory(1);
-    }, 500);
+
+    }, 300);
+
 }
 
-document.getElementById("searchBook").addEventListener("input", triggerSearch);
-document.getElementById("searchAuthor").addEventListener("input", triggerSearch);
-document.getElementById("searchGenre").addEventListener("input", triggerSearch);
+document.getElementById("searchBook")
+    .addEventListener("input", triggerSearch);
+
+document.getElementById("borrowedFrom")
+    .addEventListener("change", triggerSearch);
+
+document.getElementById("borrowedTo")
+    .addEventListener("change", triggerSearch);
+
+document.getElementById("returnedFrom")
+    .addEventListener("change", triggerSearch);
+
+document.getElementById("returnedTo")
+    .addEventListener("change", triggerSearch);
+
+document.getElementById("sortBy")
+    .addEventListener("change", triggerSearch);
 
 document.getElementById("clearFilters").addEventListener("click", () => {
+
     document.getElementById("searchBook").value = "";
-    document.getElementById("searchAuthor").value = "";
-    document.getElementById("searchGenre").value = "";
+
+    document.getElementById("borrowedFrom").value = "";
+
+    document.getElementById("borrowedTo").value = "";
+
+    document.getElementById("returnedFrom").value = "";
+
+    document.getElementById("returnedTo").value = "";
+
+    document.getElementById("sortBy").value = "returned_desc";
 
     currentTitle = "";
-    currentAuthor = "";
-    currentGenre = "";
+    currentBorrowedFrom = "";
+    currentBorrowedTo = "";
+    currentReturnedFrom = "";
+    currentReturnedTo = "";
+    currentSort = "returned_desc";
+
 
     loadBorrowHistory(1);
+
+});
+const today = new Date().toISOString().split("T")[0];
+
+const borrowedFrom = document.getElementById("borrowedFrom");
+const borrowedTo = document.getElementById("borrowedTo");
+const returnedFrom = document.getElementById("returnedFrom");
+const returnedTo = document.getElementById("returnedTo");
+
+// Prevent selecting future dates
+borrowedFrom.max = today;
+borrowedTo.max = today;
+returnedFrom.max = today;
+returnedTo.max = today;
+
+// Borrowed date range
+borrowedFrom.addEventListener("change", () => {
+    borrowedTo.min = borrowedFrom.value;
+
+    if (borrowedTo.value && borrowedTo.value < borrowedFrom.value) {
+        borrowedTo.value = "";
+    }
 });
 
+// Returned date range
+returnedFrom.addEventListener("change", () => {
+    returnedTo.min = returnedFrom.value;
+
+    if (returnedTo.value && returnedTo.value < returnedFrom.value) {
+        returnedTo.value = "";
+    }
+});
 loadBorrowHistory();

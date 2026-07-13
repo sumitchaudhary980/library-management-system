@@ -179,7 +179,8 @@
             </div>
 
             <div class="row g-3">
-              <div class="col-md-4">
+              <!-- Title -->
+              <div class="col-lg-4 col-md-6">
                 <label
                   for="searchBook"
                   class="form-label small fw-medium text-muted mb-1"
@@ -200,19 +201,19 @@
                 />
               </div>
 
-              <div class="col-md-4">
+              <!-- Borrowed From -->
+              <div class="col-lg-2 col-md-6">
                 <label
-                  for="searchAuthor"
+                  for="borrowedFrom"
                   class="form-label small fw-medium text-muted mb-1"
                 >
-                  Author
+                  Borrowed From
                 </label>
 
                 <input
-                  id="searchAuthor"
-                  type="text"
+                  id="borrowedFrom"
+                  type="date"
                   class="form-control shadow-sm"
-                  placeholder="Search author..."
                   style="
                     height: 44px;
                     border-radius: 8px;
@@ -221,25 +222,92 @@
                 />
               </div>
 
-              <div class="col-md-4">
+              <!-- Borrowed To -->
+              <div class="col-lg-2 col-md-6">
                 <label
-                  for="searchGenre"
+                  for="borrowedTo"
                   class="form-label small fw-medium text-muted mb-1"
                 >
-                  Genre
+                  Borrowed To
                 </label>
 
                 <input
-                  id="searchGenre"
-                  type="text"
+                  id="borrowedTo"
+                  type="date"
                   class="form-control shadow-sm"
-                  placeholder="Search genre..."
                   style="
                     height: 44px;
                     border-radius: 8px;
                     border-color: #e2e8f0;
                   "
                 />
+              </div>
+
+              <!-- Returned From -->
+              <div class="col-lg-2 col-md-6">
+                <label
+                  for="returnedFrom"
+                  class="form-label small fw-medium text-muted mb-1"
+                >
+                  Returned From
+                </label>
+
+                <input
+                  id="returnedFrom"
+                  type="date"
+                  class="form-control shadow-sm"
+                  style="
+                    height: 44px;
+                    border-radius: 8px;
+                    border-color: #e2e8f0;
+                  "
+                />
+              </div>
+
+              <!-- Returned To -->
+              <div class="col-lg-2 col-md-6">
+                <label
+                  for="returnedTo"
+                  class="form-label small fw-medium text-muted mb-1"
+                >
+                  Returned To
+                </label>
+
+                <input
+                  id="returnedTo"
+                  type="date"
+                  class="form-control shadow-sm"
+                  style="
+                    height: 44px;
+                    border-radius: 8px;
+                    border-color: #e2e8f0;
+                  "
+                />
+              </div>
+
+              <!-- Sort -->
+              <div class="col-lg-3 col-md-6">
+                <label
+                  for="sortBy"
+                  class="form-label small fw-medium text-muted mb-1"
+                >
+                  Sort By
+                </label>
+
+                <select
+                  id="sortBy"
+                  class="form-select shadow-sm"
+                  style="
+                    height: 44px;
+                    border-radius: 8px;
+                    border-color: #e2e8f0;
+                  "
+                >
+                  <option value="returned_desc">Recently Returned</option>
+                  <option value="returned_asc">Oldest Returned</option>
+                  <option value="borrowed_desc">Recently Borrowed</option>
+                  <option value="borrowed_asc">Oldest Borrowed</option>
+                </select>
               </div>
             </div>
           </div>
