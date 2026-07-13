@@ -459,6 +459,125 @@ exports.returnBook = (req, res) => {
   }
 };
 
+// get borrow history
+exports.getBorrowHistory = (req, res) => {
+  const userId = req.session.user.id;
+
+  const page = parseInt(req.query.page) || 1;
+  const limit = 10;
+
+  const title = req.query.title || "";
+  const author = req.query.author || "";
+  const genre = req.query.genre || "";
+
+  const offset = (page - 1) * limit;
+
+  try {
+
+    const total = db.prepare(`
+      SELECT COUNT(*) AS total
+      FROM borrowed_books
+
+      INNER JOIN books
+        ON borrowed_books.book_id = books.id
+
+      INNER JOIN authors
+        ON books.author_id = authors.id
+
+      INNER JOIN genres
+        ON books.genre_id = genres.id
+
+      WHERE
+        borrowed_books.user_id = ?
+        AND borrowed_books.returned = 1
+        AND books.title LIKE ?
+        AND authors.name LIKE ?
+        AND genres.name LIKE ?
+
+    `).get(
+      userId,
+      `%${title}%`,
+      `%${author}%`,
+      `%${genre}%`
+    ).total;
+
+
+
+    const books = db.prepare(`
+      SELECT
+
+        borrowed_books.id AS borrowed_id,
+
+        borrowed_books.borrowed_at,
+        borrowed_books.due_date,
+        borrowed_books.returned_at,
+        borrowed_books.fine_amount,
+
+        books.title,
+        books.cover_image,
+
+        authors.name AS author,
+        genres.name AS genre
+
+
+      FROM borrowed_books
+
+
+      INNER JOIN books
+        ON borrowed_books.book_id = books.id
+
+
+      INNER JOIN authors
+        ON books.author_id = authors.id
+
+
+      INNER JOIN genres
+        ON books.genre_id = genres.id
+
+
+      WHERE
+        borrowed_books.user_id = ?
+        AND borrowed_books.returned = 1
+        AND books.title LIKE ?
+        AND authors.name LIKE ?
+        AND genres.name LIKE ?
+
+
+      ORDER BY borrowed_books.returned_at DESC
+
+
+      LIMIT ?
+      OFFSET ?
+
+    `).all(
+      userId,
+      `%${title}%`,
+      `%${author}%`,
+      `%${genre}%`,
+      limit,
+      offset
+    );
+
+
+    res.json({
+      books,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit)
+    });
+
+
+  } catch (err) {
+
+    console.log(err);
+
+    res.status(500).json({
+      message: "Failed to load borrow history"
+    });
+
+  }
+};
+
 //update profile
 exports.updateProfile = async (req, res) => {
   try {

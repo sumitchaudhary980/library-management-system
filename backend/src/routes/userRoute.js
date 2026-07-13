@@ -16,6 +16,10 @@ router.post("/books/:id/borrow", requireReader, userController.borrowBook);
 router.get("/borrowed-books", requireReader, userController.getBorrowedBooks);
 router.put("/borrowed-books/:id/renew",requireReader,userController.renewBook);
 router.put("/borrowed-books/:id/return", requireReader,userController.returnBook);
+
+//borrow History Route
+router.get("/borrow-history", requireReader, userController.getBorrowHistory);
+
 //PROFILE ROUTE
 router.get("/profile", requireReader, userController.getProfile);
 router.put("/profile", requireReader, upload.single("profileImage"), userController.updateProfile);
