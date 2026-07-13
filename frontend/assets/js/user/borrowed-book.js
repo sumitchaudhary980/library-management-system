@@ -113,13 +113,7 @@ async function loadBorrowedBooks(page = 1) {
                                 </button>`
                 }
                     </td>
-                    <td class="py-3 px-4 text-center">
-                        <button class="btn btn-sm px-3 text-white"
-                                onclick="returnBook(${book.borrowed_id})"
-                                style="background:var(--primary-dark); border-radius:10px; min-width:110px;">
-                            <i class="fas fa-right-from-bracket me-2"></i>Return
-                        </button>
-                    </td>
+                    
                 </tr>
             `;
         });
