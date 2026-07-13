@@ -7,6 +7,8 @@ const router = express.Router();
 // All user pages protected by requireReader
 
 
+//Book Route
+router.get("/books", requireReader, userController.getBooks);
 
 //PROFILE ROUTE
 router.get("/profile", requireReader, userController.getProfile);

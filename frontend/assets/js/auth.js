@@ -42,3 +42,14 @@ async function logout() {
   });
   window.location.href = "/";
 }
+document.querySelectorAll(".menu-item").forEach((item) => {
+  const href = item.getAttribute("href");
+
+  if (!href) return;
+
+  if (window.location.pathname === href) {
+    item.classList.add("active");
+  } else {
+    item.classList.remove("active");
+  }
+});
