@@ -9,6 +9,7 @@ const router = express.Router();
 
 //Book Route
 router.get("/books", requireReader, userController.getBooks);
+router.get("/books/:id", requireReader, userController.getBook);
 
 //PROFILE ROUTE
 router.get("/profile", requireReader, userController.getProfile);

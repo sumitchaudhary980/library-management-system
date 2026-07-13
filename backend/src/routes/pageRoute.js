@@ -124,12 +124,25 @@ router.get("/books", (req, res) => {
   return res.sendStatus(403);
 });
 
-router.get("/books",  requireAdmin, (req, res) => {
-  res.sendFile(path.join(frontendPath, "admin/book.html"));
-});
 
-router.get("/books/:id",  requireAdmin, (req, res) => {
-  res.sendFile(path.join(frontendPath, "admin/view-book.html"));
+router.get("/books/:id", (req, res) => {
+   if (!req.session.user) {
+    return res.redirect("/");
+  }
+  if (req.session.user.role === "admin") {
+    return res.sendFile(
+      path.join(frontendPath, "admin/view-book.html")
+    );
+  }
+
+  if (req.session.user.role === "reader") {
+    return res.sendFile(
+      path.join(frontendPath, "user/view-book.html")
+    );
+  }
+
+  return res.sendStatus(403);
+ 
 });
 
 router.get("/add-book",  requireAdmin, (req, res) => {

@@ -75,6 +75,40 @@ exports.getBooks = (req, res) => {
   }
 };
 
+exports.getBook = (req, res) => {
+  const id = req.params.id;
+
+  try {
+    const book = db.prepare(`
+      SELECT
+        books.*,
+        authors.name AS author_name,
+        genres.name AS genre_name
+      FROM books
+      JOIN authors
+      ON books.author_id = authors.id
+      JOIN genres
+      ON books.genre_id = genres.id
+      WHERE books.id = ?
+    `).get(id);
+
+    if (!book) {
+      return res.status(404).json({
+        message: "Book not found",
+      });
+    }
+
+    res.json(book);
+
+  } catch (err) {
+    console.log(err);
+
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
+};
+
 exports.getProfile = (req, res) => {
   try {
     const user = db.prepare(`
