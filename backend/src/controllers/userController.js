@@ -2,6 +2,75 @@ const cloudinary = require("../config/cloudinary");
 const streamifier = require("streamifier");
 const db = require("../config/db");
 
+//Home
+exports.getHomeData = (req, res) => {
+  const userId = req.session.user.id;
+
+  try {
+
+    const user = db.prepare(`
+      SELECT first_name
+      FROM users
+      WHERE id = ?
+    `).get(userId);
+
+
+    const borrowedBooks = db.prepare(`
+      SELECT COUNT(*) AS total
+      FROM borrowed_books
+      WHERE
+        user_id = ?
+        AND returned = 0
+    `).get(userId).total;
+
+
+    const returnedBooks = db.prepare(`
+      SELECT COUNT(*) AS total
+      FROM borrowed_books
+      WHERE
+        user_id = ?
+        AND returned = 1
+    `).get(userId).total;
+
+
+    const dueBooks = db.prepare(`
+      SELECT COUNT(*) AS total
+      FROM borrowed_books
+      WHERE
+        user_id = ?
+        AND returned = 0
+        AND DATE(due_date) <= DATE('now', '+3 day')
+    `).get(userId).total;
+
+
+    const fineAmount = db.prepare(`
+      SELECT COALESCE(SUM(fine_amount), 0) AS total
+      FROM borrowed_books
+      WHERE
+        user_id = ?
+        AND fine_paid = 0
+    `).get(userId).total;
+
+
+    res.json({
+      firstName: user.first_name,
+      borrowedBooks,
+      returnedBooks,
+      dueBooks,
+      fineAmount
+    });
+
+
+  } catch (err) {
+
+    console.log(err);
+
+    res.status(500).json({
+      message: "Failed to load dashboard"
+    });
+
+  }
+};
 //Books
 exports.getBooks = (req, res) => {
   const page = parseInt(req.query.page) || 1;
@@ -518,7 +587,7 @@ exports.returnBook = (req, res) => {
     const today = new Date();
     const dueDate = new Date(borrowed.due_date);
 
-    let overdueDays = Math.floor(
+    let overdueDays = Math.ceil(
       (today - dueDate) / (1000 * 60 * 60 * 24)
     );
 
@@ -531,13 +600,14 @@ exports.returnBook = (req, res) => {
     const transaction = db.transaction(() => {
 
       db.prepare(`
-        UPDATE borrowed_books
-        SET
-          returned = 1,
-          returned_at = CURRENT_TIMESTAMP,
-          fine_amount = ?
-        WHERE id = ?
-      `).run(
+  UPDATE borrowed_books
+  SET
+    returned = 1,
+    returned_at = CURRENT_TIMESTAMP,
+    fine_amount = ?,
+    fine_paid = 0
+  WHERE id = ?
+`).run(
         fineAmount,
         borrowedId
       );

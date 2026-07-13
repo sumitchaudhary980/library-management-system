@@ -5,6 +5,7 @@ const upload = require("../middleware/uploadMiddleware");
 const router = express.Router();
 
 // All user pages protected by requireReader
+router.get("/home", requireReader, userController.getHomeData);
 
 
 //Book Route

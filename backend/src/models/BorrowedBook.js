@@ -19,6 +19,8 @@ const createBorrowedBookTable = () => {
       returned_at DATETIME,
 
       fine_amount REAL DEFAULT 0,
+      fine_paid INTEGER DEFAULT 0,
+      fine_paid_at DATETIME,
 
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
