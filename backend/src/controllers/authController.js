@@ -24,7 +24,7 @@ const login = async (req, res) => {
     if (!match) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
-    
+
     // Detect which login endpoint was used
     if (req.loginRole === "admin" && user.role !== "admin") {
       return res.status(403).json({
@@ -37,25 +37,31 @@ const login = async (req, res) => {
         message: "Invalid credentials",
       });
     }
-
-    // Create session
-    req.session.user = {
-      id: user.id,
-      first_name: user.first_name,
-      last_name: user.last_name,
-      email: user.email,
-      role: user.role,
-    };
-
     const redirectMap = {
       admin: "/dashboard",
       reader: "/home",
     };
+    // Create session
+    req.session.regenerate((err) => {
+      if (err) {
+        return res.status(500).json({
+          message: "Server error"
+        });
+      }
 
-    return res.json({
-      message: "Login successful",
-      role: user.role,
-      redirect: redirectMap[user.role],
+      req.session.user = {
+        id: user.id,
+        first_name: user.first_name,
+        last_name: user.last_name,
+        email: user.email,
+        role: user.role,
+      };
+
+      return res.json({
+        message: "Login successful",
+        role: user.role,
+        redirect: redirectMap[user.role],
+      });
     });
   } catch (err) {
     console.error("Login error:", err);
@@ -72,6 +78,8 @@ const logout = (req, res) => {
         message: "Logout failed",
       });
     }
+
+    res.clearCookie("sid");
 
     res.json({
       message: "Logged out successfully",
