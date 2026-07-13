@@ -237,6 +237,7 @@ VALUES (?, ?, ?, 0, 0, 0)
 };
 
 //get borrowed books
+//get borrowed books
 exports.getBorrowedBooks = (req, res) => {
   const userId = req.session.user.id;
 
@@ -244,107 +245,259 @@ exports.getBorrowedBooks = (req, res) => {
   const limit = 10;
 
   const title = req.query.title || "";
-  const author = req.query.author || "";
-  const genre = req.query.genre || "";
+
+  const borrowedFrom = req.query.borrowed_from || "";
+  const borrowedTo = req.query.borrowed_to || "";
 
   const offset = (page - 1) * limit;
 
+
   try {
-    const total = db.prepare(`
+
+    let dateFilter = "";
+
+    if (borrowedFrom) {
+      dateFilter += `
+        AND DATE(borrowed_books.borrowed_at) >= DATE(?)
+      `;
+    }
+
+
+    if (borrowedTo) {
+      dateFilter += `
+        AND DATE(borrowed_books.borrowed_at) <= DATE(?)
+      `;
+    }
+
+
+
+    // TOTAL COUNT
+
+    const totalQuery = `
       SELECT COUNT(*) AS total
+
       FROM borrowed_books
+
       INNER JOIN books
         ON borrowed_books.book_id = books.id
-      INNER JOIN authors
-        ON books.author_id = authors.id
-      INNER JOIN genres
-        ON books.genre_id = genres.id
-      WHERE
-        borrowed_books.user_id = ?
-        AND borrowed_books.returned = 0
-        AND books.title LIKE ?
-        AND authors.name LIKE ?
-        AND genres.name LIKE ?
-    `).get(
-      userId,
-      `%${title}%`,
-      `%${author}%`,
-      `%${genre}%`
-    ).total;
 
-    const books = db.prepare(`
+      WHERE
+
+        borrowed_books.user_id = ?
+
+        AND borrowed_books.returned = 0
+
+        AND books.title LIKE ?
+
+        ${dateFilter}
+    `;
+
+
+    const totalParams = [
+      userId,
+      `%${title}%`
+    ];
+
+
+    if (borrowedFrom) {
+      totalParams.push(borrowedFrom);
+    }
+
+
+    if (borrowedTo) {
+      totalParams.push(borrowedTo);
+    }
+
+
+
+    const total = db
+      .prepare(totalQuery)
+      .get(...totalParams)
+      .total;
+
+
+
+
+    // FETCH BOOKS
+
+    const booksQuery = `
+
       SELECT
+
         borrowed_books.id AS borrowed_id,
+
         borrowed_books.borrowed_at,
+
         borrowed_books.due_date,
+
         borrowed_books.renewed,
 
+
         books.id,
+
         books.title,
+
         books.cover_image,
 
+
         authors.name AS author,
+
         genres.name AS genre
+
 
       FROM borrowed_books
 
+
       INNER JOIN books
+
         ON borrowed_books.book_id = books.id
 
+
+
       INNER JOIN authors
+
         ON books.author_id = authors.id
 
+
+
       INNER JOIN genres
+
         ON books.genre_id = genres.id
 
-      WHERE
-        borrowed_books.user_id = ?
-        AND borrowed_books.returned = 0
-        AND books.title LIKE ?
-        AND authors.name LIKE ?
-        AND genres.name LIKE ?
 
-      ORDER BY borrowed_books.borrowed_at DESC
+
+      WHERE
+
+
+        borrowed_books.user_id = ?
+
+        AND borrowed_books.returned = 0
+
+        AND books.title LIKE ?
+
+
+        ${dateFilter}
+
+
+
+      ORDER BY
+
+        CASE
+
+          WHEN DATE(borrowed_books.due_date) < DATE('now')
+
+          THEN 0
+
+          ELSE 1
+
+        END,
+
+
+        DATE(borrowed_books.due_date) ASC
+
+
 
       LIMIT ?
+
       OFFSET ?
-    `).all(
+
+    `;
+
+
+
+    const booksParams = [
       userId,
-      `%${title}%`,
-      `%${author}%`,
-      `%${genre}%`,
-      limit,
-      offset
-    );
+      `%${title}%`
+    ];
+
+
+
+    if (borrowedFrom) {
+      booksParams.push(borrowedFrom);
+    }
+
+
+    if (borrowedTo) {
+      booksParams.push(borrowedTo);
+    }
+
+
+
+    booksParams.push(limit);
+
+    booksParams.push(offset);
+
+
+
+    const books = db
+      .prepare(booksQuery)
+      .all(...booksParams);
+
+
+
 
     const today = new Date();
 
+
+
     const formattedBooks = books.map(book => {
+
+
       const dueDate = new Date(book.due_date);
 
+
+
       const remainingDays = Math.ceil(
-        (dueDate - today) / (1000 * 60 * 60 * 24)
+
+        (dueDate - today) /
+
+        (1000 * 60 * 60 * 24)
+
       );
 
+
+
       return {
+
         ...book,
+
         remaining_days: remainingDays
+
       };
+
+
     });
+
+
+
 
     res.json({
+
       books: formattedBooks,
+
       total,
+
       page,
+
       totalPages: Math.ceil(total / limit)
+
     });
+
+
 
   } catch (err) {
+
+
     console.log(err);
 
+
     res.status(500).json({
+
       message: "Server error"
+
     });
+
+
   }
 };
 

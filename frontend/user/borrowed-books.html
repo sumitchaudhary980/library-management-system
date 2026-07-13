@@ -179,6 +179,7 @@
             </div>
 
             <div class="row g-3">
+              <!-- Title -->
               <div class="col-md-4">
                 <label
                   for="searchBook"
@@ -200,19 +201,20 @@
                 />
               </div>
 
+              <!-- Borrowed From -->
               <div class="col-md-4">
                 <label
-                  for="searchAuthor"
+                  for="borrowedFrom"
                   class="form-label small fw-medium text-muted mb-1"
                 >
-                  Author
+                  Borrowed From
                 </label>
 
                 <input
-                  id="searchAuthor"
-                  type="text"
+                  id="borrowedFrom"
+                  type="date"
                   class="form-control shadow-sm"
-                  placeholder="Search author..."
+                  max=""
                   style="
                     height: 44px;
                     border-radius: 8px;
@@ -221,19 +223,20 @@
                 />
               </div>
 
+              <!-- Borrowed To -->
               <div class="col-md-4">
                 <label
-                  for="searchGenre"
+                  for="borrowedTo"
                   class="form-label small fw-medium text-muted mb-1"
                 >
-                  Genre
+                  Borrowed To
                 </label>
 
                 <input
-                  id="searchGenre"
-                  type="text"
+                  id="borrowedTo"
+                  type="date"
                   class="form-control shadow-sm"
-                  placeholder="Search genre..."
+                  max=""
                   style="
                     height: 44px;
                     border-radius: 8px;

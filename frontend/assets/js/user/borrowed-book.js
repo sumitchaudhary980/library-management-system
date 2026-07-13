@@ -13,10 +13,17 @@ function showToast(message, type = "error") {
 }
 
 let currentTitle = "";
-let currentAuthor = "";
-let currentGenre = "";
+let currentBorrowedFrom = "";
+let currentBorrowedTo = "";
+
 let currentPage = 1;
 let searchTimer;
+
+// Disable future dates
+const today = new Date().toISOString().split("T")[0];
+
+document.getElementById("borrowedFrom").max = today;
+document.getElementById("borrowedTo").max = today;
 
 async function loadBorrowedBooks(page = 1) {
     currentPage = page;
@@ -24,8 +31,8 @@ async function loadBorrowedBooks(page = 1) {
     const params = new URLSearchParams({
         page,
         title: currentTitle,
-        author: currentAuthor,
-        genre: currentGenre,
+        borrowed_from: currentBorrowedFrom,
+        borrowed_to: currentBorrowedTo
     });
 
     try {
@@ -37,12 +44,12 @@ async function loadBorrowedBooks(page = 1) {
 
         if (data.books.length === 0) {
             table.innerHTML = `
-        <tr>
-          <td colspan="8" class="text-center py-5 text-muted">
-            No borrowed books found
-          </td>
-        </tr>
-      `;
+                <tr>
+                    <td colspan="8" class="text-center py-5 text-muted">
+                        No borrowed books found
+                    </td>
+                </tr>
+            `;
         }
 
         data.books.forEach((book) => {
@@ -53,181 +60,93 @@ async function loadBorrowedBooks(page = 1) {
                 (dueDate - today) / (1000 * 60 * 60 * 24)
             );
 
-            let remainingBadge = "";
+            let remainingBadge;
 
             if (daysRemaining > 5) {
-                remainingBadge = `<span class="badge bg-success">${daysRemaining} Days</span>`;
+                remainingBadge = `
+                    <span class="badge bg-success">
+                        ${daysRemaining} Days
+                    </span>`;
             } else if (daysRemaining > 0) {
-                remainingBadge = `<span class="badge bg-danger">${daysRemaining} Days</span>`;
+                remainingBadge = `
+                    <span class="badge bg-danger">
+                        ${daysRemaining} Days
+                    </span>`;
             } else if (daysRemaining === 0) {
-                remainingBadge = `<span class="badge bg-warning text-dark">Due Today</span>`;
+                remainingBadge = `
+                    <span class="badge bg-warning text-dark">
+                        Due Today
+                    </span>`;
             } else {
-                remainingBadge = `<span class="badge bg-dark">Overdue</span>`;
+                remainingBadge = `
+                    <span class="badge bg-dark">
+                        Overdue
+                    </span>`;
             }
 
             table.innerHTML += `
-      <tr>
-
-        <td class="py-3 px-4">
-          <img
-            src="${book.cover_image}"
-            style="width:60px;height:80px;object-fit:cover;border-radius:8px;"
-          >
-        </td>
-
-        <td class="py-3 px-4">
-          <h6 class="fw-bold mb-0 text-primary-dark">
-            ${book.title}
-          </h6>
-        </td>
-
-        <td class="py-3 px-4">
-          ${book.author}
-        </td>
-
-        <td class="py-3 px-4">
-          ${new Date(book.borrowed_at).toLocaleDateString()}
-        </td>
-
-        <td class="py-3 px-4">
-          ${new Date(book.due_date).toLocaleDateString()}
-        </td>
-
-        <td class="py-3 px-4">
-          ${remainingBadge}
-        </td>
-
-        <td class="py-3 px-4 text-center">
-          ${book.renewed
-                    ? `
-                <button
-                  class="btn btn-secondary btn-sm px-3"
-                  disabled
-                  style="border-radius:10px;min-width:110px;"
-                >
-                  Renewed
-                </button>
-              `
-                    : `
-                <button
-                  class="btn btn-sm px-3 text-white"
-                  style="background:#c5a059;border-radius:10px;min-width:110px;"
-                  onclick="renewBook(${book.borrowed_id})"
-                >
-                  <i class="fas fa-rotate me-2"></i>
-                  Renew
-                </button>
-              `
-                }
-        </td>
-
-        <td class="py-3 px-4 text-center">
-          <button
-            class="btn btn-sm px-3 text-white"
-            style="background:var(--primary-dark);border-radius:10px;min-width:110px;"
-            onclick="returnBook(${book.borrowed_id})"
-          >
-            <i class="fas fa-right-from-bracket me-2"></i>
-            Return
-          </button>
-        </td>
-
-      </tr>
-      `;
+                <tr>
+                    <td class="py-3 px-4">
+                        <img src="${book.cover_image}"
+                             style="width:60px; height:80px; object-fit:cover; border-radius:8px;">
+                    </td>
+                    <td class="py-3 px-4">
+                        <h6 class="fw-bold mb-0 text-primary-dark">${book.title}</h6>
+                    </td>
+                    <td class="py-3 px-4">${book.author}</td>
+                    <td class="py-3 px-4">${new Date(book.borrowed_at).toLocaleDateString()}</td>
+                    <td class="py-3 px-4">${new Date(book.due_date).toLocaleDateString()}</td>
+                    <td class="py-3 px-4">${remainingBadge}</td>
+                    <td class="py-3 px-4 text-center">
+                        ${
+                            book.renewed
+                                ? `
+                                <button class="btn btn-secondary btn-sm px-3" disabled
+                                        style="border-radius:10px; min-width:110px;">
+                                    Renewed
+                                </button>`
+                                : `
+                                <button class="btn btn-sm px-3 text-white"
+                                        onclick="renewBook(${book.borrowed_id})"
+                                        style="background:#c5a059; border-radius:10px; min-width:110px;">
+                                    <i class="fas fa-rotate me-2"></i>Renew
+                                </button>`
+                        }
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        <button class="btn btn-sm px-3 text-white"
+                                onclick="returnBook(${book.borrowed_id})"
+                                style="background:var(--primary-dark); border-radius:10px; min-width:110px;">
+                            <i class="fas fa-right-from-bracket me-2"></i>Return
+                        </button>
+                    </td>
+                </tr>
+            `;
         });
 
-        document.getElementById("entryText").innerHTML =
-            `Showing ${data.total === 0 ? 0 : (page - 1) * 10 + 1
-            } to ${Math.min(page * 10, data.total)} of ${data.total
-            } entries`;
+        document.getElementById("entryText").innerHTML = `
+            Showing ${data.total === 0 ? 0 : (page - 1) * 10 + 1}
+            to ${Math.min(page * 10, data.total)}
+            of ${data.total} entries
+        `;
 
         const pagination = document.getElementById("pagination");
         pagination.innerHTML = "";
 
         if (data.totalPages > 1) {
-            pagination.innerHTML += `
-        <li class="page-item ${page === 1 ? "disabled" : ""}">
-          <button class="page-link" onclick="loadBorrowedBooks(${page - 1})">
-            Previous
-          </button>
-        </li>
-      `;
-
             for (let i = 1; i <= data.totalPages; i++) {
                 pagination.innerHTML += `
-          <li class="page-item ${page === i ? "active" : ""}">
-            <button class="page-link" onclick="loadBorrowedBooks(${i})">
-              ${i}
-            </button>
-          </li>
-        `;
+                    <li class="page-item ${page === i ? "active" : ""}">
+                        <button class="page-link" onclick="loadBorrowedBooks(${i})">
+                            ${i}
+                        </button>
+                    </li>
+                `;
             }
-
-            pagination.innerHTML += `
-        <li class="page-item ${page === data.totalPages ? "disabled" : ""
-                }">
-          <button class="page-link" onclick="loadBorrowedBooks(${page + 1})">
-            Next
-          </button>
-        </li>
-      `;
         }
     } catch (err) {
         console.log(err);
         showToast("Failed to load borrowed books");
-    }
-}
-
-async function renewBook(id) {
-    try {
-        const response = await fetch(`/api/user/borrowed-books/${id}/renew`, {
-            method: "PUT",
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            showToast(data.message, "success");
-            loadBorrowedBooks(currentPage);
-        } else {
-            showToast(data.message);
-        }
-    } catch (err) {
-        console.log(err);
-        showToast("Something went wrong");
-    }
-}
-
-async function returnBook(id) {
-    const result = await Swal.fire({
-        title: "Return this book?",
-        text: "This will mark the book as returned.",
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonColor: "#002147",
-        cancelButtonColor: "#c5a059",
-        confirmButtonText: "Return",
-        cancelButtonText: "Cancel",
-    });
-
-    if (!result.isConfirmed) return;
-
-    try {
-        const response = await fetch(`/api/user/borrowed-books/${id}/return`, {
-            method: "PUT",
-        });
-
-        const data = await response.json();
-
-        if (response.ok) {
-            showToast(data.message, "success");
-            loadBorrowedBooks(currentPage);
-        } else {
-            showToast(data.message);
-        }
-    } catch (err) {
-        console.log(err);
-        showToast("Something went wrong");
     }
 }
 
@@ -236,33 +155,37 @@ function triggerSearch() {
 
     searchTimer = setTimeout(() => {
         currentTitle = document.getElementById("searchBook").value.trim();
-        currentAuthor = document.getElementById("searchAuthor").value.trim();
-        currentGenre = document.getElementById("searchGenre").value.trim();
+        currentBorrowedFrom = document.getElementById("borrowedFrom").value;
+        currentBorrowedTo = document.getElementById("borrowedTo").value;
 
         loadBorrowedBooks(1);
     }, 500);
 }
 
-document
-    .getElementById("searchBook")
-    .addEventListener("input", triggerSearch);
+document.getElementById("borrowedFrom").addEventListener("change", () => {
+    const from = document.getElementById("borrowedFrom").value;
+    document.getElementById("borrowedTo").min = from;
 
-document
-    .getElementById("searchAuthor")
-    .addEventListener("input", triggerSearch);
+    triggerSearch();
+});
 
-document
-    .getElementById("searchGenre")
-    .addEventListener("input", triggerSearch);
+document.getElementById("borrowedTo").addEventListener("change", () => {
+    const to = document.getElementById("borrowedTo").value;
+    document.getElementById("borrowedFrom").max = to || today;
+
+    triggerSearch();
+});
+
+document.getElementById("searchBook").addEventListener("input", triggerSearch);
 
 document.getElementById("clearFilters").addEventListener("click", () => {
     document.getElementById("searchBook").value = "";
-    document.getElementById("searchAuthor").value = "";
-    document.getElementById("searchGenre").value = "";
+    document.getElementById("borrowedFrom").value = "";
+    document.getElementById("borrowedTo").value = "";
 
     currentTitle = "";
-    currentAuthor = "";
-    currentGenre = "";
+    currentBorrowedFrom = "";
+    currentBorrowedTo = "";
 
     loadBorrowedBooks(1);
 });
