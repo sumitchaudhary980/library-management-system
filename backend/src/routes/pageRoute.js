@@ -18,8 +18,22 @@ router.get('/borrow-history', requireReader, (req, res) => {
   res.sendFile(path.join(frontendPath, 'user/borrow-history.html'));
 });
 
-router.get('/fines', requireReader, (req, res) => {
-  res.sendFile(path.join(frontendPath, 'user/fine.html'));
+router.get('/fines', (req, res) => {
+  if (!req.session.user) {
+    return res.redirect("/");
+  }
+
+  if (req.session.user.role === "admin") {
+    return res.sendFile(
+      path.join(frontendPath, "admin/fine.html")
+    );
+  }
+
+  if (req.session.user.role === "reader") {
+    return res.sendFile(
+      path.join(frontendPath, "user/fine.html")
+    );
+  }
 });
 
 //Profile
