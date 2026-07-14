@@ -18,6 +18,10 @@ router.get('/borrow-history', requireReader, (req, res) => {
   res.sendFile(path.join(frontendPath, 'user/borrow-history.html'));
 });
 
+router.get('/fines', requireReader, (req, res) => {
+  res.sendFile(path.join(frontendPath, 'user/fine.html'));
+});
+
 //Profile
 router.get("/profile", (req, res) => {
   if (!req.session.user) {

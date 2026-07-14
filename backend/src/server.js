@@ -5,6 +5,7 @@ const session = require("express-session");
 const SQLiteStore = require("connect-sqlite3")(session);
 const cookieParser = require("cookie-parser");
 const helmet = require("helmet");
+const startFineCron = require("./jobs/fineCron");
 
 require("dotenv").config({
   path: path.join(__dirname, "../../.env"),
@@ -15,7 +16,7 @@ if (!process.env.SESSION_SECRET) {
 }
 
 require("./config/initDb");
-
+startFineCron();
 const pageRoute = require("./routes/pageRoute");
 const authRoute = require("./routes/authRoute");
 const adminRoute = require("./routes/adminRoute");

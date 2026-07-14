@@ -560,7 +560,7 @@ exports.renewBook = (req, res) => {
 
 //return borrowed book
 exports.returnBook = (req, res) => {
-  const userId = req.session.user.id;
+
   const borrowedId = parseInt(req.params.id);
 
   try {
@@ -570,12 +570,8 @@ exports.returnBook = (req, res) => {
       FROM borrowed_books
       WHERE
         id = ?
-        AND user_id = ?
         AND returned = 0
-    `).get(
-      borrowedId,
-      userId
-    );
+    `).get(borrowedId);
 
     if (!borrowed) {
       return res.status(404).json({
@@ -583,34 +579,24 @@ exports.returnBook = (req, res) => {
       });
     }
 
-    // Calculate fine (Rs. 10/day after due date)
-    const today = new Date();
-    const dueDate = new Date(borrowed.due_date);
-
-    let overdueDays = Math.ceil(
-      (today - dueDate) / (1000 * 60 * 60 * 24)
-    );
-
-    if (overdueDays < 0) {
-      overdueDays = 0;
+    if (
+      borrowed.fine_amount > 0 &&
+      borrowed.fine_paid === 0
+    ) {
+      return res.status(400).json({
+        message: "Please pay the outstanding fine before returning this book."
+      });
     }
-
-    const fineAmount = overdueDays * 10;
 
     const transaction = db.transaction(() => {
 
       db.prepare(`
-  UPDATE borrowed_books
-  SET
-    returned = 1,
-    returned_at = CURRENT_TIMESTAMP,
-    fine_amount = ?,
-    fine_paid = 0
-  WHERE id = ?
-`).run(
-        fineAmount,
-        borrowedId
-      );
+        UPDATE borrowed_books
+        SET
+          returned = 1,
+          returned_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `).run(borrowedId);
 
       db.prepare(`
         UPDATE books
@@ -623,8 +609,7 @@ exports.returnBook = (req, res) => {
     transaction();
 
     res.json({
-      message: "Book returned successfully.",
-      fine: fineAmount
+      message: "Book returned successfully."
     });
 
   } catch (err) {
@@ -636,6 +621,7 @@ exports.returnBook = (req, res) => {
     });
 
   }
+
 };
 
 // get borrow history
@@ -777,6 +763,172 @@ exports.getBorrowHistory = (req, res) => {
   }
 };
 
+//get fines
+exports.getFines = (req, res) => {
+  const userId = req.session.user.id;
+
+  const page = parseInt(req.query.page) || 1;
+  const limit = 10;
+  const offset = (page - 1) * limit;
+
+  const title = req.query.title || "";
+  const status = req.query.status || "";
+  const returnedFrom = req.query.returned_from || "";
+  const returnedTo = req.query.returned_to || "";
+  const sort = req.query.sort || "latest";
+
+  try {
+
+    let where = `
+      bb.user_id = ?
+      AND bb.fine_amount > 0
+    `;
+
+    const params = [userId];
+
+    if (title) {
+      where += ` AND b.title LIKE ?`;
+      params.push(`%${title}%`);
+    }
+
+    if (status === "paid") {
+      where += ` AND bb.fine_paid = 1`;
+    }
+
+    if (status === "unpaid") {
+      where += ` AND bb.fine_paid = 0`;
+    }
+
+    if (returnedFrom) {
+      where += ` AND DATE(bb.returned_at) >= DATE(?)`;
+      params.push(returnedFrom);
+    }
+
+    if (returnedTo) {
+      where += ` AND DATE(bb.returned_at) <= DATE(?)`;
+      params.push(returnedTo);
+    }
+
+    let orderBy = "bb.updated_at DESC";
+
+    switch (sort) {
+      case "oldest":
+        orderBy = "bb.updated_at ASC";
+        break;
+
+      case "highest":
+        orderBy = "bb.fine_amount DESC";
+        break;
+
+      case "lowest":
+        orderBy = "bb.fine_amount ASC";
+        break;
+    }
+
+    const total = db.prepare(`
+      SELECT COUNT(*) AS total
+      FROM borrowed_books bb
+      JOIN books b ON bb.book_id = b.id
+      WHERE ${where}
+    `).get(...params).total;
+
+    const fines = db.prepare(`
+      SELECT
+    bb.id,
+    bb.due_date,
+    bb.returned_at,
+    bb.fine_amount,
+    bb.fine_paid,
+    bb.fine_paid_at,
+
+    b.title,
+    b.cover_image
+
+      FROM borrowed_books bb
+      JOIN books b
+      ON bb.book_id = b.id
+
+      WHERE ${where}
+
+      ORDER BY ${orderBy}
+
+      LIMIT ?
+      OFFSET ?
+    `).all(
+      ...params,
+      limit,
+      offset
+    );
+
+    res.json({
+      fines,
+      total,
+      totalPages: Math.ceil(total / limit)
+    });
+
+  } catch (err) {
+    console.log(err);
+
+    res.status(500).json({
+      message: "Failed to load fines."
+    });
+  }
+};
+
+//pay fines
+exports.payFine = (req, res) => {
+
+  const userId = req.session.user.id;
+  const borrowedId = parseInt(req.params.id);
+
+  try {
+
+    const fine = db.prepare(`
+      SELECT *
+      FROM borrowed_books
+      WHERE
+        id = ?
+        AND user_id = ?
+    `).get(
+      borrowedId,
+      userId
+    );
+
+    if (!fine) {
+      return res.status(404).json({
+        message: "Fine not found."
+      });
+    }
+
+    if (fine.fine_paid) {
+      return res.status(400).json({
+        message: "Fine already paid."
+      });
+    }
+
+    db.prepare(`
+      UPDATE borrowed_books
+      SET
+        fine_paid = 1,
+        fine_paid_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).run(borrowedId);
+
+    res.json({
+      message: "Fine paid successfully."
+    });
+
+  } catch (err) {
+
+    console.log(err);
+
+    res.status(500).json({
+      message: "Failed to pay fine."
+    });
+
+  }
+
+};
 //update profile
 exports.updateProfile = async (req, res) => {
   try {
