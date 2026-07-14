@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kaiser Library | Fines & Penalties</title>
+    <title>Kaiser Library | Borrow History</title>
 
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
@@ -123,15 +123,41 @@
           >
             <div>
               <h1 class="font-serif fw-bold h3 text-primary-dark mb-1">
-                Outstanding Fines
+                Borrow History
               </h1>
 
               <p class="text-muted mb-0 small">
-                View users with outstanding fines and manage payments.
+                View complete borrowing history, fines and manage book returns.
               </p>
             </div>
+            <a href="/fines" class="btn text-white author-submit-btn">
+              <i class="fas fa-arrow-left me-2"></i>
+              Back to Fine
+            </a>
           </div>
+          <!-- Borrow Summary -->
+          <div class="row g-3 mb-4">
+            <div class="col-md-4">
+              <div
+                class="card border-0 shadow-sm h-100"
+                style="border-radius: 16px"
+              >
+                <div class="card-body">
+                  <small class="text-muted text-uppercase fw-semibold">
+                    Total Borrowed Books
+                  </small>
 
+                  <h2
+                    id="totalBorrowedBooks"
+                    class="fw-bold mb-0 mt-2"
+                    style="color: #002147"
+                  >
+                    0
+                  </h2>
+                </div>
+              </div>
+            </div>
+          </div>
           <div
             class="card border-0 shadow-sm bg-white p-4 mb-4"
             style="border-radius: 16px"
@@ -156,17 +182,22 @@
               </button>
             </div>
 
+            
             <div class="row g-3">
-              <div class="col-md-4">
-                <label class="form-label small fw-medium text-muted mb-1">
-                  User
+              <!-- Title -->
+              <div class="col-lg-4 col-md-6">
+                <label
+                  for="searchBook"
+                  class="form-label small fw-medium text-muted mb-1"
+                >
+                  Title
                 </label>
 
                 <input
-                  id="searchUser"
+                  id="searchBook"
                   type="text"
                   class="form-control shadow-sm"
-                  placeholder="Search by name or email..."
+                  placeholder="Search book title..."
                   style="
                     height: 44px;
                     border-radius: 8px;
@@ -175,28 +206,96 @@
                 />
               </div>
 
-              <div class="col-md-4">
-                <label class="form-label small fw-medium text-muted mb-1">
-                  Fine Status
+              <!-- Borrowed From -->
+              <div class="col-lg-2 col-md-6">
+                <label
+                  for="borrowedFrom"
+                  class="form-label small fw-medium text-muted mb-1"
+                >
+                  Borrowed From
                 </label>
 
-                <select
-                  id="fineStatus"
-                  class="form-select shadow-sm"
+                <input
+                  id="borrowedFrom"
+                  type="date"
+                  class="form-control shadow-sm"
                   style="
                     height: 44px;
                     border-radius: 8px;
                     border-color: #e2e8f0;
                   "
-                >
-                  <option value="">All</option>
-                  <option value="unpaid">Has Outstanding Fine</option>
-                  <option value="paid">No Outstanding Fine</option>
-                </select>
+                />
               </div>
 
-              <div class="col-md-4">
-                <label class="form-label small fw-medium text-muted mb-1">
+              <!-- Borrowed To -->
+              <div class="col-lg-2 col-md-6">
+                <label
+                  for="borrowedTo"
+                  class="form-label small fw-medium text-muted mb-1"
+                >
+                  Borrowed To
+                </label>
+
+                <input
+                  id="borrowedTo"
+                  type="date"
+                  class="form-control shadow-sm"
+                  style="
+                    height: 44px;
+                    border-radius: 8px;
+                    border-color: #e2e8f0;
+                  "
+                />
+              </div>
+
+              <!-- Returned From -->
+              <div class="col-lg-2 col-md-6">
+                <label
+                  for="returnedFrom"
+                  class="form-label small fw-medium text-muted mb-1"
+                >
+                  Returned From
+                </label>
+
+                <input
+                  id="returnedFrom"
+                  type="date"
+                  class="form-control shadow-sm"
+                  style="
+                    height: 44px;
+                    border-radius: 8px;
+                    border-color: #e2e8f0;
+                  "
+                />
+              </div>
+
+              <!-- Returned To -->
+              <div class="col-lg-2 col-md-6">
+                <label
+                  for="returnedTo"
+                  class="form-label small fw-medium text-muted mb-1"
+                >
+                  Returned To
+                </label>
+
+                <input
+                  id="returnedTo"
+                  type="date"
+                  class="form-control shadow-sm"
+                  style="
+                    height: 44px;
+                    border-radius: 8px;
+                    border-color: #e2e8f0;
+                  "
+                />
+              </div>
+
+              <!-- Sort -->
+              <div class="col-lg-3 col-md-6">
+                <label
+                  for="sortBy"
+                  class="form-label small fw-medium text-muted mb-1"
+                >
                   Sort By
                 </label>
 
@@ -209,9 +308,11 @@
                     border-color: #e2e8f0;
                   "
                 >
-                  <option value="highest">Highest Fine</option>
-                  <option value="lowest">Lowest Fine</option>
-                  <option value="name">Name (A-Z)</option>
+                <option value="" selected>Sort By</option>
+                  <option value="returned_desc">Recently Returned</option>
+                  <option value="returned_asc">Oldest Returned</option>
+                  <option value="borrowed_desc">Recently Borrowed</option>
+                  <option value="borrowed_asc">Oldest Borrowed</option>
                 </select>
               </div>
             </div>
@@ -230,25 +331,43 @@
                     <th
                       class="text-uppercase text-muted small fw-bold py-3 px-4"
                     >
-                      Member
+                      Cover
+                    </th>
+
+                    <th
+                      class="text-uppercase text-muted small fw-bold py-3 px-4"
+                    >
+                      Book
+                    </th>
+
+                    <th
+                      class="text-uppercase text-muted small fw-bold py-3 px-4"
+                    >
+                      Borrowed
+                    </th>
+
+                    <th
+                      class="text-uppercase text-muted small fw-bold py-3 px-4"
+                    >
+                      Due Date
+                    </th>
+
+                    <th
+                      class="text-uppercase text-muted small fw-bold py-3 px-4 text-center text-nowrap"
+                    >
+                      Returned On
                     </th>
 
                     <th
                       class="text-uppercase text-muted small fw-bold py-3 px-4 text-center"
                     >
-                      Fined Books
+                      Fine
                     </th>
 
                     <th
                       class="text-uppercase text-muted small fw-bold py-3 px-4 text-center"
                     >
-                      Unpaid Books
-                    </th>
-
-                    <th
-                      class="text-uppercase text-muted small fw-bold py-3 px-4 text-center"
-                    >
-                      Outstanding Fine
+                      Status
                     </th>
 
                     <th
@@ -260,7 +379,6 @@
                 </thead>
 
                 <tbody id="fineTable"></tbody>
-
               </table>
             </div>
           </div>
@@ -281,6 +399,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="/assets/js/auth.js"></script>
-    <script src="/assets/js/fine.js"></script>
+    <script src="/assets/js/borrow-history.js"></script>
   </body>
 </html>

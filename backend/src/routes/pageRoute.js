@@ -36,6 +36,14 @@ router.get('/fines', (req, res) => {
   }
 });
 
+//fine detail
+router.get("/borrow-history/:userId", requireAdmin, (req, res) => {
+  res.sendFile(
+    path.join(frontendPath, "admin/borrow-history.html")
+  );
+}
+);
+
 //Profile
 router.get("/profile", (req, res) => {
   if (!req.session.user) {

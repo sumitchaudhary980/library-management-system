@@ -559,70 +559,7 @@ exports.renewBook = (req, res) => {
 };
 
 //return borrowed book
-exports.returnBook = (req, res) => {
 
-  const borrowedId = parseInt(req.params.id);
-
-  try {
-
-    const borrowed = db.prepare(`
-      SELECT *
-      FROM borrowed_books
-      WHERE
-        id = ?
-        AND returned = 0
-    `).get(borrowedId);
-
-    if (!borrowed) {
-      return res.status(404).json({
-        message: "Borrowed book not found."
-      });
-    }
-
-    if (
-      borrowed.fine_amount > 0 &&
-      borrowed.fine_paid === 0
-    ) {
-      return res.status(400).json({
-        message: "Please pay the outstanding fine before returning this book."
-      });
-    }
-
-    const transaction = db.transaction(() => {
-
-      db.prepare(`
-        UPDATE borrowed_books
-        SET
-          returned = 1,
-          returned_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-      `).run(borrowedId);
-
-      db.prepare(`
-        UPDATE books
-        SET stock_quantity = stock_quantity + 1
-        WHERE id = ?
-      `).run(borrowed.book_id);
-
-    });
-
-    transaction();
-
-    res.json({
-      message: "Book returned successfully."
-    });
-
-  } catch (err) {
-
-    console.log(err);
-
-    res.status(500).json({
-      message: "Failed to return book."
-    });
-
-  }
-
-};
 
 // get borrow history
 exports.getBorrowHistory = (req, res) => {

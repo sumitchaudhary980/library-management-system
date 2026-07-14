@@ -741,6 +741,462 @@ exports.deleteBook = async (req, res) => {
   }
 };
 
+
+// get fine users
+exports.getFineUsers = (req, res) => {
+
+  const page = parseInt(req.query.page) || 1;
+  const limit = 10;
+  const offset = (page - 1) * limit;
+
+  const search = req.query.search || "";
+  const sort = req.query.sort || "highest";
+  const status = req.query.status || "";
+
+  try {
+
+    let where = `
+            u.role = 'reader'
+        `;
+
+    const params = [];
+
+
+    if (search) {
+
+      where += `
+            AND (
+                u.first_name LIKE ?
+                OR u.last_name LIKE ?
+                OR u.email LIKE ?
+            )
+            `;
+
+      params.push(
+        `%${search}%`,
+        `%${search}%`,
+        `%${search}%`
+      );
+
+    }
+
+
+
+    let having = "";
+
+    if (status === "unpaid") {
+
+      having = `
+            HAVING outstanding_fine > 0
+            `;
+
+    }
+
+
+    if (status === "paid") {
+
+      having = `
+            HAVING outstanding_fine = 0
+            `;
+
+    }
+
+
+
+    let orderBy = "outstanding_fine DESC";
+
+
+    if (sort === "lowest") {
+
+      orderBy = "outstanding_fine ASC";
+
+    }
+
+
+    if (sort === "name") {
+
+      orderBy = "u.first_name ASC";
+
+    }
+
+
+
+    const users = db.prepare(`
+
+            SELECT
+
+                u.id,
+                u.first_name,
+                u.last_name,
+                u.email,
+                u.profile_image,
+
+
+                COUNT(
+                    CASE
+                    WHEN bb.returned = 0
+                    THEN bb.id
+                    END
+                ) AS borrowed_books,
+                 COUNT(
+    CASE
+        WHEN bb.fine_amount > 0
+        THEN bb.id
+    END
+) AS fined_books,
+
+
+                COUNT(
+                    CASE
+                    WHEN bb.fine_paid = 0
+                    AND bb.fine_amount > 0
+                    THEN bb.id
+                    END
+                ) AS unpaid_books,
+
+
+                COALESCE(
+                    SUM(
+                        CASE
+                        WHEN bb.fine_paid = 0
+                        AND bb.fine_amount > 0
+                        THEN bb.fine_amount
+                        ELSE 0
+                        END
+                    ),
+                    0
+                ) AS outstanding_fine
+
+
+
+            FROM users u
+
+
+            LEFT JOIN borrowed_books bb
+
+            ON u.id = bb.user_id
+
+
+
+            WHERE ${where}
+
+
+            GROUP BY u.id
+
+
+            ${having}
+
+
+            ORDER BY ${orderBy}
+
+
+            LIMIT ?
+            OFFSET ?
+
+
+        `).all(
+      ...params,
+      limit,
+      offset
+    );
+
+
+
+    const total = users.length;
+
+
+
+    res.json({
+
+      users,
+
+      total,
+
+      totalPages: Math.ceil(total / limit)
+
+    });
+
+
+
+  } catch (err) {
+
+    console.log(err);
+
+    res.status(500).json({
+
+      message: "Failed to load fines"
+
+    });
+
+  }
+
+};
+
+//get borrow history
+exports.getBorrowHistory = (req, res) => {
+    const userId = parseInt(req.params.userId);
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const offset = (page - 1) * limit;
+
+    const {
+        title = "",
+        borrowed_from = "",
+        borrowed_to = "",
+        returned_from = "",
+        returned_to = "",
+        sort = "borrowed_desc"
+    } = req.query;
+
+    try {
+
+        const user = db.prepare(`
+            SELECT
+                id,
+                first_name,
+                last_name,
+                email,
+                phone,
+                profile_image
+            FROM users
+            WHERE id = ?
+        `).get(userId);
+
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found"
+            });
+        }
+
+        // Total books borrowed by the user (never changes with filters)
+        const totalBorrowedBooks = db.prepare(`
+            SELECT COUNT(*) AS total
+            FROM borrowed_books
+            WHERE user_id = ?
+        `).get(userId).total;
+
+        let where = `WHERE bb.user_id = ?`;
+        const params = [userId];
+
+        // Search by title
+        if (title) {
+            where += ` AND b.title LIKE ?`;
+            params.push(`%${title}%`);
+        }
+
+        // Borrowed date filters
+        if (borrowed_from) {
+            where += ` AND DATE(bb.borrowed_at) >= DATE(?)`;
+            params.push(borrowed_from);
+        }
+
+        if (borrowed_to) {
+            where += ` AND DATE(bb.borrowed_at) <= DATE(?)`;
+            params.push(borrowed_to);
+        }
+
+        // Returned date filters
+        if (returned_from) {
+            where += ` AND bb.returned = 1 AND DATE(bb.returned_at) >= DATE(?)`;
+            params.push(returned_from);
+        }
+
+        if (returned_to) {
+            where += ` AND bb.returned = 1 AND DATE(bb.returned_at) <= DATE(?)`;
+            params.push(returned_to);
+        }
+
+        let orderBy = "";
+
+        switch (sort) {
+
+            case "returned_desc":
+                orderBy = `
+                    CASE
+                        WHEN bb.returned = 1 THEN 0
+                        ELSE 1
+                    END,
+                    bb.returned_at DESC
+                `;
+                break;
+
+            case "returned_asc":
+                orderBy = `
+                    CASE
+                        WHEN bb.returned = 1 THEN 0
+                        ELSE 1
+                    END,
+                    bb.returned_at ASC
+                `;
+                break;
+
+            case "borrowed_asc":
+                orderBy = `bb.borrowed_at ASC`;
+                break;
+
+            case "borrowed_desc":
+            default:
+                orderBy = `bb.borrowed_at DESC`;
+                break;
+        }
+
+        // Total records after filters (for pagination)
+        const total = db.prepare(`
+            SELECT COUNT(*) AS total
+            FROM borrowed_books bb
+            INNER JOIN books b
+                ON bb.book_id = b.id
+            LEFT JOIN authors a
+                ON b.author_id = a.id
+            ${where}
+        `).get(...params).total;
+
+        // Fetch paginated records
+        const books = db.prepare(`
+            SELECT
+                bb.id,
+
+                b.title,
+                b.cover_image,
+
+                a.name AS author,
+
+                bb.borrowed_at,
+                bb.due_date,
+
+                COALESCE(bb.fine_amount,0) AS fine_amount,
+                COALESCE(bb.fine_paid,0) AS fine_paid,
+                bb.fine_paid_at,
+
+                COALESCE(bb.returned,0) AS returned,
+                bb.returned_at
+
+            FROM borrowed_books bb
+
+            INNER JOIN books b
+                ON bb.book_id = b.id
+
+            LEFT JOIN authors a
+                ON b.author_id = a.id
+
+            ${where}
+
+            ORDER BY ${orderBy}
+
+            LIMIT ?
+            OFFSET ?
+        `).all(...params, limit, offset);
+
+        res.json({
+            user,
+            books,
+            totalBorrowedBooks,
+            total,
+            totalPages: Math.ceil(total / limit),
+            currentPage: page
+        });
+
+    } catch (err) {
+
+        console.log("Borrow history error:", err);
+
+        res.status(500).json({
+            message: "Failed to load borrow history"
+        });
+
+    }
+};
+
+//return book
+exports.returnBook = (req, res) => {
+
+  const borrowedId = parseInt(req.params.id);
+
+
+  try {
+
+    const borrowed = db.prepare(`
+            SELECT *
+            FROM borrowed_books
+            WHERE id = ?
+            AND returned = 0
+        `).get(borrowedId);
+
+
+
+    if (!borrowed) {
+
+      return res.status(404).json({
+        message: "Borrowed book not found."
+      });
+
+    }
+
+
+
+    if (
+      borrowed.fine_amount > 0 &&
+      borrowed.fine_paid === 0
+    ) {
+
+      return res.status(400).json({
+        message: "Please clear the fine before returning this book."
+      });
+
+    }
+
+
+
+    const transaction = db.transaction(() => {
+
+
+      db.prepare(`
+                UPDATE borrowed_books
+                SET
+                    returned = 1,
+                    returned_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            `).run(borrowedId);
+
+
+
+      db.prepare(`
+                UPDATE books
+                SET stock_quantity = stock_quantity + 1
+                WHERE id = ?
+            `).run(borrowed.book_id);
+
+
+    });
+
+
+
+    transaction();
+
+
+
+    res.json({
+      message: "Book returned successfully."
+    });
+
+
+
+  } catch (err) {
+
+
+    console.log(err);
+
+
+    res.status(500).json({
+      message: "Failed to return book."
+    });
+
+
+  }
+
+};
+
 // profile
 exports.getProfile = (req, res) => {
   try {

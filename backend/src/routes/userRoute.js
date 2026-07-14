@@ -16,7 +16,7 @@ router.post("/books/:id/borrow", requireReader, userController.borrowBook);
 //Borrowed Books Route
 router.get("/borrowed-books", requireReader, userController.getBorrowedBooks);
 router.put("/borrowed-books/:id/renew",requireReader,userController.renewBook);
-router.put("/borrowed-books/:id/return", requireAdmin,userController.returnBook);
+
 
 //borrow History Route
 router.get("/borrow-history", requireReader, userController.getBorrowHistory);

@@ -34,6 +34,11 @@ router.get("/books/:id", requireAdmin, adminController.getBook);
 router.put("/books/:id", requireAdmin, upload.single("cover"), adminController.updateBook);
 router.delete("/books/:id", requireAdmin, adminController.deleteBook);
 
+
+// FINES
+router.get("/fines", requireAdmin, adminController.getFineUsers);
+router.get("/borrow-history/:userId",requireAdmin,adminController.getBorrowHistory);
+router.put("/return-book/:id", requireAdmin,adminController.returnBook);
 // PROFILE
 router.get("/profile", requireAdmin, adminController.getProfile);
 router.put("/profile", requireAdmin, upload.single("profileImage"), adminController.updateProfile);
