@@ -1,5 +1,6 @@
 const { createAuthorTable } = require("../models/Author");
 const { createBookTable } = require("../models/Book");
+const { createBorrowedBookTable } = require("../models/BorrowedBook");
 const { createApprovedDeviceTable } = require("../models/Device");
 const { createGenreTable } = require("../models/Genre");
 const { createUserTable } = require("../models/User");
@@ -13,15 +14,16 @@ const { createUserSeeder } = require("../seeders/userSeeder");
 
 
 
-createUserTable();
-createAuthorTable();
-createGenreTable();
-createBookTable();
+// createUserTable();
+// createAuthorTable();
+// createGenreTable();
+// createBookTable();
+// createBorrowedBookTable();
 
-createAdminSeeder();
-createUserSeeder();
-createAuthorSeeder();
-createGenreSeeder();
-createBookSeeder();
+// createAdminSeeder();
+// createUserSeeder();
+// createAuthorSeeder();
+// createGenreSeeder();
+// createBookSeeder();
 
 console.log("Database initialized");
