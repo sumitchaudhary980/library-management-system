@@ -1,58 +1,113 @@
 # 📚 Library Management System
 
-A full-stack **Library Management System** developed using **HTML, CSS, JavaScript, Node.js, Express.js, and SQLite**.
+A modern full-stack **Library Management System** built with **HTML, CSS, JavaScript, Node.js, Express.js, SQLite, and Cloudinary**.
 
-This project provides a digital platform for managing library operations through an intuitive admin dashboard. It currently focuses on library resource management, including books, authors, genres, secure authentication, and cloud-based image management using **Cloudinary**.
+The project provides a complete library administration panel for managing books, authors, genres, readers, borrowing records, and fines through a clean and responsive interface.
 
-The application follows a separate **frontend** and **backend** architecture to ensure a clean, scalable, and maintainable project structure.
+The application follows a separate **frontend** and **backend** architecture for better scalability and maintainability.
 
 ---
 
 # 🚧 Project Status
 
-**Status:** Under Development
+**Status:** Under Active Development
 
-This project is currently under active development. Core administration features have been implemented, while additional library modules and user-facing functionality are planned for future releases.
+The project is actively being developed. Core library management modules are functional, while additional features and improvements are continuously being added.
 
 ---
 
-# ✨ Project Overview
+# ✨ Features
 
-The Library Management System aims to simplify library management by providing administrators with tools to efficiently organize library resources.
+## Authentication
 
-### Current Features
+- Secure Admin Login
+- Reader Login
+- Session-based Authentication
+- Protected Routes
+- Password Hashing using bcrypt
 
-- Admin authentication
-- Dashboard
-- Book management
-- Author management
-- Genre management
-- Book cover image upload
-- Cloudinary image management
-- Search and filtering
+---
+
+## Dashboard
+
+- Total Books
+- Total Authors
+- Total Genres
+- Total Readers
+
+---
+
+## Book Management
+
+- Add Books
+- Edit Books
+- Delete Books
+- Upload Book Covers
+- Cloudinary Image Storage
+- Automatic Image Replacement
+- Automatic Image Cleanup
+- Search
 - Pagination
-- Form validation
-- Responsive admin interface
-
-### Planned Features
-
-- User authentication
-- Borrow books
-- Return books
-- Due date tracking
-- Fine management
-- Borrowing history
-- Book reservation system
 
 ---
 
-# 🛠️ Tech Stack
+## Author Management
+
+- Add Authors
+- Edit Authors
+- Delete Authors
+- Search
+- Pagination
+
+---
+
+## Genre Management
+
+- Add Genres
+- Edit Genres
+- Delete Genres
+- Search
+- Pagination
+
+---
+
+## Reader Management
+
+- Add Readers
+- Edit Readers
+- Activate Reader
+- Deactivate Reader
+- Search
+- Filtering
+- Pagination
+
+---
+
+## Borrow Management
+
+- Borrow Books
+- Return Books
+- Due Date Tracking
+- Renewal Support
+
+---
+
+## Fine Management
+
+- Automatic Fine Calculation
+- Fine Payment Tracking
+- Penalty Management
+
+---
+
+# 🛠 Tech Stack
 
 ## Frontend
 
 - HTML5
 - CSS3
 - JavaScript
+- Bootstrap 5
 
 ## Backend
 
@@ -62,156 +117,183 @@ The Library Management System aims to simplify library management by providing a
 ## Database
 
 - SQLite
+- Better SQLite3
 
-## Cloud Storage
+## Image Storage
 
 - Cloudinary
 
-## Additional Technologies
+## Security
 
-- bcrypt (Password hashing)
-- Multer (Multipart form handling)
-- Better SQLite3
-- Express Sessions
+- bcrypt
+- express-session
+- cookie-parser
+- Helmet
+- Upstash Rate Limiter
 
 ---
 
-# ☁️ Image Management
+# ☁️ Cloudinary
 
-Book cover images are securely stored using **Cloudinary**.
+Book cover images are stored on Cloudinary.
 
-Current image features include:
+Features include:
 
-- Uploading book cover images
-- Cloud-based image storage
-- Automatic image replacement
-- Automatic deletion of old images
+- Upload images
+- Replace existing images
+- Delete old images automatically
 - Optimized image delivery
+
+---
+
+# 🔒 Security
+
+- Password hashing
+- Session authentication
+- Protected routes
+- Helmet security headers
+- Upstash Rate Limiter
+- Server-side validation
+- Client-side validation
 
 ---
 
 # 📂 Project Structure
 
 ```text
-Library-Management-System/
+Library-Management-System
 │
-├── backend/
-│   ├── src/
-│   │   ├── config/
-│   │   │   ├── cloudinary.js
-│   │   │   └── db.js
-│   │   │
-│   │   ├── controllers/
-│   │   ├── middleware/
-│   │   ├── models/
-│   │   ├── routes/
+├── backend
+│   ├── src
+│   │   ├── config
+│   │   ├── controllers
+│   │   ├── middleware
+│   │   ├── models
+│   │   ├── routes
+│   │   ├── seeders
+│   │   ├── cron
 │   │   └── server.js
 │   │
-│   ├── .env
-│   └── package.json
+│   ├── package.json
+│   └── .env
 │
-├── frontend/
-│   ├── admin/
-│   ├── user/
-│   ├── assets/
+├── frontend
+│   ├── admin
+│   ├── user
+│   ├── assets
 │   └── index.html
 │
-├── README.md
 ├── LICENSE
+├── README.md
 └── .gitignore
 ```
 
 ---
 
-# 🔐 Main System Modules
+# ⚙️ Project Setup
 
-## Admin Module
+## 1. Clone the repository
 
-The admin dashboard currently provides:
+```bash
+git clone https://github.com/sumitchaudhary980/Library-Management-System.git
+```
 
-- Dashboard
-- Manage books
-- Manage authors
-- Manage genres
-- Upload and update book cover images
-- Delete books and associated Cloudinary images
-- Search books
-- Pagination
-- Form validation
+```bash
+cd Library-Management-System
+```
 
 ---
 
-## User Module (Planned)
+## 2. Install Backend Dependencies
 
-The user module is planned to include:
+```bash
+cd backend
+```
 
-- User registration
-- User login
-- Browse books
-- Borrow books
-- Return books
-- Renew borrowed books
-- Borrowing history
-- Fine management
+```bash
+npm install
+```
 
 ---
 
-# 📖 Library Operations
+## 3. Create Environment File
 
-The system currently supports:
+Create a **.env** file inside the **backend** folder.
 
-- Adding books
-- Updating books
-- Deleting books
-- Managing stock quantity
-- Managing authors
-- Managing genres
-- Uploading book cover images
-- Updating existing cover images
-- Automatic removal of replaced images
-- Search functionality
-- Pagination
+```env
+SESSION_SECRET=your_session_secret
 
----
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
 
-# 🔒 Security
-
-The application focuses on:
-
-- Secure authentication
-- Password hashing using bcrypt
-- Protected admin routes
-- Server-side validation
-- Client-side validation
-- Secure file upload validation
-- Cloud-based image storage
-- Automatic cleanup of deleted images
+UPSTASH_REDIS_REST_URL=your_upstash_url
+UPSTASH_REDIS_REST_TOKEN=your_upstash_token
+```
 
 ---
 
-# 🚀 Future Enhancements
+## 4. Configure Database
 
-Planned improvements include:
+Open:
 
-- User management
-- Borrow and return management
-- Fine calculation
-- Dashboard analytics
-- Email notifications
-- Activity logs
-- Book reservation system
-- Barcode / QR code support
-- Report generation
-- Role-based access control
-- Advanced search and filtering
+```
+backend/src/config/initDB.js
+```
+
+Comment out the database creation functions and seeders after the database has been created for the first time.
+
+Example:
+
+```javascript
+// createUserTable();
+// createAuthorTable();
+// createGenreTable();
+// createBookTable();
+// createBorrowedBookTable();
+
+// seedAdmin();
+// seedAuthors();
+// seedGenres();
+// seedBooks();
+```
+
+These should only be run when initializing a fresh database.
 
 ---
 
-# ⚙️ Installation
+## 5. Start the Server
 
-Installation instructions will be added once the project reaches a stable release.
+```bash
+npm start
+```
 
-The project is currently under active development, and setup steps may change as new features and configurations are introduced.
+or
+
+```bash
+npm run dev
+```
+
+---
+
+The application is now ready to use.
+
+---
+
+# 🚀 Upcoming Features
+
+- Reader Registration
+- Reader Profile
+- Borrow History
+- Book Reservations
+- Dashboard Analytics
+- Reports
+- Email Notifications
+- QR / Barcode Support
+- Activity Logs
+- Role Based Access Control
+- Advanced Search
+- Export Reports
 
 ---
 
@@ -219,7 +301,7 @@ The project is currently under active development, and setup steps may change as
 
 This project is licensed under the **MIT License**.
 
-Copyright © 2026 Sumit Kumar Chaudhary.
+Copyright © 2026 **Sumit Kumar Chaudhary**
 
 ---
 
@@ -227,9 +309,11 @@ Copyright © 2026 Sumit Kumar Chaudhary.
 
 **Sumit Kumar Chaudhary**
 
-GitHub: https://github.com/sumitchaudhary980
+GitHub:
+https://github.com/sumitchaudhary980
 
-Email: jaiswalsumit1010@gmail.com
+Email:
+jaiswalsumit1010@gmail.com
 
 ---
 
@@ -238,9 +322,14 @@ Email: jaiswalsumit1010@gmail.com
 - HTML5
 - CSS3
 - JavaScript
+- Bootstrap 5
 - Node.js
 - Express.js
 - SQLite
+- Better SQLite3
 - Cloudinary
 - Multer
 - bcrypt
+- express-session
+- Helmet
+- Upstash Rate Limiter
