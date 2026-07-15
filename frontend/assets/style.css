@@ -795,31 +795,43 @@ button.menu-item:focus {
   align-items: center !important;
 }
 
+/* Icon */
 .small-toast .swal2-icon {
   margin: 0 10px 0 0 !important;
   flex-shrink: 0 !important;
 }
 
+/* Message */
 .small-toast .swal2-title {
   font-size: 14px !important;
   font-weight: 600 !important;
   margin: 0 !important;
+
   flex: 1 !important;
   text-align: left !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
+
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: unset !important;
+
+  line-height: 1.4 !important;
+
   order: 2 !important;
 }
 
+/* Keep icon left */
 .small-toast .swal2-icon {
   order: 1 !important;
 }
 
+/* Keep close button right */
 .small-toast .swal2-close {
   order: 3 !important;
   margin-left: auto !important;
+
   font-size: 18px !important;
+
+  flex-shrink: 0 !important;
 }
 
 /* Profile Page */

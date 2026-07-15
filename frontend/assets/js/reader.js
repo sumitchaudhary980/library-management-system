@@ -72,77 +72,86 @@ async function loadReaders(page = 1) {
       return;
     }
 
-    data.readers.forEach((reader) => {
-      table.innerHTML += `
-        <tr>
+  data.readers.forEach((reader) => {
+  const isActive = reader.status === "active";
 
-          <td class="py-3 px-4 text-nowrap">
-            <img
-              src="${
-                reader.profile_image || "/assets/images/default-user.png"
-              }"
-              style="width:55px;height:55px;border-radius:50%;object-fit:cover;"
-            >
-          </td>
+  table.innerHTML += `
+    <tr>
 
-          <td class="py-3 px-4 fw-semibold text-nowrap">
-            ${reader.first_name} ${reader.last_name}
-          </td>
+      <td class="py-3 px-4 text-nowrap">
+        <img
+          src="${reader.profile_image || "/assets/images/default-user.png"}"
+          style="width:55px;height:55px;border-radius:50%;object-fit:cover;"
+        >
+      </td>
 
-          <td class="py-3 px-4 text-capitalize text-nowrap">
-            ${reader.gender}
-          </td>
+      <td class="py-3 px-4 fw-semibold text-nowrap">
+        ${reader.first_name} ${reader.last_name}
+      </td>
 
-          <td class="py-3 px-4 text-nowrap">
-            ${reader.email}
-          </td>
+      <td class="py-3 px-4 text-capitalize text-nowrap">
+        ${reader.gender}
+      </td>
 
-          <td class="py-3 px-4 text-nowrap">
-            ${reader.phone || "-"}
-          </td>
+      <td class="py-3 px-4 text-nowrap">
+        ${reader.email}
+      </td>
 
-          <td class="py-3 px-4 text-nowrap">
-            ${reader.address || "-"}
-          </td>
+      <td class="py-3 px-4 text-nowrap">
+        ${reader.phone || "-"}
+      </td>
 
-          <td class="py-3 px-4 text-nowrap">
-            ${new Date(reader.created_at).toLocaleDateString()}
-          </td>
+      <td class="py-3 px-4 text-nowrap">
+        ${reader.address || "-"}
+      </td>
 
-          <td class="py-3 px-4 text-end text-nowrap">
-            <div class="action-wrapper">
+      <td class="py-3 px-4 text-nowrap">
+        ${
+          isActive
+            ? `<span class="badge bg-success">Active</span>`
+            : `<span class="badge bg-danger">Inactive</span>`
+        }
+      </td>
 
-              <a
-                href="/readers/edit/${reader.id}"
-                class="action-btn edit-btn"
-                title="Edit"
-              >
-                <i class="fas fa-pen"></i>
-              </a>
+      <td class="py-3 px-4 text-nowrap">
+        ${new Date(reader.created_at).toLocaleDateString()}
+      </td>
 
-              <button
-                type="button"
-                class="action-btn delete-btn"
-                title="Delete"
-                onclick="deleteReader(${reader.id})"
-              >
-                <i class="fas fa-trash"></i>
-              </button>
+      <td class="py-3 px-4 text-end text-nowrap">
 
-            </div>
-          </td>
+        <div class="action-wrapper">
 
-        </tr>
-      `;
-    });
+          <a
+            href="/readers/edit/${reader.id}"
+            class="action-btn edit-btn"
+            title="Edit"
+          >
+            <i class="fas fa-pen"></i>
+          </a>
+
+          <button
+            class="action-btn ${isActive ? "delete-btn" : "edit-btn"}"
+            title="${isActive ? "Deactivate Reader" : "Activate Reader"}"
+            onclick="toggleReaderStatus(${reader.id}, '${reader.status}')"
+          >
+            <i class="fas ${
+              isActive ? "fa-user-slash" : "fa-user-check"
+            }"></i>
+          </button>
+
+        </div>
+
+      </td>
+
+    </tr>
+  `;
+});
 
     document.getElementById(
       "entryText"
-    ).innerHTML = `Showing ${
-      data.total === 0 ? 0 : (page - 1) * 10 + 1
-    } to ${Math.min(page * 10, data.total)} of ${
-      data.total
-    } entries`;
+    ).innerHTML = `Showing ${data.total === 0 ? 0 : (page - 1) * 10 + 1
+      } to ${Math.min(page * 10, data.total)} of ${data.total
+      } entries`;
 
     const pagination = document.getElementById("pagination");
     pagination.innerHTML = "";
@@ -150,9 +159,8 @@ async function loadReaders(page = 1) {
     if (data.totalPages > 1) {
       pagination.innerHTML += `
         <li class="page-item ${page === 1 ? "disabled" : ""}">
-          <button class="page-link" onclick="loadReaders(${
-            page - 1
-          })">Previous</button>
+          <button class="page-link" onclick="loadReaders(${page - 1
+        })">Previous</button>
         </li>
       `;
 
@@ -165,12 +173,10 @@ async function loadReaders(page = 1) {
       }
 
       pagination.innerHTML += `
-        <li class="page-item ${
-          page === data.totalPages ? "disabled" : ""
+        <li class="page-item ${page === data.totalPages ? "disabled" : ""
         }">
-          <button class="page-link" onclick="loadReaders(${
-            page + 1
-          })">Next</button>
+          <button class="page-link" onclick="loadReaders(${page + 1
+        })">Next</button>
         </li>
       `;
     }
@@ -180,34 +186,40 @@ async function loadReaders(page = 1) {
   }
 }
 
-async function deleteReader(id) {
+async function toggleReaderStatus(id, currentStatus) {
+  const activate = currentStatus === "inactive";
+
   const result = await Swal.fire({
-    title: "Delete reader?",
-    text: "This reader will be permanently removed.",
+    title: activate ? "Activate Reader?" : "Deactivate Reader?",
+    text: activate
+      ? "This reader will be able to log in again."
+      : "This reader will no longer be able to log in.",
     icon: "warning",
     showCancelButton: true,
     confirmButtonColor: "#002147",
     cancelButtonColor: "#c5a059",
-    confirmButtonText: "Delete",
+    confirmButtonText: activate ? "Activate" : "Deactivate",
     cancelButtonText: "Cancel",
   });
 
   if (!result.isConfirmed) return;
 
   try {
-    const response = await fetch(`/api/admin/readers/${id}`, {
-      method: "DELETE",
+    const response = await fetch(`/api/admin/readers/${id}/status`, {
+      method: "PUT",
       credentials: "include",
     });
 
     const data = await response.json();
 
-    if (response.ok) {
-      showToast(data.message, "success");
-      loadReaders(currentPage);
-    } else {
-      showToast(data.message);
+    if (!response.ok) {
+      showToast(data.message || "Something went wrong");
+      return;
     }
+
+    showToast(data.message, "success");
+    loadReaders(currentPage);
+
   } catch (err) {
     console.log(err);
     showToast("Something went wrong");

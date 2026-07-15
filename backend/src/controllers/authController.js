@@ -16,13 +16,25 @@ const login = async (req, res) => {
       .get(email, email);
 
     if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({
+        message: "Invalid credentials",
+      });
     }
 
     const match = await bcrypt.compare(password, user.password);
 
     if (!match) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({
+        message: "Invalid credentials",
+      });
+    }
+
+    // Block inactive accounts
+    if (user.status === "inactive") {
+      return res.status(403).json({
+        message:
+          "Your account has been deactivated. Please contact administrator.",
+      });
     }
 
     // Detect which login endpoint was used
@@ -37,15 +49,17 @@ const login = async (req, res) => {
         message: "Invalid credentials",
       });
     }
+
     const redirectMap = {
       admin: "/dashboard",
       reader: "/home",
     };
+
     // Create session
     req.session.regenerate((err) => {
       if (err) {
         return res.status(500).json({
-          message: "Server error"
+          message: "Server error",
         });
       }
 
@@ -65,12 +79,12 @@ const login = async (req, res) => {
     });
   } catch (err) {
     console.error("Login error:", err);
+
     return res.status(500).json({
       message: "Server error",
     });
   }
 };
-
 const logout = (req, res) => {
   req.session.destroy((err) => {
     if (err) {

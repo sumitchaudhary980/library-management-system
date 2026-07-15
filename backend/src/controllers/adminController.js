@@ -1008,22 +1008,23 @@ exports.getReaders = (req, res) => {
     const readers = db
       .prepare(
         `
-        SELECT
-          id,
-          first_name,
-          last_name,
-          gender,
-          email,
-          phone,
-          address,
-          profile_image,
-          created_at
-        FROM users
-        ${where}
-        ${orderBy}
-        LIMIT ?
-        OFFSET ?
-      `
+    SELECT
+      id,
+      first_name,
+      last_name,
+      gender,
+      email,
+      phone,
+      address,
+      profile_image,
+      status,
+      created_at
+    FROM users
+    ${where}
+    ${orderBy}
+    LIMIT ?
+    OFFSET ?
+  `
       )
       .all(...params, limit, offset);
 
@@ -1041,26 +1042,67 @@ exports.getReaders = (req, res) => {
     });
   }
 };
+
+//toggle reader status
+exports.toggleReaderStatus = (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const reader = db.prepare(`
+      SELECT id, first_name, last_name, status
+      FROM users
+      WHERE id = ?
+      AND role = 'reader'
+    `).get(id);
+
+    if (!reader) {
+      return res.status(404).json({
+        message: "Reader not found",
+      });
+    }
+
+    const newStatus =
+      reader.status === "active" ? "inactive" : "active";
+
+    db.prepare(`
+      UPDATE users
+      SET status = ?
+      WHERE id = ?
+    `).run(newStatus, id);
+
+    res.json({
+      message: `Reader ${newStatus === "active" ? "activated" : "deactivated"
+        } successfully`,
+    });
+
+  } catch (err) {
+    console.log(err);
+
+    res.status(500).json({
+      message: "Failed to update reader status",
+    });
+  }
+};
 //get borrow history
 exports.getBorrowHistory = (req, res) => {
-    const userId = parseInt(req.params.userId);
+  const userId = parseInt(req.params.userId);
 
-    const page = parseInt(req.query.page) || 1;
-    const limit = 10;
-    const offset = (page - 1) * limit;
+  const page = parseInt(req.query.page) || 1;
+  const limit = 10;
+  const offset = (page - 1) * limit;
 
-    const {
-        title = "",
-        borrowed_from = "",
-        borrowed_to = "",
-        returned_from = "",
-        returned_to = "",
-        sort = "borrowed_desc"
-    } = req.query;
+  const {
+    title = "",
+    borrowed_from = "",
+    borrowed_to = "",
+    returned_from = "",
+    returned_to = "",
+    sort = "borrowed_desc"
+  } = req.query;
 
-    try {
+  try {
 
-        const user = db.prepare(`
+    const user = db.prepare(`
             SELECT
                 id,
                 first_name,
@@ -1072,86 +1114,86 @@ exports.getBorrowHistory = (req, res) => {
             WHERE id = ?
         `).get(userId);
 
-        if (!user) {
-            return res.status(404).json({
-                message: "User not found"
-            });
-        }
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found"
+      });
+    }
 
-        // Total books borrowed by the user (never changes with filters)
-        const totalBorrowedBooks = db.prepare(`
+    // Total books borrowed by the user (never changes with filters)
+    const totalBorrowedBooks = db.prepare(`
             SELECT COUNT(*) AS total
             FROM borrowed_books
             WHERE user_id = ?
         `).get(userId).total;
 
-        let where = `WHERE bb.user_id = ?`;
-        const params = [userId];
+    let where = `WHERE bb.user_id = ?`;
+    const params = [userId];
 
-        // Search by title
-        if (title) {
-            where += ` AND b.title LIKE ?`;
-            params.push(`%${title}%`);
-        }
+    // Search by title
+    if (title) {
+      where += ` AND b.title LIKE ?`;
+      params.push(`%${title}%`);
+    }
 
-        // Borrowed date filters
-        if (borrowed_from) {
-            where += ` AND DATE(bb.borrowed_at) >= DATE(?)`;
-            params.push(borrowed_from);
-        }
+    // Borrowed date filters
+    if (borrowed_from) {
+      where += ` AND DATE(bb.borrowed_at) >= DATE(?)`;
+      params.push(borrowed_from);
+    }
 
-        if (borrowed_to) {
-            where += ` AND DATE(bb.borrowed_at) <= DATE(?)`;
-            params.push(borrowed_to);
-        }
+    if (borrowed_to) {
+      where += ` AND DATE(bb.borrowed_at) <= DATE(?)`;
+      params.push(borrowed_to);
+    }
 
-        // Returned date filters
-        if (returned_from) {
-            where += ` AND bb.returned = 1 AND DATE(bb.returned_at) >= DATE(?)`;
-            params.push(returned_from);
-        }
+    // Returned date filters
+    if (returned_from) {
+      where += ` AND bb.returned = 1 AND DATE(bb.returned_at) >= DATE(?)`;
+      params.push(returned_from);
+    }
 
-        if (returned_to) {
-            where += ` AND bb.returned = 1 AND DATE(bb.returned_at) <= DATE(?)`;
-            params.push(returned_to);
-        }
+    if (returned_to) {
+      where += ` AND bb.returned = 1 AND DATE(bb.returned_at) <= DATE(?)`;
+      params.push(returned_to);
+    }
 
-        let orderBy = "";
+    let orderBy = "";
 
-        switch (sort) {
+    switch (sort) {
 
-            case "returned_desc":
-                orderBy = `
+      case "returned_desc":
+        orderBy = `
                     CASE
                         WHEN bb.returned = 1 THEN 0
                         ELSE 1
                     END,
                     bb.returned_at DESC
                 `;
-                break;
+        break;
 
-            case "returned_asc":
-                orderBy = `
+      case "returned_asc":
+        orderBy = `
                     CASE
                         WHEN bb.returned = 1 THEN 0
                         ELSE 1
                     END,
                     bb.returned_at ASC
                 `;
-                break;
+        break;
 
-            case "borrowed_asc":
-                orderBy = `bb.borrowed_at ASC`;
-                break;
+      case "borrowed_asc":
+        orderBy = `bb.borrowed_at ASC`;
+        break;
 
-            case "borrowed_desc":
-            default:
-                orderBy = `bb.borrowed_at DESC`;
-                break;
-        }
+      case "borrowed_desc":
+      default:
+        orderBy = `bb.borrowed_at DESC`;
+        break;
+    }
 
-        // Total records after filters (for pagination)
-        const total = db.prepare(`
+    // Total records after filters (for pagination)
+    const total = db.prepare(`
             SELECT COUNT(*) AS total
             FROM borrowed_books bb
             INNER JOIN books b
@@ -1161,8 +1203,8 @@ exports.getBorrowHistory = (req, res) => {
             ${where}
         `).get(...params).total;
 
-        // Fetch paginated records
-        const books = db.prepare(`
+    // Fetch paginated records
+    const books = db.prepare(`
             SELECT
                 bb.id,
 
@@ -1197,24 +1239,24 @@ exports.getBorrowHistory = (req, res) => {
             OFFSET ?
         `).all(...params, limit, offset);
 
-        res.json({
-            user,
-            books,
-            totalBorrowedBooks,
-            total,
-            totalPages: Math.ceil(total / limit),
-            currentPage: page
-        });
+    res.json({
+      user,
+      books,
+      totalBorrowedBooks,
+      total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page
+    });
 
-    } catch (err) {
+  } catch (err) {
 
-        console.log("Borrow history error:", err);
+    console.log("Borrow history error:", err);
 
-        res.status(500).json({
-            message: "Failed to load borrow history"
-        });
+    res.status(500).json({
+      message: "Failed to load borrow history"
+    });
 
-    }
+  }
 };
 
 //return book
