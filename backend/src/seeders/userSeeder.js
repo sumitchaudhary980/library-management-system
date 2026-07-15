@@ -23,19 +23,6 @@ const uploadToCloudinary = (filePath) => {
 
 const createUserSeeder = async () => {
     try {
-        const email = "john.doe@gmail.com";
-
-        const user = db
-            .prepare("SELECT * FROM users WHERE email = ?")
-            .get(email);
-
-        if (user) {
-            console.log("User already exists");
-            return;
-        }
-
-        const hashedPassword = await bcrypt.hash("User@12345", 10);
-
         const imagePath = path.join(
             __dirname,
             "../uploads/users/user.png"
@@ -46,44 +33,78 @@ const createUserSeeder = async () => {
 
         if (fs.existsSync(imagePath)) {
             const upload = await uploadToCloudinary(imagePath);
-
             profileImage = upload.secure_url;
             profileImagePublicId = upload.public_id;
         } else {
             console.log("User profile image not found.");
         }
 
-        db.prepare(`
-            INSERT INTO users
-            (
-                first_name,
-                last_name,
-                gender,
-                email,
-                phone,
-                password,
-                role,
-                address,
-                profile_image,
-                profile_image_public_id
-            )
-            VALUES (?,?,?,?,?,?,?,?,?,?)
-        `).run(
-            "John",
-            "Doe",
-            "male",
-            "john@gmail.com",
-            "9812345678",
-            hashedPassword,
-            "reader",
-            "Kathmandu, Nepal",
-            profileImage,
-            profileImagePublicId
-        );
+        const users = [
+            {
+                first_name: "John",
+                last_name: "Doe",
+                gender: "male",
+                email: "john@gmail.com",
+                phone: "9812345678",
+                password: "User@12345",
+                role: "reader",
+                address: "Kathmandu, Nepal",
+            },
+            {
+                first_name: "Jane",
+                last_name: "Smith",
+                gender: "female",
+                email: "jane@gmail.com",
+                phone: "9801234567",
+                password: "User@12345",
+                role: "reader",
+                address: "Pokhara, Nepal",
+            },
+        ];
 
-        console.log("✅ User created successfully");
+        for (const user of users) {
+            const existingUser = db
+                .prepare("SELECT * FROM users WHERE email = ?")
+                .get(user.email);
+
+            if (existingUser) {
+                console.log(`${user.email} already exists`);
+                continue;
+            }
+
+            const hashedPassword = await bcrypt.hash(user.password, 10);
+
+            db.prepare(`
+                INSERT INTO users (
+                    first_name,
+                    last_name,
+                    gender,
+                    email,
+                    phone,
+                    password,
+                    role,
+                    address,
+                    profile_image,
+                    profile_image_public_id
+                )
+                VALUES (?,?,?,?,?,?,?,?,?,?)
+            `).run(
+                user.first_name,
+                user.last_name,
+                user.gender,
+                user.email,
+                user.phone,
+                hashedPassword,
+                user.role,
+                user.address,
+                profileImage,
+                profileImagePublicId
+            );
+
+            console.log(`${user.email} created successfully`);
+        }
     } catch (error) {
-        console.error("❌ User Seeder Error:", error);
+        console.error("User Seeder Error:", error);
     }
 };
 

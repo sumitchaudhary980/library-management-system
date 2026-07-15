@@ -932,6 +932,115 @@ exports.getFineUsers = (req, res) => {
 
 };
 
+// get readers
+exports.getReaders = (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 10;
+    const offset = (page - 1) * limit;
+
+    const {
+      first_name = "",
+      last_name = "",
+      email = "",
+      phone = "",
+      gender = "",
+      sort = "newest",
+    } = req.query;
+
+    let where = `WHERE role = 'reader'`;
+    const params = [];
+
+    if (first_name.trim()) {
+      where += ` AND first_name LIKE ?`;
+      params.push(`%${first_name.trim()}%`);
+    }
+
+    if (last_name.trim()) {
+      where += ` AND last_name LIKE ?`;
+      params.push(`%${last_name.trim()}%`);
+    }
+
+    if (email.trim()) {
+      where += ` AND email LIKE ?`;
+      params.push(`%${email.trim()}%`);
+    }
+
+    if (phone.trim()) {
+      where += ` AND phone LIKE ?`;
+      params.push(`%${phone.trim()}%`);
+    }
+
+    if (gender.trim()) {
+      where += ` AND gender = ?`;
+      params.push(gender);
+    }
+
+    let orderBy = `ORDER BY created_at DESC`;
+
+    switch (sort) {
+      case "oldest":
+        orderBy = `ORDER BY created_at ASC`;
+        break;
+
+      case "az":
+        orderBy = `ORDER BY first_name ASC, last_name ASC`;
+        break;
+
+      case "za":
+        orderBy = `ORDER BY first_name DESC, last_name DESC`;
+        break;
+
+      default:
+        orderBy = `ORDER BY created_at DESC`;
+    }
+
+    const total = db
+      .prepare(
+        `
+        SELECT COUNT(*) AS total
+        FROM users
+        ${where}
+      `
+      )
+      .get(...params).total;
+
+    const readers = db
+      .prepare(
+        `
+        SELECT
+          id,
+          first_name,
+          last_name,
+          gender,
+          email,
+          phone,
+          address,
+          profile_image,
+          created_at
+        FROM users
+        ${where}
+        ${orderBy}
+        LIMIT ?
+        OFFSET ?
+      `
+      )
+      .all(...params, limit, offset);
+
+    res.json({
+      readers,
+      total,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+    });
+  } catch (err) {
+    console.log("Get readers error:", err);
+
+    res.status(500).json({
+      message: "Failed to load readers",
+    });
+  }
+};
 //get borrow history
 exports.getBorrowHistory = (req, res) => {
     const userId = parseInt(req.params.userId);

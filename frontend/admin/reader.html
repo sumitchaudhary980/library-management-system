@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kaiser Library | Fines & Penalties</title>
+    <title>Kaiser Library | Readers</title>
 
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
@@ -85,12 +85,14 @@
                 Genres
               </a>
             </li>
+
             <li>
-              <a href="/readers" class="menu-item">
+              <a href="/readers" class="menu-item active">
                 <i class="fas fa-user-group menu-icon"></i>
                 Readers
               </a>
             </li>
+
             <li>
               <a href="/fines" class="menu-item">
                 <i class="fas fa-money-check-dollar menu-icon"></i>
@@ -129,13 +131,28 @@
           >
             <div>
               <h1 class="font-serif fw-bold h3 text-primary-dark mb-1">
-                Outstanding Fines
+                Readers
               </h1>
 
               <p class="text-muted mb-0 small">
-                View users with outstanding fines and manage payments.
+                Manage registered library readers.
               </p>
             </div>
+
+            <a
+              href="/add-reader"
+              class="btn text-white px-4 fw-medium shadow-sm"
+              style="
+                background: var(--primary-dark);
+                border-radius: 8px;
+                height: 42px;
+                display: flex;
+                align-items: center;
+              "
+            >
+              <i class="fas fa-user-plus me-2"></i>
+              Add Reader
+            </a>
           </div>
 
           <div
@@ -153,7 +170,6 @@
 
               <button
                 id="clearFilters"
-                type="button"
                 class="btn btn-sm text-muted"
                 style="border: 1px solid #e2e8f0; border-radius: 8px"
               >
@@ -164,15 +180,17 @@
 
             <div class="row g-3">
               <div class="col-md-4">
-                <label class="form-label small fw-medium text-muted mb-1">
-                  User
+                <label
+                  class="form-label small fw-medium text-muted mb-1"
+                  for="searchFirstName"
+                >
+                  First Name
                 </label>
 
                 <input
-                  id="searchUser"
-                  type="text"
+                  id="searchFirstName"
                   class="form-control shadow-sm"
-                  placeholder="Search by name or email..."
+                  placeholder="Search first name..."
                   style="
                     height: 44px;
                     border-radius: 8px;
@@ -182,12 +200,75 @@
               </div>
 
               <div class="col-md-4">
-                <label class="form-label small fw-medium text-muted mb-1">
-                  Fine Status
+                <label
+                  class="form-label small fw-medium text-muted mb-1"
+                  for="searchLastName"
+                >
+                  Last Name
+                </label>
+
+                <input
+                  id="searchLastName"
+                  class="form-control shadow-sm"
+                  placeholder="Search last name..."
+                  style="
+                    height: 44px;
+                    border-radius: 8px;
+                    border-color: #e2e8f0;
+                  "
+                />
+              </div>
+
+              <div class="col-md-4">
+                <label
+                  class="form-label small fw-medium text-muted mb-1"
+                  for="searchEmail"
+                >
+                  Email
+                </label>
+
+                <input
+                  id="searchEmail"
+                  class="form-control shadow-sm"
+                  placeholder="Search email..."
+                  style="
+                    height: 44px;
+                    border-radius: 8px;
+                    border-color: #e2e8f0;
+                  "
+                />
+              </div>
+
+              <div class="col-md-4">
+                <label
+                  class="form-label small fw-medium text-muted mb-1"
+                  for="searchPhone"
+                >
+                  Phone
+                </label>
+
+                <input
+                  id="searchPhone"
+                  class="form-control shadow-sm"
+                  placeholder="Search phone..."
+                  style="
+                    height: 44px;
+                    border-radius: 8px;
+                    border-color: #e2e8f0;
+                  "
+                />
+              </div>
+
+              <div class="col-md-4">
+                <label
+                  class="form-label small fw-medium text-muted mb-1"
+                  for="searchGender"
+                >
+                  Gender
                 </label>
 
                 <select
-                  id="fineStatus"
+                  id="searchGender"
                   class="form-select shadow-sm"
                   style="
                     height: 44px;
@@ -196,14 +277,18 @@
                   "
                 >
                   <option value="">All</option>
-                  <option value="unpaid">Has Outstanding Fine</option>
-                  <option value="paid">No Outstanding Fine</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
                 </select>
               </div>
 
               <div class="col-md-4">
-                <label class="form-label small fw-medium text-muted mb-1">
-                  Sort By
+                <label
+                  class="form-label small fw-medium text-muted mb-1"
+                  for="sortBy"
+                >
+                  Sort
                 </label>
 
                 <select
@@ -215,9 +300,10 @@
                     border-color: #e2e8f0;
                   "
                 >
-                  <option value="highest">Highest Fine</option>
-                  <option value="lowest">Lowest Fine</option>
-                  <option value="name">Name (A-Z)</option>
+                  <option value="newest">Newest First</option>
+                  <option value="oldest">Oldest First</option>
+                  <option value="az">A - Z</option>
+                  <option value="za">Z - A</option>
                 </select>
               </div>
             </div>
@@ -234,39 +320,56 @@
                 >
                   <tr>
                     <th
-                      class="text-uppercase text-muted small fw-bold py-3 px-4"
+                      class="text-uppercase text-muted small fw-bold py-3 px-4 text-nowrap"
                     >
-                      Member
+                      Profile
                     </th>
 
                     <th
-                      class="text-uppercase text-muted small fw-bold py-3 px-4 text-center"
+                      class="text-uppercase text-muted small fw-bold py-3 px-4 text-nowrap"
                     >
-                      Fined Books
+                      Full Name
                     </th>
 
                     <th
-                      class="text-uppercase text-muted small fw-bold py-3 px-4 text-center"
+                      class="text-uppercase text-muted small fw-bold py-3 px-4 text-nowrap"
                     >
-                      Unpaid Books
+                      Gender
                     </th>
 
                     <th
-                      class="text-uppercase text-muted small fw-bold py-3 px-4 text-center"
+                      class="text-uppercase text-muted small fw-bold py-3 px-4 text-nowrap"
                     >
-                      Outstanding Fine
+                      Email
                     </th>
 
                     <th
-                      class="text-uppercase text-muted small fw-bold py-3 px-4 text-center"
+                      class="text-uppercase text-muted small fw-bold py-3 px-4 text-nowrap"
                     >
-                      Action
+                      Phone
+                    </th>
+
+                    <th
+                      class="text-uppercase text-muted small fw-bold py-3 px-4 text-nowrap"
+                    >
+                      Address
+                    </th>
+
+                    <th
+                      class="text-uppercase text-muted small fw-bold py-3 px-4 text-nowrap"
+                    >
+                      Joined
+                    </th>
+
+                    <th
+                      class="text-uppercase text-muted small fw-bold py-3 px-4 text-end text-nowrap"
+                    >
+                      Actions
                     </th>
                   </tr>
                 </thead>
 
-                <tbody id="fineTable"></tbody>
-
+                <tbody id="readerTable"></tbody>
               </table>
             </div>
           </div>
@@ -287,6 +390,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="/assets/js/auth.js"></script>
-    <script src="/assets/js/fine.js"></script>
+    <script src="/assets/js/reader.js"></script>
   </body>
 </html>

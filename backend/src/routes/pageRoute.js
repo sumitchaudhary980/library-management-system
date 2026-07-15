@@ -8,6 +8,10 @@ const frontendPath = path.join(__dirname, "../../../frontend");
 router.get("/", (req, res) => {
   res.sendFile(path.join(frontendPath, "index.html"));
 });
+//User Pages — protected, live at root level URLs
+router.get("/home", requireReader, (req, res) => {
+  res.sendFile(path.join(frontendPath, "user/home.html"));
+});
 
 //user routes
 router.get('/borrowed-books', requireReader, (req, res) => {
@@ -93,10 +97,6 @@ router.get("/login", (req, res) => {
   res.sendFile(path.join(frontendPath, "user/login.html"));
 });
 
-//User Pages — protected, live at root level URLs
-router.get("/home", requireReader, (req, res) => {
-  res.sendFile(path.join(frontendPath, "user/home.html"));
-});
 
 
 // Admin Routes
@@ -187,5 +187,10 @@ router.get("/books/edit/:id", requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/edit-book.html"));
 });
 
+
+// Readers page
+router.get("/readers", requireAdmin, (req, res) => {
+  res.sendFile(path.join(frontendPath, "admin/reader.html"));
+});
 
 module.exports = router;
