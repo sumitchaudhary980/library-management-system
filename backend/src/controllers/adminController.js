@@ -4,17 +4,36 @@ const db = require("../config/db");
 
 exports.getDashboardData = (req, res) => {
   try {
-    const totalAuthors = db.prepare(`SELECT COUNT(*) AS total FROM authors`).get().total;
-    const totalGenres = db.prepare(`SELECT COUNT(*) AS total FROM genres`).get().total;
-    const totalBooks = db.prepare(`SELECT COUNT(*) AS total FROM books`).get().total;
+    const totalAuthors = db
+      .prepare(`SELECT COUNT(*) AS total FROM authors`)
+      .get().total;
+
+    const totalGenres = db
+      .prepare(`SELECT COUNT(*) AS total FROM genres`)
+      .get().total;
+
+    const totalBooks = db
+      .prepare(`SELECT COUNT(*) AS total FROM books`)
+      .get().total;
+
+    const totalReaders = db
+      .prepare(`
+        SELECT COUNT(*) AS total 
+        FROM users 
+        WHERE role = 'reader'
+      `)
+      .get().total;
 
     res.json({
       totalAuthors,
       totalGenres,
-      totalBooks
+      totalBooks,
+      totalReaders
     });
+
   } catch (err) {
     console.log(err);
+
     res.status(500).json({
       message: "Failed to load dashboard data"
     });
