@@ -193,4 +193,18 @@ router.get("/readers", requireAdmin, (req, res) => {
   res.sendFile(path.join(frontendPath, "admin/reader.html"));
 });
 
+router.get('/add-reader', requireAdmin, (req, res) => {
+  res.sendFile(path.join(frontendPath, 'admin/add-reader.html'));
+});
+
+router.get("/change-password", (req, res) => {
+  if (!req.session.passwordReset) {
+    return res.redirect("/login");
+  }
+
+  res.sendFile(
+    path.join(frontendPath, "user", "change-password.html")
+  );
+});
+
 module.exports = router;

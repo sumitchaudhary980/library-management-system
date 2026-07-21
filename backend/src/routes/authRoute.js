@@ -1,8 +1,8 @@
 const express = require("express");
 const { login, logout, getSession } = require("../controllers/authController");
 const { requireAdmin } = require("../middleware/authMiddleware");
+const authController = require("../controllers/authController");
 const router = express.Router();
-
 // routes
 router.post(
     "/admin/login",
@@ -21,6 +21,12 @@ router.post(
     },
     login
 );
+
+router.post(
+  "/change-password",
+  authController.changePassword
+);
+
 router.post("/logout", logout);
 router.get("/me", getSession);
 

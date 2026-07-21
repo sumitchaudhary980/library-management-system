@@ -1,6 +1,9 @@
 const cloudinary = require("../config/cloudinary");
 const streamifier = require("streamifier");
 const db = require("../config/db");
+const transporter = require("../config/mail"); 
+const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 
 exports.getDashboardData = (req, res) => {
   try {
@@ -1402,6 +1405,150 @@ exports.getProfile = (req, res) => {
 
     res.status(500).json({
       message: "Failed to load profile",
+    });
+  }
+};
+
+
+//add reader
+exports.createReader = async (req, res) => {
+  try {
+    const {
+      first_name,
+      last_name,
+      gender,
+      email,
+      phone,
+      address,
+    } = req.body;
+
+    const errors = {};
+
+    if (!first_name?.trim())
+      errors.first_name = "First name is required";
+
+    if (!last_name?.trim())
+      errors.last_name = "Last name is required";
+
+    if (!["male", "female", "other"].includes(gender))
+      errors.gender = "Invalid gender";
+
+    if (!email?.trim()) {
+      errors.email = "Email is required";
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!emailRegex.test(email.trim())) {
+        errors.email = "Invalid email address";
+      }
+    }
+
+    if (phone && !/^[0-9+\-\s()]{7,20}$/.test(phone.trim())) {
+      errors.phone = "Invalid phone number";
+    }
+
+    if (Object.keys(errors).length) {
+      return res.status(400).json({ errors });
+    }
+
+    const existing = db
+      .prepare(
+        `
+        SELECT id
+        FROM users
+        WHERE email = ?
+           OR phone = ?
+      `
+      )
+      .get(email.trim(), phone || null);
+
+    if (existing) {
+      return res.status(400).json({
+        message: "Email or phone already exists",
+      });
+    }
+
+    // Generate temporary password
+    const temporaryPassword = crypto.randomBytes(4).toString("hex");
+
+    const hashedPassword = await bcrypt.hash(
+      temporaryPassword,
+      10
+    );
+
+    db.prepare(
+      `
+      INSERT INTO users (
+        first_name,
+        last_name,
+        gender,
+        email,
+        phone,
+        password,
+        role,
+        status,
+       must_change_password,
+        address
+      )
+      VALUES (
+        ?, ?, ?, ?, ?, ?,
+        'reader',
+        'active',
+        1,
+        ?
+      )
+    `
+    ).run(
+      first_name.trim(),
+      last_name.trim(),
+      gender,
+      email.trim(),
+      phone?.trim() || null,
+      hashedPassword,
+      address?.trim() || null
+    );
+
+    await transporter.sendMail({
+      to: email.trim(),
+      subject: "Welcome to Kaiser Library",
+      html: `
+        <h2>Welcome to Kaiser Library</h2>
+
+        <p>Hello <strong>${first_name}</strong>,</p>
+
+        <p>Your library account has been created by the administrator.</p>
+
+        <p><strong>Email:</strong> ${email}</p>
+
+        <p><strong>Temporary Password:</strong></p>
+
+        <h2 style="letter-spacing:2px;">${temporaryPassword}</h2>
+
+        <p>
+          For security reasons, you must change this password the first
+          time you log in.
+        </p>
+
+        <p>
+          If you did not expect this email, please contact the library.
+        </p>
+
+        <br>
+
+        <p>Regards,</p>
+        <p><strong>Kaiser Library</strong></p>
+      `,
+    });
+
+    res.status(201).json({
+      message:
+        "Reader created successfully. Temporary password has been emailed.",
+    });
+  } catch (err) {
+    console.error("Create reader error:", err);
+
+    res.status(500).json({
+      message: "Failed to create reader",
     });
   }
 };

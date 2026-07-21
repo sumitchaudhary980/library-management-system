@@ -43,6 +43,7 @@ router.put("/return-book/:id", requireAdmin,adminController.returnBook);
 // READERS
 router.get("/readers", requireAdmin, adminController.getReaders);
 router.put("/readers/:id/status",requireAdmin, adminController.toggleReaderStatus);
+router.post("/readers", requireAdmin, adminController.createReader);
 // PROFILE
 router.get("/profile", requireAdmin, adminController.getProfile);
 router.put("/profile", requireAdmin, upload.single("profileImage"), adminController.updateProfile);
