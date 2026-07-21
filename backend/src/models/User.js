@@ -32,6 +32,17 @@ const createUserTable = () => {
       ADD COLUMN status TEXT NOT NULL DEFAULT 'active';
     `);
   }
+  // Add must_change_password column to existing databases
+  const hasMustChangePassword = columns.some(
+    (column) => column.name === "must_change_password"
+  );
+
+  if (!hasMustChangePassword) {
+    db.exec(`
+    ALTER TABLE users
+    ADD COLUMN must_change_password INTEGER NOT NULL DEFAULT 1;
+  `);
+  }
 
   db.exec(`
     CREATE TRIGGER IF NOT EXISTS update_users_updated_at
