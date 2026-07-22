@@ -2,6 +2,23 @@ const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const db = require("../config/db");
 const transporter = require("../config/mail");
+function hashToken(token) {
+  return crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+}
+
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
@@ -184,99 +201,230 @@ exports.changePassword = async (req, res) => {
 
 exports.forgotPassword = async (req, res) => {
   try {
-    if (typeof req.body.email !== "string") {
+
+    let { email } = req.body;
+
+
+    // ===============================
+    // Email validation
+    // ===============================
+
+    if (
+      !email ||
+      typeof email !== "string" ||
+      Array.isArray(email)
+    ) {
+
       return res.status(400).json({
         errors: {
           email: "Enter a valid email address",
         },
       });
+
     }
 
-    const email = req.body.email.trim().toLowerCase();
+
+    email = email.trim().toLowerCase();
+
 
     const errors = {};
 
+
     if (!email) {
+
       errors.email = "Email is required";
-    } else {
+
+    }
+    else {
+
+
       const emailRegex =
         /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
 
+
+
       if (!emailRegex.test(email)) {
-        errors.email = "Enter a valid email address";
+
+        errors.email =
+          "Enter a valid email address";
+
       }
 
-      // Reject multiple recipients / header injection
+
+
+      // Prevent email header injection
       if (
         email.includes(",") ||
         email.includes(";") ||
         email.includes("\n") ||
         email.includes("\r")
       ) {
-        errors.email = "Enter a valid email address";
+
+        errors.email =
+          "Enter a valid email address";
+
       }
+
+
+
+      if (email.length > 254) {
+
+        errors.email =
+          "Email is too long";
+
+      }
+
     }
+
+
 
     if (Object.keys(errors).length) {
-      return res.status(400).json({ errors });
+
+      return res.status(400).json({
+        errors,
+      });
+
     }
 
-    const user = db
-      .prepare(`
-        SELECT id, first_name, email, reset_token, reset_token_expires FROM users WHERE email = ?
-      `).get(email);
 
-    // Always return same response
+
+    // ===============================
+    // Find user
+    // ===============================
+
+
+    const user = db.prepare(`
+      SELECT
+        id,
+        first_name,
+        email,
+        reset_token_expires
+
+      FROM users
+
+      WHERE email = ?
+    `).get(email);
+
+
+
+
+    // Prevent account enumeration
     if (!user) {
+
       return res.json({
+
         message:
           "If an account exists, a password reset link has been sent.",
+
       });
+
     }
 
-    // Prevent repeated reset emails within 60 seconds
-    if (user.reset_token_expires) {
-      const expiresAt = new Date(user.reset_token_expires).getTime();
 
-      // Token lifetime = 30 minutes
-      // Remaining > 29 minutes means it was created less than 1 minute ago
-      if (expiresAt - Date.now() > 29 * 60 * 1000) {
+
+
+    // ===============================
+    // Prevent reset spam
+    // ===============================
+
+
+    if (user.reset_token_expires) {
+
+      const expiresAt =
+        new Date(
+          user.reset_token_expires
+        ).getTime();
+
+
+
+      // Existing token created within last minute
+      if (
+        expiresAt - Date.now()
+        >
+        29 * 60 * 1000
+      ) {
+
         return res.json({
+
           message:
             "If an account exists, a password reset link has been sent.",
+
         });
+
       }
+
     }
 
-    let token = user.reset_token;
 
-    const expired =
-      !user.reset_token ||
-      !user.reset_token_expires ||
-      new Date(user.reset_token_expires).getTime() <= Date.now();
 
-    if (expired) {
-      token = crypto.randomBytes(32).toString("hex");
 
-      const expires = new Date(
+    // ===============================
+    // Generate token
+    // ===============================
+
+
+    const rawToken =
+      crypto.randomBytes(32).toString("hex");
+
+
+
+    const hashedToken =
+      hashToken(rawToken);
+
+
+
+    const expires =
+      new Date(
         Date.now() + 30 * 60 * 1000
       ).toISOString();
 
-      db.prepare(`
-    UPDATE users
-    SET
-      reset_token = ?,
-      reset_token_expires = ?
-    WHERE id = ?
-  `).run(token, expires, user.id);
-    }
+
+
+
+
+    // Store HASH only
+    db.prepare(`
+      UPDATE users
+
+      SET
+        reset_token = ?,
+        reset_token_expires = ?
+
+      WHERE id = ?
+
+    `).run(
+      hashedToken,
+      expires,
+      user.id
+    );
+
+
+
+
 
     const resetLink =
-      `${process.env.APP_URL}/reset-password?token=${token}`;
+      `${process.env.APP_URL}/reset-password?token=${rawToken}`;
+
+
+
+
+
+    const safeName =
+      escapeHtml(user.first_name);
+
+
+
+
 
     await transporter.sendMail({
+
       to: user.email,
-      subject: "Reset Your Kaiser Library Password",
+
+
+      subject:
+        "Reset Your Kaiser Library Password",
+
+
       html: `
 <!DOCTYPE html>
 <html lang="en">
@@ -313,6 +461,7 @@ exports.forgotPassword = async (req, res) => {
                 padding:40px;
               "
             >
+
               <h1 style="margin:0;font-size:30px;">
                 📚 Kaiser Library
               </h1>
@@ -320,12 +469,15 @@ exports.forgotPassword = async (req, res) => {
               <p style="margin-top:12px;font-size:16px;">
                 Password Reset Request
               </p>
+
             </td>
           </tr>
+
 
           <!-- Content -->
           <tr>
             <td style="padding:40px;">
+
 
               <h2
                 style="
@@ -336,16 +488,7 @@ exports.forgotPassword = async (req, res) => {
                 Hello ${user.first_name},
               </h2>
 
-              <p
-                style="
-                  color:#555;
-                  font-size:15px;
-                  line-height:1.8;
-                "
-              >
-                We received a request to reset the password for your
-                <strong>Kaiser Library</strong> account.
-              </p>
+
 
               <p
                 style="
@@ -354,10 +497,30 @@ exports.forgotPassword = async (req, res) => {
                   line-height:1.8;
                 "
               >
+
+                We received a request to reset the password for your
+                <strong>Kaiser Library</strong> account.
+
+              </p>
+
+
+
+              <p
+                style="
+                  color:#555;
+                  font-size:15px;
+                  line-height:1.8;
+                "
+              >
+
                 Click the button below to securely create a new password.
                 This password reset link will remain valid for
                 <strong>30 minutes</strong>.
+
               </p>
+
+
+
 
               <div
                 style="
@@ -382,7 +545,12 @@ exports.forgotPassword = async (req, res) => {
                   Reset Your Password
                 </a>
 
+
               </div>
+
+
+
+
 
               <div
                 style="
@@ -398,6 +566,7 @@ exports.forgotPassword = async (req, res) => {
                   ⚠ Security Notice
                 </strong>
 
+
                 <p
                   style="
                     margin-top:10px;
@@ -405,15 +574,20 @@ exports.forgotPassword = async (req, res) => {
                     line-height:1.7;
                   "
                 >
+
                   If you didn't request this password reset, you can safely
                   ignore this email. Your password will remain unchanged.
                   This reset link will automatically expire after
                   <strong>30 minutes</strong>.
+
                 </p>
+
 
               </div>
 
-              
+
+
+
 
               <p
                 style="
@@ -421,11 +595,16 @@ exports.forgotPassword = async (req, res) => {
                   line-height:1.8;
                 "
               >
+
                 If the button above doesn't work, copy and paste the following
                 link into your browser:
+
               </p>
 
+
+
               <p style="word-break:break-word;">
+
                 <a
                   href="${resetLink}"
                   style="
@@ -434,9 +613,16 @@ exports.forgotPassword = async (req, res) => {
                     font-weight:600;
                   "
                 >
+
                   ${resetLink}
+
                 </a>
+
               </p>
+
+
+
+
 
               <hr
                 style="
@@ -446,7 +632,9 @@ exports.forgotPassword = async (req, res) => {
                 "
               >
 
-              
+
+
+
 
               <p
                 style="
@@ -454,15 +642,26 @@ exports.forgotPassword = async (req, res) => {
                   color:#555;
                 "
               >
+
                 Regards,<br>
+
                 <strong>Kaiser Library Team</strong>
+
               </p>
+
+
 
             </td>
           </tr>
 
+
+
+
+
           <!-- Footer -->
+
           <tr>
+
             <td
               align="center"
               style="
@@ -472,9 +671,14 @@ exports.forgotPassword = async (req, res) => {
                 font-size:13px;
               "
             >
+
               © ${new Date().getFullYear()} Kaiser Library. All Rights Reserved.
+
             </td>
+
           </tr>
+
+
 
         </table>
 
@@ -482,26 +686,48 @@ exports.forgotPassword = async (req, res) => {
     </tr>
   </table>
 
+
 </body>
 </html>
 `,
+
     });
+
+
+
+
 
     return res.json({
+
       message:
         "If an account exists, a password reset link has been sent.",
+
     });
-  } catch (err) {
-    console.error("Forgot password error:", err);
+
+
+
+  }
+  catch (err) {
+
+
+    console.error(
+      "Forgot password error:",
+      err
+    );
+
 
     return res.status(500).json({
-      message: "Server error",
+
+      message:
+        "Server error",
+
     });
+
+
   }
+
 };
-
 exports.resetPassword = async (req, res) => {
-
 
   try {
 
@@ -515,6 +741,10 @@ exports.resetPassword = async (req, res) => {
 
 
 
+    // ===============================
+    // Validate token exists
+    // ===============================
+
     if (!token) {
 
       return res.status(400).json({
@@ -524,6 +754,10 @@ exports.resetPassword = async (req, res) => {
     }
 
 
+
+    // ===============================
+    // Validate password fields
+    // ===============================
 
     if (!password || !confirmPassword) {
 
@@ -555,9 +789,27 @@ exports.resetPassword = async (req, res) => {
 
 
 
+
+    // ===============================
+    // Hash incoming token
+    // ===============================
+
+    const tokenHash = crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
+
+
+
+
+
+    // ===============================
+    // Find user using hashed token
+    // ===============================
+
     const user = db.prepare(`
 
-      SELECT 
+      SELECT
         id,
         reset_token_expires
 
@@ -565,23 +817,36 @@ exports.resetPassword = async (req, res) => {
 
       WHERE reset_token = ?
 
-    `).get(token);
+    `).get(tokenHash);
+
+
 
 
 
     if (!user) {
 
       return res.status(400).json({
-        message: "Invalid or expired reset link."
+
+        message:
+          "Invalid or expired reset link."
+
       });
 
     }
 
 
 
+
+
+    // ===============================
+    // Check token expiry
+    // ===============================
+
     const expired =
       !user.reset_token_expires ||
       new Date(user.reset_token_expires).getTime() <= Date.now();
+
+
 
 
 
@@ -592,7 +857,7 @@ exports.resetPassword = async (req, res) => {
 
         UPDATE users
 
-        SET 
+        SET
           reset_token = NULL,
           reset_token_expires = NULL
 
@@ -614,9 +879,23 @@ exports.resetPassword = async (req, res) => {
 
 
 
+
+
+    // ===============================
+    // Hash new password
+    // ===============================
+
     const hashedPassword =
       await bcrypt.hash(password, 10);
 
+
+
+
+
+
+    // ===============================
+    // Update password and remove token
+    // ===============================
 
     db.prepare(`
 
@@ -638,10 +917,12 @@ exports.resetPassword = async (req, res) => {
       WHERE id = ?
 
     `)
-    .run(
-      hashedPassword,
-      user.id
-    );
+      .run(
+        hashedPassword,
+        user.id
+      );
+
+
 
 
 
@@ -655,13 +936,17 @@ exports.resetPassword = async (req, res) => {
 
 
 
+
+
   }
-  catch(error){
+  catch (error) {
+
 
     console.error(
       "Reset password error:",
       error
     );
+
 
 
     return res.status(500).json({
@@ -670,6 +955,7 @@ exports.resetPassword = async (req, res) => {
         "Server error."
 
     });
+
 
   }
 

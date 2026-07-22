@@ -5,7 +5,7 @@ const { requireAdmin, requireReader } = require("../middleware/authMiddleware");
 const router = express.Router();
 const frontendPath = path.join(__dirname, "../../../frontend");
 const db = require("../config/db");
-
+const crypto = require("crypto");
 router.get("/", (req, res) => {
   res.sendFile(path.join(frontendPath, "index.html"));
 });
@@ -226,11 +226,17 @@ router.get("/reset-password", (req, res) => {
   }
 
 
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(token)
+    .digest("hex");
+
+
   const user = db.prepare(`
     SELECT id, reset_token_expires
     FROM users
     WHERE reset_token = ?
-  `).get(token);
+  `).get(hashedToken);
 
 
 
@@ -248,15 +254,19 @@ router.get("/reset-password", (req, res) => {
 
   if (expired) {
 
+
     db.prepare(`
       UPDATE users
-      SET reset_token = NULL,
-          reset_token_expires = NULL
+      SET
+        reset_token = NULL,
+        reset_token_expires = NULL
       WHERE id = ?
     `).run(user.id);
 
 
+
     return res.redirect("/forgot-password?error=expired");
+
   }
 
 
@@ -267,6 +277,7 @@ router.get("/reset-password", (req, res) => {
       "auth/reset-password.html"
     )
   );
+
 
 });
 
