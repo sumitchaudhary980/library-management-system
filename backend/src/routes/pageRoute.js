@@ -4,6 +4,7 @@ const { requireAdmin, requireReader } = require("../middleware/authMiddleware");
 // const deviceGate = require("../middleware/deviceGate");
 const router = express.Router();
 const frontendPath = path.join(__dirname, "../../../frontend");
+const db = require("../config/db");
 
 router.get("/", (req, res) => {
   res.sendFile(path.join(frontendPath, "index.html"));
@@ -207,10 +208,66 @@ router.get("/change-password", (req, res) => {
   );
 });
 
+
 router.get("/forgot-password", (req, res) => {
   res.sendFile(
     path.join(frontendPath, "auth/forgot-password.html")
   );
+});
+
+
+router.get("/reset-password", (req, res) => {
+
+  const { token } = req.query;
+
+
+  if (!token) {
+    return res.redirect("/forgot-password?error=invalid");
+  }
+
+
+  const user = db.prepare(`
+    SELECT id, reset_token_expires
+    FROM users
+    WHERE reset_token = ?
+  `).get(token);
+
+
+
+  if (!user) {
+    return res.redirect("/forgot-password?error=expired");
+  }
+
+
+
+  const expired =
+    !user.reset_token_expires ||
+    new Date(user.reset_token_expires).getTime() <= Date.now();
+
+
+
+  if (expired) {
+
+    db.prepare(`
+      UPDATE users
+      SET reset_token = NULL,
+          reset_token_expires = NULL
+      WHERE id = ?
+    `).run(user.id);
+
+
+    return res.redirect("/forgot-password?error=expired");
+  }
+
+
+
+  res.sendFile(
+    path.join(
+      frontendPath,
+      "auth/reset-password.html"
+    )
+  );
+
 });
 
 module.exports = router;

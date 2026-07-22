@@ -14,7 +14,7 @@ function showToast(message, type = "error") {
 
 const name = document.getElementById("name");
 const biography = document.getElementById("biography");
-
+const submitBtn = document.getElementById("submitBtn");
 
 let submitted = false;
 

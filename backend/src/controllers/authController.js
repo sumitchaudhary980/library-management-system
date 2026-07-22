@@ -500,6 +500,181 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
+exports.resetPassword = async (req, res) => {
+
+
+  try {
+
+    const {
+      password,
+      confirmPassword
+    } = req.body;
+
+
+    const { token } = req.query;
+
+
+
+    if (!token) {
+
+      return res.status(400).json({
+        message: "Invalid password reset link."
+      });
+
+    }
+
+
+
+    if (!password || !confirmPassword) {
+
+      return res.status(400).json({
+        message: "Password fields are required."
+      });
+
+    }
+
+
+
+    if (password !== confirmPassword) {
+
+      return res.status(400).json({
+        message: "Passwords do not match."
+      });
+
+    }
+
+
+
+    if (password.length < 8) {
+
+      return res.status(400).json({
+        message: "Password must be at least 8 characters."
+      });
+
+    }
+
+
+
+    const user = db.prepare(`
+
+      SELECT 
+        id,
+        reset_token_expires
+
+      FROM users
+
+      WHERE reset_token = ?
+
+    `).get(token);
+
+
+
+    if (!user) {
+
+      return res.status(400).json({
+        message: "Invalid or expired reset link."
+      });
+
+    }
+
+
+
+    const expired =
+      !user.reset_token_expires ||
+      new Date(user.reset_token_expires).getTime() <= Date.now();
+
+
+
+    if (expired) {
+
+
+      db.prepare(`
+
+        UPDATE users
+
+        SET 
+          reset_token = NULL,
+          reset_token_expires = NULL
+
+        WHERE id = ?
+
+      `).run(user.id);
+
+
+
+      return res.status(400).json({
+
+        message:
+          "Your password reset link has expired. Please request a new one."
+
+      });
+
+    }
+
+
+
+
+    const hashedPassword =
+      await bcrypt.hash(password, 10);
+
+
+    db.prepare(`
+
+      UPDATE users
+
+      SET
+
+        password = ?,
+
+        reset_token = NULL,
+
+        reset_token_expires = NULL,
+
+        must_change_password = 0,
+
+        updated_at = CURRENT_TIMESTAMP
+
+
+      WHERE id = ?
+
+    `)
+    .run(
+      hashedPassword,
+      user.id
+    );
+
+
+
+
+    return res.json({
+
+      message:
+        "Password reset successfully."
+
+    });
+
+
+
+  }
+  catch(error){
+
+    console.error(
+      "Reset password error:",
+      error
+    );
+
+
+    return res.status(500).json({
+
+      message:
+        "Server error."
+
+    });
+
+  }
+
+};
+
 exports.logout = (req, res) => {
   req.session.destroy((err) => {
     if (err) {
