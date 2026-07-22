@@ -1,7 +1,8 @@
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
 const db = require("../config/db");
-
-const login = async (req, res) => {
+const transporter = require("../config/mail");
+exports.login = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -59,7 +60,6 @@ const login = async (req, res) => {
           });
         }
 
-        // Temporary session
         req.session.passwordReset = {
           id: user.id,
           email: user.email,
@@ -78,7 +78,6 @@ const login = async (req, res) => {
       reader: "/home",
     };
 
-    // Normal login session
     req.session.regenerate((err) => {
       if (err) {
         return res.status(500).json({
@@ -109,11 +108,10 @@ const login = async (req, res) => {
   }
 };
 
-const changePassword = async (req, res) => {
+exports.changePassword = async (req, res) => {
   const { password, confirmPassword } = req.body;
 
   try {
-    // Check temporary password session
     if (!req.session.passwordReset) {
       return res.status(401).json({
         message: "Password change session expired. Please login again.",
@@ -138,31 +136,22 @@ const changePassword = async (req, res) => {
       });
     }
 
-
     const userId = req.session.passwordReset.id;
-
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-
     db.prepare(`
       UPDATE users
-      SET 
+      SET
         password = ?,
         must_change_password = 0,
         updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
-    `).run(
-      hashedPassword,
-      userId
-    );
+    `).run(hashedPassword, userId);
 
-
-    // Convert reset session into normal login session
     const user = db
       .prepare("SELECT * FROM users WHERE id = ?")
       .get(userId);
-
 
     req.session.regenerate((err) => {
       if (err) {
@@ -170,7 +159,6 @@ const changePassword = async (req, res) => {
           message: "Session error",
         });
       }
-
 
       req.session.user = {
         id: user.id,
@@ -180,24 +168,364 @@ const changePassword = async (req, res) => {
         role: user.role,
       };
 
-
-      res.json({
+      return res.json({
         message: "Password changed successfully",
         redirect: "/home",
       });
     });
-
-
   } catch (err) {
     console.error("Change password error:", err);
 
-    res.status(500).json({
+    return res.status(500).json({
       message: "Server error",
     });
   }
 };
 
-const logout = (req, res) => {
+exports.forgotPassword = async (req, res) => {
+  try {
+    if (typeof req.body.email !== "string") {
+      return res.status(400).json({
+        errors: {
+          email: "Enter a valid email address",
+        },
+      });
+    }
+
+    const email = req.body.email.trim().toLowerCase();
+
+    const errors = {};
+
+    if (!email) {
+      errors.email = "Email is required";
+    } else {
+      const emailRegex =
+        /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+
+      if (!emailRegex.test(email)) {
+        errors.email = "Enter a valid email address";
+      }
+
+      // Reject multiple recipients / header injection
+      if (
+        email.includes(",") ||
+        email.includes(";") ||
+        email.includes("\n") ||
+        email.includes("\r")
+      ) {
+        errors.email = "Enter a valid email address";
+      }
+    }
+
+    if (Object.keys(errors).length) {
+      return res.status(400).json({ errors });
+    }
+
+    const user = db
+      .prepare(`
+        SELECT id, first_name, email
+        FROM users
+        WHERE email = ?
+      `)
+    .get(email);
+
+    // Always return same response
+    if (!user) {
+      return res.json({
+        message:
+          "If an account exists, a password reset link has been sent.",
+      });
+    }
+
+    const token = crypto.randomBytes(32).toString("hex");
+
+    const expires = new Date(
+      Date.now() + 30 * 60 * 1000
+    ).toISOString();
+
+    db.prepare(`
+      UPDATE users
+      SET
+        reset_token = ?,
+        reset_token_expires = ?
+      WHERE id = ?
+    `).run(token, expires, user.id);
+
+    const resetLink =
+      `${process.env.APP_URL}/reset-password?token=${token}`;
+
+    await transporter.sendMail({
+      to: user.email,
+      subject: "Reset Your Kaiser Library Password",
+      html: `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+</head>
+
+<body style="margin:0;padding:40px 0;background:#f4f6f9;font-family:Arial,Helvetica,sans-serif;">
+
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+      <td align="center">
+
+        <table
+          width="620"
+          cellpadding="0"
+          cellspacing="0"
+          border="0"
+          style="
+            background:#ffffff;
+            border-radius:14px;
+            overflow:hidden;
+            box-shadow:0 8px 30px rgba(0,0,0,.08);
+          "
+        >
+
+          <!-- Header -->
+          <tr>
+            <td
+              align="center"
+              style="
+                background:linear-gradient(135deg,#123458,#1e5a92);
+                color:#ffffff;
+                padding:40px;
+              "
+            >
+              <h1 style="margin:0;font-size:30px;">
+                📚 Kaiser Library
+              </h1>
+
+              <p style="margin-top:12px;font-size:16px;">
+                Password Reset Request
+              </p>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td style="padding:40px;">
+
+              <h2
+                style="
+                  margin-top:0;
+                  color:#123458;
+                "
+              >
+                Hello ${user.first_name},
+              </h2>
+
+              <p
+                style="
+                  color:#555;
+                  font-size:15px;
+                  line-height:1.8;
+                "
+              >
+                We received a request to reset the password for your
+                <strong>Kaiser Library</strong> account.
+              </p>
+
+              <p
+                style="
+                  color:#555;
+                  font-size:15px;
+                  line-height:1.8;
+                "
+              >
+                Click the button below to securely create a new password.
+                This password reset link will remain valid for
+                <strong>30 minutes</strong>.
+              </p>
+
+              <table
+                width="100%"
+                cellpadding="18"
+                cellspacing="0"
+                border="0"
+                style="
+                  background:#f8fafc;
+                  border:1px solid #e5e7eb;
+                  border-radius:10px;
+                  margin:30px 0;
+                "
+              >
+
+                <tr>
+                  <td align="center">
+
+                    <a
+                      href="${resetLink}"
+                      style="
+                        background:#123458;
+                        color:#ffffff;
+                        text-decoration:none;
+                        padding:15px 35px;
+                        border-radius:8px;
+                        font-weight:bold;
+                        font-size:16px;
+                        display:inline-block;
+                      "
+                    >
+                      Reset Password
+                    </a>
+
+                  </td>
+                </tr>
+
+              </table>
+
+              <div
+                style="
+                  background:#fff8e7;
+                  border-left:5px solid #d4a017;
+                  padding:18px;
+                  border-radius:8px;
+                  margin-bottom:30px;
+                "
+              >
+
+                <strong style="color:#8a6500;">
+                  ⚠ Security Notice
+                </strong>
+
+                <p
+                  style="
+                    margin-top:10px;
+                    color:#555;
+                    line-height:1.7;
+                  "
+                >
+                  If you didn't request this password reset, you can safely
+                  ignore this email. Your password will remain unchanged.
+                  This reset link will automatically expire after
+                  <strong>30 minutes</strong>.
+                </p>
+
+              </div>
+
+              <div
+                style="
+                  text-align:center;
+                  margin:35px 0;
+                "
+              >
+
+                <a
+                  href="${resetLink}"
+                  style="
+                    background:#123458;
+                    color:#ffffff;
+                    text-decoration:none;
+                    padding:15px 35px;
+                    border-radius:8px;
+                    font-weight:bold;
+                    font-size:16px;
+                    display:inline-block;
+                  "
+                >
+                  Reset Your Password
+                </a>
+
+              </div>
+
+              <p
+                style="
+                  color:#555;
+                  line-height:1.8;
+                "
+              >
+                If the button above doesn't work, copy and paste the following
+                link into your browser:
+              </p>
+
+              <p style="word-break:break-word;">
+                <a
+                  href="${resetLink}"
+                  style="
+                    color:#123458;
+                    text-decoration:none;
+                    font-weight:600;
+                  "
+                >
+                  ${resetLink}
+                </a>
+              </p>
+
+              <hr
+                style="
+                  margin:35px 0;
+                  border:none;
+                  border-top:1px solid #eeeeee;
+                "
+              >
+
+              <p
+                style="
+                  color:#777;
+                  font-size:14px;
+                  line-height:1.7;
+                "
+              >
+                For your security, this password reset link is valid for
+                <strong>30 minutes</strong>. After that, you'll need to request
+                a new password reset.
+              </p>
+
+              <p
+                style="
+                  margin-top:30px;
+                  color:#555;
+                "
+              >
+                Regards,<br>
+                <strong>Kaiser Library Team</strong>
+              </p>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td
+              align="center"
+              style="
+                background:#f8fafc;
+                padding:18px;
+                color:#888;
+                font-size:13px;
+              "
+            >
+              © ${new Date().getFullYear()} Kaiser Library. All Rights Reserved.
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
+`,
+    });
+
+    return res.json({
+      message:
+        "If an account exists, a password reset link has been sent.",
+    });
+  } catch (err) {
+    console.error("Forgot password error:", err);
+
+    return res.status(500).json({
+      message: "Server error",
+    });
+  }
+};
+
+exports.logout = (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       return res.status(500).json({
@@ -213,7 +541,7 @@ const logout = (req, res) => {
   });
 };
 
-const getSession = (req, res) => {
+exports.getSession = (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({
       message: "Not authenticated",
@@ -223,12 +551,4 @@ const getSession = (req, res) => {
   res.json({
     user: req.session.user,
   });
-};
-
-
-module.exports = {
-  login,
-  logout,
-  getSession,
-  changePassword,
 };

@@ -209,7 +209,7 @@ router.get("/change-password", (req, res) => {
 
 router.get("/forgot-password", (req, res) => {
   res.sendFile(
-    path.join(frontendPath, "forgot-password.html")
+    path.join(frontendPath, "auth/forgot-password.html")
   );
 });
 

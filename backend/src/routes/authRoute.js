@@ -4,28 +4,13 @@ const { requireAdmin } = require("../middleware/authMiddleware");
 const authController = require("../controllers/authController");
 const router = express.Router();
 // routes
-router.post(
-    "/admin/login",
-    (req, res, next) => {
-        req.loginRole = "admin";
-        next();
-    },
-    login
-);
+router.post("/admin/login", (req, res, next) => { req.loginRole = "admin"; next(); }, login);
 
-router.post(
-    "/login",
-    (req, res, next) => {
-        req.loginRole = "reader";
-        next();
-    },
-    login
-);
+router.post("/login", (req, res, next) => { req.loginRole = "reader"; next(); }, login);
 
-router.post(
-  "/change-password",
-  authController.changePassword
-);
+router.post("/change-password", authController.changePassword);
+
+router.post("/forgot-password", authController.forgotPassword);
 
 router.post("/logout", logout);
 router.get("/me", getSession);
