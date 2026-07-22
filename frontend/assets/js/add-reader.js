@@ -23,6 +23,7 @@ const gender = document.getElementById("gender");
 const email = document.getElementById("email");
 const phone = document.getElementById("phone");
 const address = document.getElementById("address");
+const submitBtn = document.getElementById("submitBtn");
 
 let submitted = false;
 
@@ -183,6 +184,8 @@ document
   .addEventListener("submit", async (e) => {
     e.preventDefault();
 
+    if (submitBtn.disabled) return;
+
     submitted = true;
 
     if (!validateForm()) return;
@@ -196,6 +199,7 @@ document
       address: address.value.trim(),
     };
 
+    setButtonLoading(submitBtn, true);
     try {
       const response = await fetch("/api/admin/readers", {
         method: "POST",
@@ -244,5 +248,7 @@ document
     } catch (err) {
       console.error(err);
       showToast("Something went wrong");
+    } finally {
+      setButtonLoading(submitBtn, false);
     }
   });

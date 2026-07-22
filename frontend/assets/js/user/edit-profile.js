@@ -10,6 +10,7 @@ function showToast(message, type = "error") {
 
     Toast.fire({ icon: type, title: message });
 }
+const submitBtn = document.getElementById("submitBtn");
 
 function setError(fieldId, message) {
     const input = document.getElementById(fieldId);
@@ -91,7 +92,9 @@ function validateField(fieldId) {
 // LOAD PROFILE
 async function loadProfile() {
     try {
-        const res = await fetch("/api/user/profile");
+        const res = await fetch("/api/user/profile", {
+            credentials: "include"
+        });
         const data = await res.json();
 
         const user = data.user;
@@ -233,6 +236,10 @@ document.getElementById("profileForm").addEventListener("submit", async function
     // STOP IF INVALID
     if (!valid) return;
 
+    if (submitBtn.disabled) return;
+
+    setButtonLoading(submitBtn, true);
+
     const formData = new FormData();
     formData.append("first_name", first_name.value.trim());
     formData.append("last_name", last_name.value.trim());
@@ -245,6 +252,7 @@ document.getElementById("profileForm").addEventListener("submit", async function
     try {
         const res = await fetch("/api/user/profile", {
             method: "PUT",
+            credentials: "include",
             body: formData,
         });
 
@@ -269,7 +277,16 @@ document.getElementById("profileForm").addEventListener("submit", async function
         }, 800);
 
     } catch (err) {
+
         showToast("Something went wrong");
+
+    } finally {
+
+        setButtonLoading(
+            submitBtn,
+            false
+        );
+
     }
 });
 

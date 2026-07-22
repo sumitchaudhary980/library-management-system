@@ -15,6 +15,7 @@ function showToast(message, type = "error") {
 const name = document.getElementById("name");
 const biography = document.getElementById("biography");
 
+
 let submitted = false;
 
 function setError(input, message) {
@@ -75,35 +76,48 @@ document.getElementById("authorForm").addEventListener("submit", async (e) => {
 
   if (!validateForm()) return;
 
+  if (submitBtn.disabled) return;
+
+  setButtonLoading(submitBtn, true);
+
   try {
     const response = await fetch("/api/admin/authors", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+      },
       credentials: "include",
       body: JSON.stringify({
         name: name.value.trim(),
-        biography: biography.value.trim()
-      })
+        biography: biography.value.trim(),
+      }),
     });
 
     const data = await response.json();
 
     if (response.ok) {
-      showToast("Author added successfully", "success");
+      showToast(data.message || "Author added successfully.", "success");
+
       setTimeout(() => {
         window.location.href = "/authors";
-      }, 1000);
+      }, 1500);
+
       return;
     }
 
     if (data.errors) {
       if (data.errors.name) setError(name, data.errors.name);
-      if (data.errors.biography) setError(biography, data.errors.biography);
+      if (data.errors.biography)
+        setError(biography, data.errors.biography);
     }
 
-    showToast(data.message || "Something went wrong", "error");
+    if (!data.errors) {
+      showToast(data.message || "Something went wrong.", "error");
+    }
   } catch (err) {
-    console.log(err);
-    showToast("Server error", "error");
+    console.error(err);
+    showToast("Server error. Please try again.", "error");
+  } finally {
+    setButtonLoading(submitBtn, false);
   }
 });

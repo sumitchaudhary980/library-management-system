@@ -6,84 +6,173 @@ function showToast(message, type = "error") {
     showCloseButton: true,
     timer: 4000,
     timerProgressBar: true,
-    customClass: { popup: "small-toast" }
+    customClass: {
+      popup: "small-toast",
+    },
   });
 
-  Toast.fire({ icon: type, title: message });
+  Toast.fire({
+    icon: type,
+    title: message,
+  });
 }
 
-const name = document.getElementById("name");
+
+const nameInput = document.getElementById("name");
+const submitBtn = document.getElementById("submitBtn");
 
 let submitted = false;
+
+
+/* ---------- Error Handling ---------- */
 
 function setError(input, message) {
   input.classList.add("is-invalid");
 
-  const feedback = input.parentElement.querySelector(".invalid-feedback");
-  if (feedback) feedback.textContent = message;
+  const feedback =
+    input.parentElement.querySelector(".invalid-feedback");
+
+  if (feedback) {
+    feedback.textContent = message;
+  }
 }
+
 
 function clearError(input) {
   input.classList.remove("is-invalid");
 
-  const feedback = input.parentElement.querySelector(".invalid-feedback");
+  const feedback =
+    input.parentElement.querySelector(".invalid-feedback");
+
   if (feedback) {
-    const def = feedback.getAttribute("data-default");
-    feedback.textContent = def || "";
+    feedback.textContent =
+      feedback.getAttribute("data-default") || "";
   }
 }
 
+
+function clearErrors() {
+  document
+    .querySelectorAll(".is-invalid")
+    .forEach((el) => {
+      el.classList.remove("is-invalid");
+    });
+
+  document
+    .querySelectorAll(".invalid-feedback")
+    .forEach((el) => {
+      const def = el.getAttribute("data-default");
+
+      if (def) {
+        el.textContent = def;
+      }
+    });
+}
+
+
+
+/* ---------- Validation ---------- */
+
 function validateName() {
-  if (!name.value.trim()) {
-    setError(name, "Genre name is required");
+  if (!nameInput.value.trim()) {
+    setError(nameInput, "Genre name is required");
     return false;
   }
 
-  clearError(name);
+  clearError(nameInput);
   return true;
 }
 
-// LIVE VALIDATION — only kicks in after the first submit attempt
-name.addEventListener("input", () => {
-  if (submitted) validateName();
-});
-name.addEventListener("blur", () => {
-  if (submitted) validateName();
+
+function validateForm() {
+  clearErrors();
+
+  return validateName();
+}
+
+
+
+/* ---------- Live Validation ---------- */
+
+nameInput.addEventListener("input", () => {
+  if (submitted) {
+    validateName();
+  }
 });
 
+
+nameInput.addEventListener("blur", () => {
+  if (submitted) {
+    validateName();
+  }
+});
 document.getElementById("genreForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   submitted = true;
 
-  if (!validateName()) return;
+  if (!validateForm()) return;
+
+  if (submitBtn.disabled) return;
+
+  setButtonLoading(submitBtn, true);
 
   try {
+
     const response = await fetch("/api/admin/genres", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
-        name: name.value.trim()
-      })
+        name: nameInput.value.trim(),
+      }),
     });
 
     const data = await response.json();
 
     if (response.ok) {
-      showToast("Genre added successfully", "success");
+      showToast(
+        data.message || "Genre added successfully.",
+        "success"
+      );
 
       setTimeout(() => {
         window.location.href = "/genres";
-      }, 1000);
+      }, 1500);
+
       return;
     }
 
-    if (data.errors?.name) setError(name, data.errors.name);
+    clearErrors();
 
-    showToast(data.message || "Something went wrong", "error");
+    if (data.errors?.name) {
+      setError(nameInput, data.errors.name);
+    }
+
+    if (!data.errors) {
+      showToast(
+        data.message || "Something went wrong.",
+        "error"
+      );
+    }
+
   } catch (err) {
-    console.log(err);
-    showToast("Server error", "error");
+
+    console.error(err);
+
+    showToast(
+      "Server error. Please try again.",
+      "error"
+    );
+
+  } finally {
+
+    setButtonLoading(
+      submitBtn,
+      false
+    );
+
   }
 });

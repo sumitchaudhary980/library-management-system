@@ -1,6 +1,7 @@
 const authorId = window.location.pathname.split("/").pop();
 const nameInput = document.getElementById("name");
 const biographyInput = document.getElementById("biography");
+const submitBtn = document.getElementById("submitBtn");
 
 let submitted = false;
 
@@ -97,11 +98,15 @@ document.getElementById("authorForm").addEventListener("submit", async (e) => {
     submitted = true;
 
     if (!validateForm()) return;
+    if (submitBtn.disabled) return;
+    setButtonLoading(submitBtn, true);
 
     try {
         const response = await fetch(`/api/admin/authors/${authorId}`, {
             method: "PUT",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json"
+            },
             credentials: "include",
             body: JSON.stringify({
                 name: nameInput.value.trim(),
@@ -112,21 +117,30 @@ document.getElementById("authorForm").addEventListener("submit", async (e) => {
         const data = await response.json();
 
         if (response.ok) {
-            sweetToast("Author updated successfully", "success");
+            sweetToast(data.message || "Author updated successfully", "success");
+
             setTimeout(() => {
                 window.location.href = "/authors";
-            }, 1000);
+            }, 1500);
+
             return;
         }
 
         if (data.errors) {
-            if (data.errors.name) setError(nameInput, data.errors.name);
-            if (data.errors.biography) setError(biographyInput, data.errors.biography);
+            if (data.errors.name)
+                setError(nameInput, data.errors.name);
+
+            if (data.errors.biography)
+                setError(biographyInput, data.errors.biography);
         }
 
-        sweetToast(data.message || "Failed to update author", "error");
+        if (!data.errors) {
+            sweetToast(data.message || "Failed to update author", "error");
+        }
     } catch (err) {
         console.log(err);
         sweetToast("Server error", "error");
+    } finally {
+        setButtonLoading(submitBtn, false);
     }
 });

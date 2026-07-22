@@ -15,6 +15,7 @@ function showToast(message, type = "error") {
   });
 }
 
+
 const title = document.getElementById("title");
 
 const authorSearch = document.getElementById("authorSearch");
@@ -32,7 +33,7 @@ const coverPreview = document.getElementById("coverPreview");
 const removeCoverBtn = document.getElementById("removeCoverBtn");
 
 const bookForm = document.getElementById("bookForm");
-
+const submitBtn = document.getElementById("submitBtn");
 const bookId = window.location.pathname.split("/").pop();
 
 let authors = [];
@@ -204,8 +205,14 @@ async function loadBook() {
   });
 
   if (!res.ok) {
-    showToast("Book not found");
-    setTimeout(() => (location.href = "/books"), 1000);
+    const data = await res.json();
+
+    showToast(data.message || "Book not found.", "error");
+
+    setTimeout(() => {
+      location.href = "/books";
+    }, 1500);
+
     return;
   }
 
@@ -253,7 +260,7 @@ removeCoverBtn.addEventListener("click", () => {
 
 bookForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-
+  if (submitBtn.disabled) return;
   clearErrors();
 
   const validFlags = [
@@ -277,29 +284,54 @@ bookForm.addEventListener("submit", async (e) => {
   if (cover.files.length) {
     formData.append("cover", cover.files[0]);
   }
+  setButtonLoading(submitBtn, true);
+  try {
+    const res = await fetch(`/api/admin/books/${bookId}`, {
+      method: "PUT",
+      credentials: "include",
+      body: formData,
+    });
 
-  const res = await fetch(`/api/admin/books/${bookId}`, {
-    method: "PUT",
-    credentials: "include",
-    body: formData,
-  });
+    const data = await res.json();
 
-  const data = await res.json();
+    if (res.ok) {
+      showToast(data.message || "Book updated successfully.", "success");
 
-  if (res.ok) {
-    showToast("Book updated successfully", "success");
-    setTimeout(() => (location.href = "/books"), 1000);
-    return;
-  }
+      setTimeout(() => {
+        location.href = "/books";
+      }, 1200);
 
-  if (data.errors) {
-    if (data.errors.title) setError(title, data.errors.title);
-    if (data.errors.authorId) setError(authorSearch, data.errors.authorId);
-    if (data.errors.genreId) setError(genreSearch, data.errors.genreId);
-    if (data.errors.stock) setError(stock, data.errors.stock);
-    if (data.errors.cover) setError(cover, data.errors.cover);
-  } else {
-    showToast(data.message || "Failed to update book");
+      return;
+    }
+
+    clearErrors();
+
+    if (data.errors?.title)
+      setError(title, data.errors.title);
+
+    if (data.errors?.authorId)
+      setError(authorSearch, data.errors.authorId);
+
+    if (data.errors?.genreId)
+      setError(genreSearch, data.errors.genreId);
+
+    if (data.errors?.stock)
+      setError(stock, data.errors.stock);
+
+    if (data.errors?.cover)
+      setError(cover, data.errors.cover);
+
+    if (!data.errors) {
+      showToast(data.message || "Something went wrong.", "error");
+    }
+  } catch (err) {
+    console.error(err);
+    showToast(
+      "An error occurred while updating the book. Please try again.",
+      "error"
+    );
+  } finally {
+    setButtonLoading(submitBtn, false);
   }
 });
 

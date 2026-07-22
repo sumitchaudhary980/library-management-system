@@ -25,8 +25,24 @@
   </head>
 
   <body class="dashboard-body">
+    <div
+      class="mobile-header d-lg-none bg-white border-bottom px-3 py-2 d-flex align-items-center justify-content-between fixed-top"
+    >
+      <a class="navbar-brand font-serif fw-bold m-0 fs-4" href="/home">
+        <i class="fas fa-book-open brand-icon me-2"></i>
+        Kaiser Library
+      </a>
+
+      <button
+        class="btn btn-outline-dark border-0 p-2"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#sidebarCollapse"
+      >
+        <i class="fas fa-bars fa-lg"></i>
+      </button>
+    </div>
     <div class="dashboard-wrapper">
-      <!-- SAME SIDEBAR AS AUTHOR (UNCHANGED) -->
       <aside class="admin-sidebar collapse d-lg-flex" id="sidebarCollapse">
         <div class="sidebar-header d-none d-lg-flex">
           <a class="sidebar-brand font-serif fw-bold" href="/dashboard">
@@ -117,7 +133,7 @@
               <p class="text-muted small mb-0">Create a new genre.</p>
             </div>
 
-            <a href="/genres" class="btn text-white author-submit-btn">
+            <a href="/genres" class="author-submit-btn">
               <i class="fas fa-arrow-left me-2"></i>
               Back to Genre
             </a>
@@ -141,8 +157,18 @@
               </div>
 
               <div class="d-flex gap-2">
-                <button type="submit" class="btn text-white author-submit-btn">
-                  Save Genre
+                <button
+                  type="submit"
+                  id="submitBtn"
+                  class="author-submit-btn"
+                  data-text="Save Genre"
+                  data-loading-text="Saving..."
+                  data-icon='<i class="fas fa-tags ms-2"></i>'
+                >
+                  <span id="btnText">Save Genre</span>
+                  <span id="btnIcon">
+                    <i class="fas fa-tags ms-2"></i>
+                  </span>
                 </button>
 
                 <a href="/genres" class="btn btn-light author-cancel-btn">
@@ -154,10 +180,12 @@
         </div>
       </main>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script src="/assets/js/auth/auth.js"></script>
+    <script src="/assets/js/button-loading.js"></script>
     <script src="/assets/js/add-genre.js"></script>
   </body>
 </html>

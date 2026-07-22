@@ -27,6 +27,9 @@ const genreSuggestions = document.getElementById("genreSuggestions");
 const stock = document.getElementById("stock");
 const cover = document.getElementById("cover");
 
+const submitBtn = document.getElementById("submitBtn");
+
+
 let authors = [];
 let genres = [];
 
@@ -231,6 +234,8 @@ document.addEventListener("click", (e) => {
 document.getElementById("bookForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
+  if (submitBtn.disabled) return;
+
   submitted = true;
 
   if (!validateForm()) return;
@@ -242,26 +247,38 @@ document.getElementById("bookForm").addEventListener("submit", async (e) => {
   formData.append("stock", stock.value);
   formData.append("cover", cover.files[0]);
 
-  const res = await fetch("/api/admin/books", {
-    method: "POST",
-    credentials: "include",
-    body: formData,
-  });
+  setButtonLoading(submitBtn, true);
+  try {
+    const res = await fetch("/api/admin/books", {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+    });
 
-  const data = await res.json();
+    const data = await res.json();
 
-  if (res.ok) {
-    showToast("Book added successfully", "success");
-    setTimeout(() => (location.href = "/books"), 1000);
-  } else {
-    clearErrors();
+    if (res.ok) {
+      showToast(data.message || "Book added successfully.", "success");
+      setTimeout(() => (location.href = "/books"), 1500);
+    } else {
+      clearErrors();
 
-    if (data.errors?.title) setError(title, data.errors.title);
-    if (data.errors?.authorId) setError(authorSearch, data.errors.authorId);
-    if (data.errors?.genreId) setError(genreSearch, data.errors.genreId);
-    if (data.errors?.stock) setError(stock, data.errors.stock);
-    if (data.errors?.cover) setError(cover, data.errors.cover);
+      if (data.errors?.title) setError(title, data.errors.title);
+      if (data.errors?.authorId) setError(authorSearch, data.errors.authorId);
+      if (data.errors?.genreId) setError(genreSearch, data.errors.genreId);
+      if (data.errors?.stock) setError(stock, data.errors.stock);
+      if (data.errors?.cover) setError(cover, data.errors.cover);
+
+      if (!data.errors) {
+        showToast(data.message || "Something went wrong.", "error");
+      }
+    }
+  } catch (err) {
+    showToast("An error occurred while adding the book. Please try again.", "error");
+  } finally {
+    setButtonLoading(submitBtn, false);
   }
+
 });
 
 loadLookupData();

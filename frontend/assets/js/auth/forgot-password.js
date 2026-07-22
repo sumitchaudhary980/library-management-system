@@ -20,7 +20,33 @@ function showToast(message, type = "error") {
 const email = document.getElementById("email");
 const form = document.getElementById("forgotPasswordForm");
 
+const submitBtn = document.getElementById("submitBtn");
+const btnText = document.getElementById("btnText");
+const btnIcon = document.getElementById("btnIcon");
+
 let submitted = false;
+
+function setLoading(loading) {
+  submitBtn.disabled = loading;
+
+  if (loading) {
+    btnText.textContent = "Sending...";
+
+    btnIcon.innerHTML = `
+      <span
+        class="spinner-border spinner-border-sm ms-2"
+        role="status"
+        aria-hidden="true"
+      ></span>
+    `;
+  } else {
+    btnText.textContent = "Send Reset Link";
+
+    btnIcon.innerHTML = `
+      <i class="fas fa-arrow-right ms-2"></i>
+    `;
+  }
+}
 
 function clearErrors() {
   document.querySelectorAll(".is-invalid").forEach((el) => {
@@ -92,6 +118,8 @@ form.addEventListener("submit", async (e) => {
 
   if (!validateEmail()) return;
 
+  setLoading(true);
+
   try {
     const res = await fetch("/api/auth/forgot-password", {
       method: "POST",
@@ -125,5 +153,7 @@ form.addEventListener("submit", async (e) => {
   } catch (err) {
     console.error(err);
     showToast("Something went wrong. Please try again.", "error");
+  } finally {
+    setLoading(false);
   }
 });

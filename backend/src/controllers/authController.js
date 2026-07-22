@@ -223,11 +223,8 @@ exports.forgotPassword = async (req, res) => {
 
     const user = db
       .prepare(`
-        SELECT id, first_name, email
-        FROM users
-        WHERE email = ?
-      `)
-    .get(email);
+        SELECT id, first_name, email, reset_token, reset_token_expires FROM users WHERE email = ?
+      `).get(email);
 
     // Always return same response
     if (!user) {
@@ -237,19 +234,42 @@ exports.forgotPassword = async (req, res) => {
       });
     }
 
-    const token = crypto.randomBytes(32).toString("hex");
+    // Prevent repeated reset emails within 60 seconds
+    if (user.reset_token_expires) {
+      const expiresAt = new Date(user.reset_token_expires).getTime();
 
-    const expires = new Date(
-      Date.now() + 30 * 60 * 1000
-    ).toISOString();
+      // Token lifetime = 30 minutes
+      // Remaining > 29 minutes means it was created less than 1 minute ago
+      if (expiresAt - Date.now() > 29 * 60 * 1000) {
+        return res.json({
+          message:
+            "If an account exists, a password reset link has been sent.",
+        });
+      }
+    }
 
-    db.prepare(`
-      UPDATE users
-      SET
-        reset_token = ?,
-        reset_token_expires = ?
-      WHERE id = ?
-    `).run(token, expires, user.id);
+    let token = user.reset_token;
+
+    const expired =
+      !user.reset_token ||
+      !user.reset_token_expires ||
+      new Date(user.reset_token_expires).getTime() <= Date.now();
+
+    if (expired) {
+      token = crypto.randomBytes(32).toString("hex");
+
+      const expires = new Date(
+        Date.now() + 30 * 60 * 1000
+      ).toISOString();
+
+      db.prepare(`
+    UPDATE users
+    SET
+      reset_token = ?,
+      reset_token_expires = ?
+    WHERE id = ?
+  `).run(token, expires, user.id);
+    }
 
     const resetLink =
       `${process.env.APP_URL}/reset-password?token=${token}`;
@@ -339,42 +359,30 @@ exports.forgotPassword = async (req, res) => {
                 <strong>30 minutes</strong>.
               </p>
 
-              <table
-                width="100%"
-                cellpadding="18"
-                cellspacing="0"
-                border="0"
+              <div
                 style="
-                  background:#f8fafc;
-                  border:1px solid #e5e7eb;
-                  border-radius:10px;
-                  margin:30px 0;
+                  text-align:center;
+                  margin:35px 0;
                 "
               >
 
-                <tr>
-                  <td align="center">
+                <a
+                  href="${resetLink}"
+                  style="
+                    background:#123458;
+                    color:#ffffff;
+                    text-decoration:none;
+                    padding:15px 35px;
+                    border-radius:8px;
+                    font-weight:bold;
+                    font-size:16px;
+                    display:inline-block;
+                  "
+                >
+                  Reset Your Password
+                </a>
 
-                    <a
-                      href="${resetLink}"
-                      style="
-                        background:#123458;
-                        color:#ffffff;
-                        text-decoration:none;
-                        padding:15px 35px;
-                        border-radius:8px;
-                        font-weight:bold;
-                        font-size:16px;
-                        display:inline-block;
-                      "
-                    >
-                      Reset Password
-                    </a>
-
-                  </td>
-                </tr>
-
-              </table>
+              </div>
 
               <div
                 style="
@@ -405,30 +413,7 @@ exports.forgotPassword = async (req, res) => {
 
               </div>
 
-              <div
-                style="
-                  text-align:center;
-                  margin:35px 0;
-                "
-              >
-
-                <a
-                  href="${resetLink}"
-                  style="
-                    background:#123458;
-                    color:#ffffff;
-                    text-decoration:none;
-                    padding:15px 35px;
-                    border-radius:8px;
-                    font-weight:bold;
-                    font-size:16px;
-                    display:inline-block;
-                  "
-                >
-                  Reset Your Password
-                </a>
-
-              </div>
+              
 
               <p
                 style="
@@ -461,17 +446,7 @@ exports.forgotPassword = async (req, res) => {
                 "
               >
 
-              <p
-                style="
-                  color:#777;
-                  font-size:14px;
-                  line-height:1.7;
-                "
-              >
-                For your security, this password reset link is valid for
-                <strong>30 minutes</strong>. After that, you'll need to request
-                a new password reset.
-              </p>
+              
 
               <p
                 style="

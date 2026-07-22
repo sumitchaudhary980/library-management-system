@@ -321,7 +321,6 @@ body {
   color: #a88544;
 }
 
-
 .back-link {
   color: var(--text-muted);
   font-size: 0.9rem;
@@ -599,7 +598,6 @@ button.menu-item:focus {
   border-color: var(--accent-gold);
 }
 
-
 .biography-box {
   max-width: 420px;
   line-height: 1.6;
@@ -711,14 +709,28 @@ button.menu-item:focus {
 
 .author-submit-btn {
   background-color: var(--primary-dark);
+  color: #fff;
+  border: none;
   border-radius: 10px;
   padding: 12px 24px;
   font-weight: 600;
+  text-decoration: none;
   transition: all 0.3s ease;
+}
+.author-submit-btn,
+.author-submit-btn span,
+.author-submit-btn i {
+  color: #fff !important;
 }
 
 .author-submit-btn:hover {
   background-color: #001229;
+  color: #fff;
+}
+
+.author-submit-btn:hover span,
+.author-submit-btn:hover i {
+  color: #fff !important;
 }
 
 .author-cancel-btn {
@@ -948,7 +960,6 @@ button.menu-item:focus {
   overflow: hidden;
 }
 
-
 .profile-header-icon {
   width: 34px;
   height: 34px;
@@ -1035,7 +1046,6 @@ button.menu-item:focus {
   transform: translateY(-2px);
 }
 
-
 @media (max-width: 991px) {
   .profile-card .card-body {
     padding: 1.4rem;
@@ -1065,7 +1075,6 @@ button.menu-item:focus {
     font-size: 0.9rem;
   }
 }
-
 
 .author-input.is-invalid ~ .invalid-feedback,
 .form-control.is-invalid ~ .invalid-feedback,
