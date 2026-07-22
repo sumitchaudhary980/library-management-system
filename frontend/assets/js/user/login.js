@@ -4,28 +4,38 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value;
 
-  const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
-
   if (!email || !password) {
     showToast("Please fill in all fields.", "error");
-  }
-
-  if (!gmailRegex.test(email)) {
-    showToast("Please enter a valid gmail address.", "error");
     return;
   }
 
   try {
     const res = await fetch("/api/auth/login", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+      },
       credentials: "include",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({
+        email,
+        password,
+      }),
     });
 
     const data = await res.json();
 
     if (res.ok) {
+      // First login - force password change
+      if (data.requirePasswordChange) {
+        showToast("Please change your temporary password.", "info");
+
+        setTimeout(() => {
+          window.location.href = data.redirect;
+        }, 1000);
+
+        return;
+      }
+
       showToast("Login successful! Redirecting...", "success");
 
       setTimeout(() => {

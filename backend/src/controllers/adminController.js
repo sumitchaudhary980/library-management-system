@@ -1,7 +1,7 @@
 const cloudinary = require("../config/cloudinary");
 const streamifier = require("streamifier");
 const db = require("../config/db");
-const transporter = require("../config/mail"); 
+const transporter = require("../config/mail");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 
@@ -1507,39 +1507,258 @@ exports.createReader = async (req, res) => {
       hashedPassword,
       address?.trim() || null
     );
+    const APP_URL = process.env.APP_URL;
 
     await transporter.sendMail({
       to: email.trim(),
-      subject: "Welcome to Kaiser Library",
+      subject: "Welcome to Kaiser Library - Your Reader Account",
       html: `
-        <h2>Welcome to Kaiser Library</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+</head>
 
-        <p>Hello <strong>${first_name}</strong>,</p>
+<body style="margin:0;padding:40px 0;background:#f4f6f9;font-family:Arial,Helvetica,sans-serif;">
 
-        <p>Your library account has been created by the administrator.</p>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+      <td align="center">
 
-        <p><strong>Email:</strong> ${email}</p>
+        <table
+          width="620"
+          cellpadding="0"
+          cellspacing="0"
+          border="0"
+          style="
+            background:#ffffff;
+            border-radius:14px;
+            overflow:hidden;
+            box-shadow:0 8px 30px rgba(0,0,0,.08);
+          "
+        >
 
-        <p><strong>Temporary Password:</strong></p>
+          <!-- Header -->
+          <tr>
+            <td
+              align="center"
+              style="
+                background:linear-gradient(135deg,#123458,#1e5a92);
+                color:#ffffff;
+                padding:40px;
+              "
+            >
+              <h1 style="margin:0;font-size:30px;">
+                📚 Kaiser Library
+              </h1>
 
-        <h2 style="letter-spacing:2px;">${temporaryPassword}</h2>
+              <p style="margin-top:12px;font-size:16px;">
+                Welcome! Your Reader Account is Ready
+              </p>
+            </td>
+          </tr>
 
-        <p>
-          For security reasons, you must change this password the first
-          time you log in.
-        </p>
+          <!-- Content -->
+          <tr>
+            <td style="padding:40px;">
 
-        <p>
-          If you did not expect this email, please contact the library.
-        </p>
+              <h2
+                style="
+                  margin-top:0;
+                  color:#123458;
+                "
+              >
+                Hello ${first_name},
+              </h2>
 
-        <br>
+              <p
+                style="
+                  color:#555;
+                  font-size:15px;
+                  line-height:1.8;
+                "
+              >
+                Your reader account has been successfully created by the
+                <strong>Kaiser Library Administrator</strong>.
+              </p>
 
-        <p>Regards,</p>
-        <p><strong>Kaiser Library</strong></p>
-      `,
+              <table
+                width="100%"
+                cellpadding="18"
+                cellspacing="0"
+                border="0"
+                style="
+                  background:#f8fafc;
+                  border:1px solid #e5e7eb;
+                  border-radius:10px;
+                  margin:30px 0;
+                "
+              >
+
+                <tr>
+                  <td>
+
+                    <p style="margin:0 0 18px;">
+                      <strong>Email Address</strong><br>
+                      ${email}
+                    </p>
+
+                    <p style="margin:0 0 10px;">
+                      <strong>Temporary Password</strong>
+                    </p>
+
+                    <div
+                      style="
+                        background:#123458;
+                        color:#ffffff;
+                        font-size:24px;
+                        font-weight:bold;
+                        letter-spacing:5px;
+                        text-align:center;
+                        padding:16px;
+                        border-radius:8px;
+                      "
+                    >
+                      ${temporaryPassword}
+                    </div>
+
+                  </td>
+                </tr>
+
+              </table>
+
+              <div
+                style="
+                  background:#fff8e7;
+                  border-left:5px solid #d4a017;
+                  padding:18px;
+                  border-radius:8px;
+                  margin-bottom:30px;
+                "
+              >
+
+                <strong style="color:#8a6500;">
+                  ⚠ Security Notice
+                </strong>
+
+                <p
+                  style="
+                    margin-top:10px;
+                    color:#555;
+                    line-height:1.7;
+                  "
+                >
+                  For security reasons, you must change your temporary password
+                  the first time you sign in to your account.
+                </p>
+
+              </div>
+
+              <div
+                style="
+                  text-align:center;
+                  margin:35px 0;
+                "
+              >
+
+                <a
+                  href="${APP_URL}/login"
+                  style="
+                    background:#123458;
+                    color:#ffffff;
+                    text-decoration:none;
+                    padding:15px 35px;
+                    border-radius:8px;
+                    font-weight:bold;
+                    font-size:16px;
+                    display:inline-block;
+                  "
+                >
+                  Login to Kaiser Library
+                </a>
+
+              </div>
+
+              <p
+                style="
+                  color:#555;
+                  line-height:1.8;
+                "
+              >
+                If the button above doesn't work, copy and paste the following
+                link into your browser:
+              </p>
+
+              <p style="word-break:break-word;">
+                <a
+                  href="${APP_URL}/login"
+                  style="
+                    color:#123458;
+                    text-decoration:none;
+                    font-weight:600;
+                  "
+                >
+                  ${APP_URL}/login
+                </a>
+              </p>
+
+              <hr
+                style="
+                  margin:35px 0;
+                  border:none;
+                  border-top:1px solid #eeeeee;
+                "
+              >
+
+              <p
+                style="
+                  color:#777;
+                  font-size:14px;
+                  line-height:1.7;
+                "
+              >
+                If you did not expect this email, please ignore it or contact
+                the library administrator.
+              </p>
+
+              <p
+                style="
+                  margin-top:30px;
+                  color:#555;
+                "
+              >
+                Regards,<br>
+                <strong>Kaiser Library Team</strong>
+              </p>
+
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td
+              align="center"
+              style="
+                background:#f8fafc;
+                padding:18px;
+                color:#888;
+                font-size:13px;
+              "
+            >
+              © ${new Date().getFullYear()} Kaiser Library. All Rights Reserved.
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
+`,
     });
-
     res.status(201).json({
       message:
         "Reader created successfully. Temporary password has been emailed.",
