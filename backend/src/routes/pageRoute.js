@@ -203,7 +203,13 @@ router.get("/change-password", (req, res) => {
   }
 
   res.sendFile(
-    path.join(frontendPath, "user", "change-password.html")
+    path.join(frontendPath, "user/change-password.html")
+  );
+});
+
+router.get("/forgot-password", (req, res) => {
+  res.sendFile(
+    path.join(frontendPath, "forgot-password.html")
   );
 });
 
