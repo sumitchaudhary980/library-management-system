@@ -13,6 +13,9 @@ const createUserTable = () => {
       role TEXT DEFAULT 'reader',
       status TEXT NOT NULL DEFAULT 'active'
         CHECK(status IN ('active', 'inactive')),
+      must_change_password INTEGER NOT NULL DEFAULT 1,
+      reset_token TEXT,
+      reset_token_expires DATETIME,
       address TEXT,
       profile_image TEXT,
       profile_image_public_id TEXT,
@@ -21,27 +24,38 @@ const createUserTable = () => {
     )
   `);
 
-  // Add status column to existing databases (runs only once)
   const columns = db.prepare(`PRAGMA table_info(users)`).all();
 
-  const hasStatus = columns.some((column) => column.name === "status");
-
-  if (!hasStatus) {
+  // Status column
+  if (!columns.some((column) => column.name === "status")) {
     db.exec(`
       ALTER TABLE users
       ADD COLUMN status TEXT NOT NULL DEFAULT 'active';
     `);
   }
-  // Add must_change_password column to existing databases
-  const hasMustChangePassword = columns.some(
-    (column) => column.name === "must_change_password"
-  );
 
-  if (!hasMustChangePassword) {
+  // Must change password column
+  if (!columns.some((column) => column.name === "must_change_password")) {
     db.exec(`
-    ALTER TABLE users
-    ADD COLUMN must_change_password INTEGER NOT NULL DEFAULT 1;
-  `);
+      ALTER TABLE users
+      ADD COLUMN must_change_password INTEGER NOT NULL DEFAULT 1;
+    `);
+  }
+
+  // Reset token column
+  if (!columns.some((column) => column.name === "reset_token")) {
+    db.exec(`
+      ALTER TABLE users
+      ADD COLUMN reset_token TEXT;
+    `);
+  }
+
+  // Reset token expiry column
+  if (!columns.some((column) => column.name === "reset_token_expires")) {
+    db.exec(`
+      ALTER TABLE users
+      ADD COLUMN reset_token_expires DATETIME;
+    `);
   }
 
   db.exec(`
