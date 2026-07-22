@@ -25,6 +25,9 @@ The project is actively being developed. Core library management modules are fun
 - Session-based Authentication
 - Protected Routes
 - Password Hashing using bcrypt
+- Forgot Password
+- Password Reset via Email
+- Secure One-Time Password Reset Links
 
 ---
 
@@ -113,6 +116,7 @@ The project is actively being developed. Core library management modules are fun
 
 - Node.js
 - Express.js
+- Nodemailer
 
 ## Database
 
@@ -125,11 +129,19 @@ The project is actively being developed. Core library management modules are fun
 
 ## Security
 
-- bcrypt
-- express-session
-- cookie-parser
-- Helmet
+- Password hashing
+
+- Session authentication
+
+- Protected routes
+
+- Helmet security headers
+
 - Upstash Rate Limiter
+
+- Server-side validation
+
+- Client-side validation
 
 ---
 
@@ -221,12 +233,25 @@ npm install
 Create a **.env** file inside the **backend** folder.
 
 ```env
+# Application
+PORT=3000
+APP_URL=http://localhost:3000
 SESSION_SECRET=your_session_secret
 
+# Cloudinary
 CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
 
+# Email (SMTP)
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_SECURE=false
+MAIL_USER=your_email@gmail.com
+MAIL_PASS=your_app_password
+MAIL_FROM="Kaiser Library <your_email@gmail.com>"
+
+# Upstash Rate Limiter
 UPSTASH_REDIS_REST_URL=your_upstash_url
 UPSTASH_REDIS_REST_TOKEN=your_upstash_token
 ```
