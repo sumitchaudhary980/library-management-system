@@ -72,17 +72,36 @@ async function loadReaders(page = 1) {
       return;
     }
 
-  data.readers.forEach((reader) => {
-  const isActive = reader.status === "active";
+    data.readers.forEach((reader) => {
+      const isActive = reader.status === "active";
 
-  table.innerHTML += `
+      table.innerHTML += `
     <tr>
 
       <td class="py-3 px-4 text-nowrap">
-        <img
-          src="${reader.profile_image || "/assets/images/default-user.png"}"
-          style="width:55px;height:55px;border-radius:50%;object-fit:cover;"
-        >
+       ${reader.profile_image
+          ? `
+      <img
+        src="${reader.profile_image}"
+        style="width:55px;height:55px;border-radius:50%;object-fit:cover;"
+      >
+    `
+          : `
+      <div 
+        style="
+          width:55px;
+          height:55px;
+          border-radius:50%;
+          background:#f1f1f1;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+        "
+      >
+        <i class="fas fa-user text-muted"></i>
+      </div>
+    `
+        }
       </td>
 
       <td class="py-3 px-4 fw-semibold text-nowrap">
@@ -106,10 +125,9 @@ async function loadReaders(page = 1) {
       </td>
 
       <td class="py-3 px-4 text-nowrap">
-        ${
-          isActive
-            ? `<span class="badge bg-success">Active</span>`
-            : `<span class="badge bg-danger">Inactive</span>`
+        ${isActive
+          ? `<span class="badge bg-success">Active</span>`
+          : `<span class="badge bg-danger">Inactive</span>`
         }
       </td>
 
@@ -134,9 +152,8 @@ async function loadReaders(page = 1) {
             title="${isActive ? "Deactivate Reader" : "Activate Reader"}"
             onclick="toggleReaderStatus(${reader.id}, '${reader.status}')"
           >
-            <i class="fas ${
-              isActive ? "fa-user-slash" : "fa-user-check"
-            }"></i>
+            <i class="fas ${isActive ? "fa-user-slash" : "fa-user-check"
+        }"></i>
           </button>
 
         </div>
@@ -145,12 +162,12 @@ async function loadReaders(page = 1) {
 
     </tr>
   `;
-});
+    });
 
     document.getElementById(
       "entryText"
     ).innerHTML = `Showing ${data.total === 0 ? 0 : (page - 1) * 10 + 1
-      } to ${Math.min(page * 10, data.total)} of ${data.total
+    } to ${Math.min(page * 10, data.total)} of ${data.total
       } entries`;
 
     const pagination = document.getElementById("pagination");
