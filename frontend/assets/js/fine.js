@@ -119,20 +119,34 @@ async function loadUsers(page = 1) {
                     <div class="d-flex align-items-center">
 
 
-                        <img
-
-                        src="${user.profile_image || "/assets/images/default-profile.png"}"
-
-                        class="rounded-circle me-3"
-
-                        style="
-                            width:52px;
-                            height:52px;
-                            object-fit:cover;
-                            border:2px solid #e5e7eb;
-                        "
-
-                        >
+                      ${user.profile_image
+                    ? `
+      <img
+        src="${user.profile_image}"
+        class="rounded-circle me-3"
+        style="
+          width:52px;
+          height:52px;
+          object-fit:cover;
+          border:2px solid #e5e7eb;
+        "
+      >
+    `
+                    : `
+      <div
+        class="rounded-circle me-3 d-flex align-items-center justify-content-center"
+        style="
+          width:52px;
+          height:52px;
+          border:2px solid #e5e7eb;
+          background:#f8f9fa;
+          flex-shrink:0;
+        "
+      >
+        <i class="fas fa-user text-muted"></i>
+      </div>
+    `
+                }
 
 
 
@@ -180,8 +194,7 @@ async function loadUsers(page = 1) {
                 <td class="text-center">
 
 
-                ${
-                    user.unpaid_books > 0
+                ${user.unpaid_books > 0
 
                     ?
 
@@ -214,8 +227,7 @@ async function loadUsers(page = 1) {
                 <td class="text-center fw-bold">
 
 
-                ${
-                    Number(user.outstanding_fine) > 0
+                ${Number(user.outstanding_fine) > 0
 
                     ?
 
@@ -315,7 +327,7 @@ async function loadUsers(page = 1) {
 
 
 
-        if(data.totalPages > 1){
+        if (data.totalPages > 1) {
 
 
 
@@ -341,7 +353,7 @@ async function loadUsers(page = 1) {
 
 
 
-            for(let i = 1; i <= data.totalPages; i++){
+            for (let i = 1; i <= data.totalPages; i++) {
 
 
                 pagination.innerHTML += `
@@ -403,7 +415,7 @@ async function loadUsers(page = 1) {
 
 
 
-    } catch(err){
+    } catch (err) {
 
 
         console.log(err);
@@ -422,28 +434,28 @@ async function loadUsers(page = 1) {
 
 
 
-function triggerSearch(){
+function triggerSearch() {
 
 
     clearTimeout(searchTimer);
 
 
 
-    searchTimer = setTimeout(()=>{
+    searchTimer = setTimeout(() => {
 
 
         currentSearch =
-        document.getElementById("searchUser").value.trim();
+            document.getElementById("searchUser").value.trim();
 
 
 
         currentSort =
-        document.getElementById("sortBy").value;
+            document.getElementById("sortBy").value;
 
 
 
         currentStatus =
-        document.getElementById("fineStatus").value;
+            document.getElementById("fineStatus").value;
 
 
 
@@ -452,7 +464,7 @@ function triggerSearch(){
 
 
 
-    },300);
+    }, 300);
 
 
 }
@@ -464,24 +476,24 @@ function triggerSearch(){
 
 
 document
-.getElementById("searchUser")
-.addEventListener("input", triggerSearch);
+    .getElementById("searchUser")
+    .addEventListener("input", triggerSearch);
 
 
 
 
 
 document
-.getElementById("sortBy")
-.addEventListener("change", triggerSearch);
+    .getElementById("sortBy")
+    .addEventListener("change", triggerSearch);
 
 
 
 
 
 document
-.getElementById("fineStatus")
-.addEventListener("change", triggerSearch);
+    .getElementById("fineStatus")
+    .addEventListener("change", triggerSearch);
 
 
 
@@ -489,30 +501,30 @@ document
 
 
 document
-.getElementById("clearFilters")
-.addEventListener("click",()=>{
+    .getElementById("clearFilters")
+    .addEventListener("click", () => {
 
 
-    document.getElementById("searchUser").value = "";
+        document.getElementById("searchUser").value = "";
 
-    document.getElementById("sortBy").value = "highest";
+        document.getElementById("sortBy").value = "highest";
 
-    document.getElementById("fineStatus").value = "";
-
-
-
-    currentSearch = "";
-
-    currentSort = "highest";
-
-    currentStatus = "";
+        document.getElementById("fineStatus").value = "";
 
 
 
-    loadUsers(1);
+        currentSearch = "";
+
+        currentSort = "highest";
+
+        currentStatus = "";
 
 
-});
+
+        loadUsers(1);
+
+
+    });
 
 
 
