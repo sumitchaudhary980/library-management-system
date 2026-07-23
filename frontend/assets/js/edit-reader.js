@@ -143,7 +143,19 @@ function validateForm() {
     validatePhone(),
   ].every(Boolean);
 }
+firstName.addEventListener("input", validateFirstName);
+firstName.addEventListener("blur", validateFirstName);
 
+lastName.addEventListener("input", validateLastName);
+lastName.addEventListener("blur", validateLastName);
+
+gender.addEventListener("change", validateGender);
+
+email.addEventListener("input", validateEmail);
+email.addEventListener("blur", validateEmail);
+
+phone.addEventListener("input", validatePhone);
+phone.addEventListener("blur", validatePhone);
 async function loadReader() {
   try {
     const response = await fetch(`/api/admin/readers/${readerId}`, {
