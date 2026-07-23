@@ -1771,6 +1771,157 @@ exports.createReader = async (req, res) => {
     });
   }
 };
+exports.getReader = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const reader = db.prepare(`
+      SELECT
+        id,
+        first_name,
+        last_name,
+        gender,
+        email,
+        phone,
+        address
+      FROM users
+      WHERE id = ?
+        AND role = 'reader'
+    `).get(id);
+
+    if (!reader) {
+      return res.status(404).json({
+        message: "Reader not found",
+      });
+    }
+
+    res.json({
+      reader,
+    });
+
+  } catch (err) {
+    console.error("Get reader error:", err);
+
+    res.status(500).json({
+      message: "Failed to load reader",
+    });
+  }
+};
+
+exports.updateReader = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const {
+      first_name,
+      last_name,
+      gender,
+      email,
+      phone,
+      address,
+    } = req.body;
+
+    const errors = {};
+
+    if (!first_name?.trim())
+      errors.first_name = "First name is required";
+
+    if (!last_name?.trim())
+      errors.last_name = "Last name is required";
+
+    if (!["male", "female", "other"].includes(gender))
+      errors.gender = "Invalid gender";
+
+    if (!email?.trim()) {
+      errors.email = "Email is required";
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!emailRegex.test(email.trim())) {
+        errors.email = "Invalid email address";
+      }
+    }
+
+    if (phone && !/^[0-9+\-\s()]{7,20}$/.test(phone.trim())) {
+      errors.phone = "Invalid phone number";
+    }
+
+    if (Object.keys(errors).length) {
+      return res.status(400).json({ errors });
+    }
+
+    const reader = db
+      .prepare(
+        `
+        SELECT id
+        FROM users
+        WHERE id = ?
+          AND role = 'reader'
+      `
+      )
+      .get(id);
+
+    if (!reader) {
+      return res.status(404).json({
+        message: "Reader not found",
+      });
+    }
+
+    const existing = db
+      .prepare(
+        `
+        SELECT id
+        FROM users
+        WHERE (email = ? OR phone = ?)
+          AND id != ?
+      `
+      )
+      .get(
+        email.trim(),
+        phone?.trim() || null,
+        id
+      );
+
+    if (existing) {
+      return res.status(400).json({
+        message: "Email or phone already exists",
+      });
+    }
+
+    db.prepare(
+      `
+      UPDATE users
+      SET
+        first_name = ?,
+        last_name = ?,
+        gender = ?,
+        email = ?,
+        phone = ?,
+        address = ?,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+      `
+    ).run(
+      first_name.trim(),
+      last_name.trim(),
+      gender,
+      email.trim(),
+      phone?.trim() || null,
+      address?.trim() || null,
+      id
+    );
+
+    res.json({
+      message: "Reader updated successfully",
+    });
+  } catch (err) {
+    console.error("Update reader error:", err);
+
+    res.status(500).json({
+      message: "Failed to update reader",
+    });
+  }
+};
 
 //update profile
 exports.updateProfile = async (req, res) => {
