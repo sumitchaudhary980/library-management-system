@@ -320,13 +320,9 @@ exports.forgotPassword = async (req, res) => {
 
     }
 
-
-
-
     // ===============================
     // Prevent reset spam
     // ===============================
-
 
     if (user.reset_token_expires) {
 
@@ -898,42 +894,44 @@ exports.resetPassword = async (req, res) => {
     // ===============================
 
     db.prepare(`
-
-      UPDATE users
-
-      SET
-
-        password = ?,
-
-        reset_token = NULL,
-
-        reset_token_expires = NULL,
-
-        must_change_password = 0,
-
-        updated_at = CURRENT_TIMESTAMP
+  UPDATE users
+  SET
+    password = ?,
+    reset_token = NULL,
+    reset_token_expires = NULL,
+    must_change_password = 0,
+    updated_at = CURRENT_TIMESTAMP
+  WHERE id = ?
+`).run(
+      hashedPassword,
+      user.id
+    );
 
 
-      WHERE id = ?
+    // Destroy all sessions of this user
+    const Database = require("better-sqlite3");
+    const path = require("path");
 
-    `)
-      .run(
-        hashedPassword,
-        user.id
-      );
+    console.log(
+      "Session DB:",
+      path.join(__dirname, "../database/sessions.sqlite")
+    );
 
+    const sessionDb = new Database(
+      path.join(__dirname, "../database/sessions.sqlite")
+    );
 
+    sessionDb.prepare(`
+  DELETE FROM sessions
+  WHERE sess LIKE ?
+`).run(`%"id":${user.id}%`);
 
-
+    sessionDb.close();
 
 
     return res.json({
-
-      message:
-        "Password reset successfully."
-
+      message: "Password reset successfully. Please login again."
     });
-
 
 
 
