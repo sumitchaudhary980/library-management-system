@@ -28,6 +28,8 @@ router.put("/fines/:id/pay", requireReader,userController.payFine);
 //PROFILE ROUTE
 router.get("/profile", requireReader, userController.getProfile);
 router.put("/profile", requireReader, upload.single("profileImage"), userController.updateProfile);
+
+router.post("/change-password", requireReader, userController.changePassword);
 module.exports = router;
 
 module.exports = router;

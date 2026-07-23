@@ -281,4 +281,24 @@ router.get("/reset-password", (req, res) => {
 
 });
 
+router.get("/profile/change-password", (req, res) => {
+  if (!req.session.user) {
+    return res.redirect("/");
+  }
+
+  if (req.session.user.role === "admin") {
+    return res.sendFile(
+      path.join(frontendPath, "admin/change-password.html")
+    );
+  }
+
+  if (req.session.user.role === "reader") {
+    return res.sendFile(
+      path.join(frontendPath, "user/change-password.html")
+    );
+  }
+
+  return res.sendStatus(403);
+});
+
 module.exports = router;

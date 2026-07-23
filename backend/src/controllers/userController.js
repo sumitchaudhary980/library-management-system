@@ -1,6 +1,8 @@
 const cloudinary = require("../config/cloudinary");
 const streamifier = require("streamifier");
 const db = require("../config/db");
+const bcrypt = require("bcrypt");
+const transporter = require("../config/mail");
 
 //Home
 exports.getHomeData = (req, res) => {
@@ -955,5 +957,395 @@ exports.updateProfile = async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Failed to update profile" });
+  }
+};
+
+exports.changePassword = async (req, res) => {
+  try {
+
+    const {
+      currentPassword,
+      password,
+      confirmPassword
+    } = req.body;
+
+
+    if (!currentPassword || !password || !confirmPassword) {
+      return res.status(400).json({
+        message: "All password fields are required",
+      });
+    }
+
+
+    if (password !== confirmPassword) {
+      return res.status(400).json({
+        message: "Passwords do not match",
+      });
+    }
+
+
+    if (password.length < 8) {
+      return res.status(400).json({
+        message: "Password must be at least 8 characters",
+      });
+    }
+
+
+
+    const user = db.prepare(`
+      SELECT *
+      FROM users
+      WHERE id = ?
+    `).get(req.session.user.id);
+
+
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+
+
+    const currentPasswordMatch =
+      await bcrypt.compare(
+        currentPassword,
+        user.password
+      );
+
+
+    if (!currentPasswordMatch) {
+      return res.status(400).json({
+        message: "Current password is incorrect",
+      });
+    }
+
+
+
+    const samePassword =
+      await bcrypt.compare(
+        password,
+        user.password
+      );
+
+
+    if (samePassword) {
+      return res.status(400).json({
+        message:
+          "New password cannot be the same as current password",
+      });
+    }
+
+
+
+    const hashedPassword =
+      await bcrypt.hash(password, 10);
+
+
+
+    db.prepare(`
+      UPDATE users
+      SET
+        password = ?,
+        must_change_password = 0,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).run(
+      hashedPassword,
+      user.id
+    );
+
+
+
+    const changedAt =
+      new Date().toLocaleString(
+        "en-US",
+        {
+          dateStyle: "long",
+          timeStyle: "short",
+        }
+      );
+
+    await transporter.sendMail({
+
+      to: user.email,
+
+      subject:
+        "Your Kaiser Library Password Has Been Changed",
+
+      html:`
+
+<!DOCTYPE html>
+<html>
+
+<body style="
+margin:0;
+padding:40px 0;
+background:#f4f6f9;
+font-family:Arial,Helvetica,sans-serif;
+">
+
+
+<table width="100%">
+
+<tr>
+
+<td align="center">
+
+
+<table width="620"
+
+style="
+background:#ffffff;
+border-radius:14px;
+overflow:hidden;
+box-shadow:0 8px 30px rgba(0,0,0,.08);
+">
+
+
+<tr>
+
+<td align="center"
+
+style="
+background:#123458;
+color:white;
+padding:40px;
+">
+
+<h1 style="margin:0;">
+📚 Kaiser Library
+</h1>
+
+<p style="margin-top:12px;">
+Password Changed Successfully
+</p>
+
+</td>
+
+</tr>
+
+
+
+<tr>
+
+<td style="padding:40px;">
+
+
+<h2 style="color:#123458;">
+
+Hello ${user.first_name},
+
+</h2>
+
+
+
+<p style="
+color:#555;
+line-height:1.8;
+">
+
+Your Kaiser Library account password was successfully changed.
+
+</p>
+
+
+
+
+<div style="
+background:#e8f7ee;
+border-left:5px solid #198754;
+padding:18px;
+border-radius:8px;
+margin:25px 0;
+">
+
+
+<strong style="color:#146c43;">
+✓ Security Confirmation
+</strong>
+
+
+<p style="
+margin-top:10px;
+color:#555;
+line-height:1.7;
+">
+
+Your password has been updated successfully. Your account is now protected with your new password.
+
+</p>
+
+
+</div>
+
+
+
+
+<!-- Change Details -->
+
+<div style="
+background:#f8fafc;
+border:1px solid #e5e7eb;
+padding:18px;
+border-radius:8px;
+margin:25px 0;
+">
+
+
+<strong style="color:#123458;">
+🔐 Password Change Details
+</strong>
+
+
+<table width="100%" style="margin-top:15px;color:#555;">
+
+<tr>
+
+<td style="padding:6px 0;">
+<strong>Changed On:</strong>
+</td>
+
+<td style="padding:6px 0;text-align:right;">
+${changedAt}
+</td>
+
+</tr>
+
+
+<tr>
+
+<td style="padding:6px 0;">
+<strong>Account:</strong>
+</td>
+
+<td style="padding:6px 0;text-align:right;">
+${user.email}
+</td>
+
+</tr>
+
+
+</table>
+
+
+</div>
+
+
+
+
+
+<div style="
+background:#fff8e7;
+border-left:5px solid #d4a017;
+padding:18px;
+border-radius:8px;
+margin:25px 0;
+">
+
+
+<strong style="color:#8a6500;">
+⚠ Security Notice
+</strong>
+
+
+<p style="
+margin-top:10px;
+color:#555;
+line-height:1.7;
+">
+
+If you did not make this change, please contact the Kaiser Library administrator immediately to secure your account.
+
+</p>
+
+
+</div>
+
+
+
+
+
+<hr style="
+margin:35px 0;
+border:none;
+border-top:1px solid #eeeeee;
+">
+
+
+<p style="color:#555;">
+
+Regards,<br>
+
+<strong>
+Kaiser Library Team
+</strong>
+
+</p>
+
+
+</td>
+
+</tr>
+
+
+
+
+<tr>
+
+<td align="center"
+
+style="
+background:#f8fafc;
+padding:18px;
+color:#888;
+">
+
+© ${new Date().getFullYear()} Kaiser Library. All Rights Reserved.
+
+</td>
+
+</tr>
+
+
+
+</table>
+
+
+</td>
+
+</tr>
+
+</table>
+
+
+</body>
+
+</html>
+
+`
+
+    });
+
+    return res.json({
+      message:
+        "Password changed successfully",
+    });
+
+
+  } catch (error) {
+
+    console.error(
+      "Change password error:",
+      error
+    );
+
+
+    return res.status(500).json({
+      message:
+        "Server error",
+    });
+
   }
 };

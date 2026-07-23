@@ -47,4 +47,7 @@ router.post("/readers", requireAdmin, adminController.createReader);
 // PROFILE
 router.get("/profile", requireAdmin, adminController.getProfile);
 router.put("/profile", requireAdmin, upload.single("profileImage"), adminController.updateProfile);
+
+router.post("/change-password", requireAdmin, adminController.changePassword);
+
 module.exports = router;

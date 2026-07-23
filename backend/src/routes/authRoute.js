@@ -12,11 +12,9 @@ router.post("/change-password", authController.changePassword);
 
 router.post("/forgot-password", authController.forgotPassword);
 
-// router.get( "/verify-reset-token",authController.verifyResetToken);
-router.post(
-    "/reset-password",
-    authController.resetPassword
-);
+router.post( "/reset-password",authController.resetPassword);
+
+
 
 router.post("/logout", logout);
 router.get("/me", getSession);
