@@ -94,30 +94,30 @@ async function loadBooks(page = 1) {
           style="cursor:pointer;"
           onclick="window.location.href='/books/${book.id}'"
         >
-          <td class="py-3 px-4">
+          <td class="py-3 px-4 text-nowrap">
             <img
               src="${book.cover_image}"
               style="width:60px;height:80px;object-fit:cover;border-radius:8px;"
             >
           </td>
 
-          <td class="py-3 px-4">
+          <td class="py-3 px-4 text-nowrap">
             <h6 class="fw-bold mb-0 text-primary-dark">${book.title}</h6>
           </td>
 
-          <td class="py-3 px-4">
+          <td class="py-3 px-4 text-nowrap">
             ${book.author}
           </td>
 
-          <td class="py-3 px-4">
+          <td class="py-3 px-4 text-nowrap">
             ${book.genre}
           </td>
 
-          <td class="py-3 px-4">
+          <td class="py-3 px-4 text-nowrap">
             ${available}
           </td>
 
-          <td class="py-3 px-4 text-center">
+          <td class="py-3 px-4 text-center text-nowrap">
             ${borrowButton}
           </td>
         </tr>

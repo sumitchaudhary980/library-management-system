@@ -415,41 +415,43 @@ exports.getBorrowedBooks = (req, res) => {
     // FETCH BOOKS
 
     const booksQuery = `
-      SELECT
-        borrowed_books.id AS borrowed_id,
-        borrowed_books.borrowed_at,
-        borrowed_books.due_date,
-        borrowed_books.renewed,
+  SELECT
+    borrowed_books.id AS borrowed_id,
+    borrowed_books.borrowed_at,
+    borrowed_books.due_date,
+    borrowed_books.renewed,
+    borrowed_books.fine_amount,
+    borrowed_books.fine_paid,
 
-        books.id,
-        books.title,
-        books.cover_image,
+    books.id,
+    books.title,
+    books.cover_image,
 
-        authors.name AS author,
-        genres.name AS genre
+    authors.name AS author,
+    genres.name AS genre
 
-      FROM borrowed_books
+  FROM borrowed_books
 
-      INNER JOIN books
-        ON borrowed_books.book_id = books.id
+  INNER JOIN books
+    ON borrowed_books.book_id = books.id
 
-      INNER JOIN authors
-        ON books.author_id = authors.id
+  INNER JOIN authors
+    ON books.author_id = authors.id
 
-      INNER JOIN genres
-        ON books.genre_id = genres.id
+  INNER JOIN genres
+    ON books.genre_id = genres.id
 
-      WHERE
-        borrowed_books.user_id = ?
-        AND borrowed_books.returned = 0
-        AND books.title LIKE ?
-        ${dateFilter}
+  WHERE
+    borrowed_books.user_id = ?
+    AND borrowed_books.returned = 0
+    AND books.title LIKE ?
+    ${dateFilter}
 
-      ORDER BY ${orderBy}
+  ORDER BY ${orderBy}
 
-      LIMIT ?
-      OFFSET ?
-    `;
+  LIMIT ?
+  OFFSET ?
+`;
 
     const booksParams = [
       userId,

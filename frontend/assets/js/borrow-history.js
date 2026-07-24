@@ -105,15 +105,15 @@ async function loadFineDetails(page = 1) {
                     </small>
                 </td>
 
-                <td class="py-3 px-4">
+                <td class="py-3 px-4 text-nowrap">
                     ${new Date(book.borrowed_at).toLocaleDateString()}
                 </td>
 
-                <td class="py-3 px-4">
+                <td class="py-3 px-4 text-nowrap">
                     ${new Date(book.due_date).toLocaleDateString()}
                 </td>
 
-                <td class="py-3 px-4 text-center">
+                <td class="py-3 px-4 text-center text-nowrap">
 
                     ${
                         returned
@@ -135,7 +135,7 @@ async function loadFineDetails(page = 1) {
 
                 </td>
 
-                <td class="py-3 px-4 text-center">
+                <td class="py-3 px-4 text-center text-nowrap">
 
                     ${
                         fineAmount > 0 && !finePaid

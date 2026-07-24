@@ -21,7 +21,7 @@ async function loadAuthors(page = 1, search = currentSearch) {
   data.authors.forEach((author) => {
     table.innerHTML += `
       <tr>
-        <td class="py-3 px-4">
+        <td class="py-3 px-4 text-nowrap">
           <div class="d-flex align-items-center">
             <div class="stat-icon-wrapper bg-primary-light me-3 flex-shrink-0">
               <i class="fas fa-user"></i>
@@ -31,12 +31,12 @@ async function loadAuthors(page = 1, search = currentSearch) {
             </div>
           </div>
         </td>
-        <td class="py-3 px-4">
+        <td class="py-3 px-4 ">
           <div class="biography-box">
             ${author.biography || "No biography available"}
           </div>
         </td>
-        <td class="py-3 px-4">
+        <td class="py-3 px-4 text-nowrap">
           <div class="action-wrapper">
             <a href="/authors/edit/${author.id}" class="action-btn edit-btn" title="Edit">
               <i class="fas fa-pen"></i>

@@ -30,11 +30,11 @@ async function loadGenres(page = 1, search = currentSearch) {
   data.genres.forEach((genre) => {
     table.innerHTML += `
       <tr>
-        <td class="py-3 px-4">
+        <td class="py-3 px-4 text-nowrap">
           <h6 class="mb-0 fw-bold text-primary-dark">${genre.name}</h6>
         </td>
 
-        <td class="py-3 px-4 text-end">
+        <td class="py-3 px-4 text-end text-nowrap">
           <div class="action-wrapper">
             <a href="/genres/edit/${genre.id}" class="action-btn edit-btn" title="Edit">
               <i class="fas fa-pen"></i>

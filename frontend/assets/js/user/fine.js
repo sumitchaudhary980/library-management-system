@@ -74,20 +74,20 @@ async function loadFines(page = 1) {
                              style="width:60px;height:80px;object-fit:cover;border-radius:8px;">
                     </td>
 
-                    <td class="py-3 px-4">
+                    <td class="py-3 px-4 text-nowrap">
                         <h6 class="fw-bold mb-0 text-primary-dark">
                             ${fine.title}
                         </h6>
                     </td>
 
-                    <td class="py-3 px-4">
+                    <td class="py-3 px-4 text-nowrap">
     ${new Date(fine.due_date).toLocaleDateString()}
 </td>
-                    <td class="py-3 px-4 fw-semibold text-danger">
+                    <td class="py-3 px-4 fw-semibold text-danger text-nowrap">
                         Rs. ${Number(fine.fine_amount).toLocaleString()}
                     </td>
 
-                    <td class="py-3 px-4">
+                    <td class="py-3 px-4 text-nowrap">
 
                         ${fine.fine_paid
                     ?
@@ -98,7 +98,7 @@ async function loadFines(page = 1) {
 
                     </td>
 
-                    <td class="py-3 px-4 text-center">
+                    <td class="py-3 px-4 text-center text-nowrap">
 
                         ${fine.fine_paid
                     ?

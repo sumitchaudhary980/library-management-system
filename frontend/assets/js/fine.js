@@ -113,7 +113,8 @@ async function loadUsers(page = 1) {
             <tr>
 
 
-                <td class="py-3 px-4">
+
+                <td class="py-3 px-4 text-nowrap">
 
 
                     <div class="d-flex align-items-center">

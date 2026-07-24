@@ -49,26 +49,26 @@ async function loadBooks(page = 1) {
         >
       </td>
 
-      <td class="py-3 px-4">
+      <td class="py-3 px-4 text-nowrap">
         <h6 class="fw-bold mb-0 text-primary-dark">${book.title}</h6>
       </td>
 
-      <td class="py-3 px-4">
+      <td class="py-3 px-4 text-nowrap">
         ${book.author}
       </td>
 
-      <td class="py-3 px-4">
+      <td class="py-3 px-4 text-nowrap">
         ${book.genre}
       </td>
 
-      <td class="py-3 px-4">
+      <td class="py-3 px-4 text-nowrap">
         <span class="badge ${book.stock_quantity < 5 ? "bg-danger" : "bg-success"
         }">
           ${book.stock_quantity}
         </span>
       </td>
 
-      <td class="py-3 px-4 text-end">
+      <td class="py-3 px-4 text-end text-nowrap">
         <div class="action-wrapper">
           <a
             href="/books/edit/${book.id}"

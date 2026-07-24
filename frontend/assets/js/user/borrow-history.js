@@ -64,14 +64,14 @@ async function loadBorrowHistory(page = 1) {
                         <img src="${book.cover_image}"
                              style="width:60px; height:80px; object-fit:cover; border-radius:8px;">
                     </td>
-                    <td class="py-3 px-4">
+                    <td class="py-3 px-4 text-nowrap">
                         <h6 class="fw-bold mb-0 text-primary-dark">${book.title}</h6>
                     </td>
-                    <td class="py-3 px-4">${book.author}</td>
-                    <td class="py-3 px-4">${new Date(book.borrowed_at).toLocaleDateString()}</td>
-                    <td class="py-3 px-4">${new Date(book.due_date).toLocaleDateString()}</td>
-                    <td class="py-3 px-4">${new Date(book.returned_at).toLocaleDateString()}</td>
-                    <td class="py-3 px-4 text-center">
+                    <td class="py-3 px-4 text-nowrap">${book.author}</td>
+                    <td class="py-3 px-4 text-nowrap">${new Date(book.borrowed_at).toLocaleDateString()}</td>
+                    <td class="py-3 px-4 text-nowrap">${new Date(book.due_date).toLocaleDateString()}</td>
+                    <td class="py-3 px-4 text-nowrap">${new Date(book.returned_at).toLocaleDateString()}</td>
+                    <td class="py-3 px-4 text-center text-nowrap">
                         ${new Date(book.returned_at) <= new Date(book.due_date)
                     ? `<span class="badge bg-success">Returned On Time</span>`
                     : `<span class="badge bg-danger">Returned Late</span>`

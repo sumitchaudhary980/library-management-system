@@ -52,7 +52,7 @@ async function loadBorrowedBooks(page = 1) {
                 </tr>
             `;
         }
-
+console.log(data.books);
         data.books.forEach((book) => {
             const today = new Date();
             const dueDate = new Date(book.due_date);
@@ -87,18 +87,18 @@ async function loadBorrowedBooks(page = 1) {
 
             table.innerHTML += `
                 <tr>
-                    <td class="py-3 px-4">
+                    <td class="py-3 px-4 text-nowrap">
                         <img src="${book.cover_image}"
                              style="width:60px; height:80px; object-fit:cover; border-radius:8px;">
                     </td>
-                    <td class="py-3 px-4">
+                    <td class="py-3 px-4 text-nowrap">
                         <h6 class="fw-bold mb-0 text-primary-dark">${book.title}</h6>
                     </td>
-                    <td class="py-3 px-4">${book.author}</td>
-                    <td class="py-3 px-4">${new Date(book.borrowed_at).toLocaleDateString()}</td>
-                    <td class="py-3 px-4">${new Date(book.due_date).toLocaleDateString()}</td>
-                    <td class="py-3 px-4">${remainingBadge}</td>
-                    <td class="py-3 px-4 text-center">
+                    <td class="py-3 px-4 text-nowrap">${book.author}</td>
+                    <td class="py-3 px-4 text-nowrap">${new Date(book.borrowed_at).toLocaleDateString()}</td>
+                    <td class="py-3 px-4 text-nowrap">${new Date(book.due_date).toLocaleDateString()}</td>
+                    <td class="py-3 px-4 text-nowrap">${remainingBadge}</td>
+                    <td class="py-3 px-4 text-center text-nowrap">
                        ${book.renewed
                     ? `
             <button class="btn btn-secondary btn-sm px-3" disabled
