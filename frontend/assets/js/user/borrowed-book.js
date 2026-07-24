@@ -99,18 +99,28 @@ async function loadBorrowedBooks(page = 1) {
                     <td class="py-3 px-4">${new Date(book.due_date).toLocaleDateString()}</td>
                     <td class="py-3 px-4">${remainingBadge}</td>
                     <td class="py-3 px-4 text-center">
-                        ${book.renewed
+                       ${book.renewed
                     ? `
-                                <button class="btn btn-secondary btn-sm px-3" disabled
-                                        style="border-radius:10px; min-width:110px;">
-                                    Renewed
-                                </button>`
-                    : `
-                                <button class="btn btn-sm px-3 text-white"
-                                        onclick="renewBook(${book.borrowed_id})"
-                                        style="background:#c5a059; border-radius:10px; min-width:110px;">
-                                    <i class="fas fa-rotate me-2"></i>Renew
-                                </button>`
+            <button class="btn btn-secondary btn-sm px-3" disabled
+                    style="border-radius:10px; min-width:110px;">
+                Renewed
+            </button>
+        `
+                    : (book.fine_amount > 0 && book.fine_paid === 0)
+                        ? `
+                <button class="btn btn-danger btn-sm px-3" disabled
+                        title="Please clear your fine before renewing this book."
+                        style="border-radius:10px; min-width:110px;">
+                    <i class="fas fa-ban me-2"></i>Fine Due
+                </button>
+            `
+                        : `
+                <button class="btn btn-sm px-3 text-white"
+                        onclick="renewBook(${book.borrowed_id})"
+                        style="background:#c5a059; border-radius:10px; min-width:110px;">
+                    <i class="fas fa-rotate me-2"></i>Renew
+                </button>
+            `
                 }
                     </td>
                     

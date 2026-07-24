@@ -527,6 +527,15 @@ exports.renewBook = (req, res) => {
       });
     }
 
+    if (
+      borrowed.fine_amount > 0 &&
+      borrowed.fine_paid === 0
+    ) {
+      return res.status(400).json({
+        message: "Please clear the fine before renewing this book."
+      });
+    }
+
     if (borrowed.renewed) {
       return res.status(400).json({
         message: "This book has already been renewed."
