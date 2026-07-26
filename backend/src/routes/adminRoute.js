@@ -38,11 +38,7 @@ router.delete("/books/:id", requireAdmin, adminController.deleteBook);
 // FINES
 router.get("/fines", requireAdmin, adminController.getFineUsers);
 router.get("/borrow-history/:userId",requireAdmin,adminController.getBorrowHistory);
-router.put(
-    "/fines/:id/pay",
-    requireAdmin,
-    adminController.payFine
-);
+router.put( "/fines/:id/pay", requireAdmin, adminController.payFine);
 router.put("/return-book/:id", requireAdmin,adminController.returnBook);
 
 // READERS
