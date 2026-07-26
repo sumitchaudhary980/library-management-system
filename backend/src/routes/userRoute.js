@@ -24,7 +24,7 @@ router.get("/borrow-history", requireReader, userController.getBorrowHistory);
 //fine Route
 router.get("/fines",requireReader,userController.getFines);
 
-router.put("/fines/:id/pay", requireReader,userController.payFine);
+// router.put("/fines/:id/pay", requireReader,userController.payFine);
 //PROFILE ROUTE
 router.get("/profile", requireReader, userController.getProfile);
 router.put("/profile", requireReader, upload.single("profileImage"), userController.updateProfile);

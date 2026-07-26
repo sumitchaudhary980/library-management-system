@@ -2,6 +2,7 @@ const { createAuthorTable } = require("../models/Author");
 const { createBookTable } = require("../models/Book");
 const { createBorrowedBookTable } = require("../models/BorrowedBook");
 const { createApprovedDeviceTable } = require("../models/Device");
+const { createFinePaymentTable } = require("../models/FinePayment");
 const { createGenreTable } = require("../models/Genre");
 const { createUserTable } = require("../models/User");
 const { createAdminSeeder } = require("../seeders/adminSeeder");
@@ -19,6 +20,7 @@ const { createUserSeeder } = require("../seeders/userSeeder");
 // createGenreTable();
 // createBookTable();
 // createBorrowedBookTable();
+// createFinePaymentTable();
 
 // createAdminSeeder();
 // createUserSeeder();

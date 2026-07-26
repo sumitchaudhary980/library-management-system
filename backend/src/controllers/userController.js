@@ -826,59 +826,59 @@ exports.getFines = (req, res) => {
 };
 
 //pay fines
-exports.payFine = (req, res) => {
+// exports.payFine = (req, res) => {
 
-  const userId = req.session.user.id;
-  const borrowedId = parseInt(req.params.id);
+//   const userId = req.session.user.id;
+//   const borrowedId = parseInt(req.params.id);
 
-  try {
+//   try {
 
-    const fine = db.prepare(`
-      SELECT *
-      FROM borrowed_books
-      WHERE
-        id = ?
-        AND user_id = ?
-    `).get(
-      borrowedId,
-      userId
-    );
+//     const fine = db.prepare(`
+//       SELECT *
+//       FROM borrowed_books
+//       WHERE
+//         id = ?
+//         AND user_id = ?
+//     `).get(
+//       borrowedId,
+//       userId
+//     );
 
-    if (!fine) {
-      return res.status(404).json({
-        message: "Fine not found."
-      });
-    }
+//     if (!fine) {
+//       return res.status(404).json({
+//         message: "Fine not found."
+//       });
+//     }
 
-    if (fine.fine_paid) {
-      return res.status(400).json({
-        message: "Fine already paid."
-      });
-    }
+//     if (fine.fine_paid) {
+//       return res.status(400).json({
+//         message: "Fine already paid."
+//       });
+//     }
 
-    db.prepare(`
-      UPDATE borrowed_books
-      SET
-        fine_paid = 1,
-        fine_paid_at = CURRENT_TIMESTAMP
-      WHERE id = ?
-    `).run(borrowedId);
+//     db.prepare(`
+//       UPDATE borrowed_books
+//       SET
+//         fine_paid = 1,
+//         fine_paid_at = CURRENT_TIMESTAMP
+//       WHERE id = ?
+//     `).run(borrowedId);
 
-    res.json({
-      message: "Fine paid successfully."
-    });
+//     res.json({
+//       message: "Fine paid successfully."
+//     });
 
-  } catch (err) {
+//   } catch (err) {
 
-    console.log(err);
+//     console.log(err);
 
-    res.status(500).json({
-      message: "Failed to pay fine."
-    });
+//     res.status(500).json({
+//       message: "Failed to pay fine."
+//     });
 
-  }
+//   }
 
-};
+// };
 //update profile
 exports.updateProfile = async (req, res) => {
   try {

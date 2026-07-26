@@ -60,7 +60,7 @@ async function loadFineDetails(page = 1) {
         }
 
         document.getElementById("totalBorrowedBooks").textContent =
-    data.totalBorrowedBooks;
+            data.totalBorrowedBooks;
 
         const table = document.getElementById("fineTable");
         table.innerHTML = "";
@@ -115,58 +115,58 @@ async function loadFineDetails(page = 1) {
 
                 <td class="py-3 px-4 text-center text-nowrap">
 
-                    ${
-                        returned
-                            ? new Date(book.returned_at).toLocaleDateString()
-                            : `<span class="text-muted">Not Returned</span>`
-                    }
+                    ${returned
+                    ? new Date(book.returned_at).toLocaleDateString()
+                    : `<span class="text-muted">Not Returned</span>`
+                }
 
                 </td>
 
                 <td class="py-3 px-4 fw-bold text-center text-nowrap">
 
-                    ${
-                        fineAmount > 0
-                            ? `<span class="${finePaid ? "text-success" : "text-danger"}">
+                    ${fineAmount > 0
+                    ? `<span class="${finePaid ? "text-success" : "text-danger"}">
                                     Rs. ${fineAmount.toLocaleString()}
                                </span>`
-                            : `<span class="text-muted">No Fine</span>`
-                    }
+                    : `<span class="text-muted">No Fine</span>`
+                }
 
                 </td>
 
                 <td class="py-3 px-4 text-center text-nowrap">
 
-                    ${
-                        fineAmount > 0 && !finePaid
-                            ? `<span class="badge bg-danger">Unpaid Fine</span>`
-                            : fineAmount > 0 && finePaid
-                            ? `<span class="badge bg-success">Fine Paid</span>`
-                            : `<span class="badge bg-secondary">No Fine</span>`
-                    }
+                    ${fineAmount > 0 && !finePaid
+                    ? `<span class="badge bg-danger">Unpaid Fine</span>`
+                    : fineAmount > 0 && finePaid
+                        ? `<span class="badge bg-success">Fine Paid</span>`
+                        : `<span class="badge bg-secondary">No Fine</span>`
+                }
 
                 </td>
 
                 <td class="py-3 px-4 text-center text-nowrap">
 
-                    ${
-                        returned
-                            ? `
+                    ${returned
+                    ? `
                             <button
                                 class="btn btn-secondary btn-sm"
                                 disabled>
                                 Returned
                             </button>
                             `
-                            : fineAmount > 0 && !finePaid
-                            ? `
-                            <button
-                                class="btn btn-warning btn-sm"
-                                disabled>
-                                Pay Fine First
-                            </button>
-                            `
-                            : `
+                    : fineAmount > 0 && !finePaid
+? `
+<button
+    class="btn btn-sm text-white"
+    style="background:#002147;border-radius:8px;"
+    onclick="collectCash(${book.id})">
+
+    <i class="fas fa-money-bill-wave me-1"></i>
+    Collect Cash
+
+</button>
+`
+                        : `
                             <button
                                 class="btn btn-sm text-white"
                                 style="background:#002147;border-radius:8px;"
@@ -177,7 +177,7 @@ async function loadFineDetails(page = 1) {
 
                             </button>
                             `
-                    }
+                }
 
                 </td>
 
@@ -236,6 +236,50 @@ async function loadFineDetails(page = 1) {
         showToast("Failed to load borrow history");
 
     }
+}
+async function collectCash(id) {
+
+    const result = await Swal.fire({
+        title: "Collect Cash?",
+        text: "Confirm that the fine has been collected.",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: "#002147",
+        cancelButtonColor: "#c5a059",
+        confirmButtonText: "Collect",
+        cancelButtonText: "Cancel"
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+
+        const response = await fetch(
+            `/api/admin/fines/${id}/pay`,
+            {
+                method: "PUT",
+                credentials: "include"
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            showToast(data.message);
+            return;
+        }
+
+        showToast(data.message, "success");
+
+        loadFineDetails(currentPage);
+
+    } catch (err) {
+
+        console.log(err);
+        showToast("Failed to collect cash.");
+
+    }
+
 }
 
 async function returnBook(id) {

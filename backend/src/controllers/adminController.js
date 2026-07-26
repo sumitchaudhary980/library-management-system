@@ -954,6 +954,190 @@ exports.getFineUsers = (req, res) => {
 
 };
 
+// exports.getFines = (req, res) => {
+//   const userId = req.session.user.id;
+
+//   const page = parseInt(req.query.page) || 1;
+//   const limit = 10;
+//   const offset = (page - 1) * limit;
+
+//   const title = req.query.title || "";
+//   const status = req.query.status || "";
+//   const returnedFrom = req.query.returned_from || "";
+//   const returnedTo = req.query.returned_to || "";
+//   const sort = req.query.sort || "latest";
+
+//   try {
+
+//     let where = `
+//       bb.user_id = ?
+//       AND bb.fine_amount > 0
+//     `;
+
+//     const params = [userId];
+
+//     if (title) {
+//       where += ` AND b.title LIKE ?`;
+//       params.push(`%${title}%`);
+//     }
+
+//     if (status === "paid") {
+//       where += ` AND bb.fine_paid = 1`;
+//     }
+
+//     if (status === "unpaid") {
+//       where += ` AND bb.fine_paid = 0`;
+//     }
+
+//     if (returnedFrom) {
+//       where += ` AND DATE(bb.returned_at) >= DATE(?)`;
+//       params.push(returnedFrom);
+//     }
+
+//     if (returnedTo) {
+//       where += ` AND DATE(bb.returned_at) <= DATE(?)`;
+//       params.push(returnedTo);
+//     }
+
+//     let orderBy = "bb.updated_at DESC";
+
+//     switch (sort) {
+//       case "oldest":
+//         orderBy = "bb.updated_at ASC";
+//         break;
+
+//       case "highest":
+//         orderBy = "bb.fine_amount DESC";
+//         break;
+
+//       case "lowest":
+//         orderBy = "bb.fine_amount ASC";
+//         break;
+//     }
+
+//     const total = db.prepare(`
+//       SELECT COUNT(*) AS total
+//       FROM borrowed_books bb
+//       JOIN books b ON bb.book_id = b.id
+//       WHERE ${where}
+//     `).get(...params).total;
+
+//     const fines = db.prepare(`
+//       SELECT
+//     bb.id,
+//     bb.due_date,
+//     bb.returned_at,
+//     bb.fine_amount,
+//     bb.fine_paid,
+//     bb.fine_paid_at,
+
+//     b.title,
+//     b.cover_image
+
+//       FROM borrowed_books bb
+//       JOIN books b
+//       ON bb.book_id = b.id
+
+//       WHERE ${where}
+
+//       ORDER BY ${orderBy}
+
+//       LIMIT ?
+//       OFFSET ?
+//     `).all(
+//       ...params,
+//       limit,
+//       offset
+//     );
+
+//     res.json({
+//       fines,
+//       total,
+//       totalPages: Math.ceil(total / limit)
+//     });
+
+//   } catch (err) {
+//     console.log(err);
+
+//     res.status(500).json({
+//       message: "Failed to load fines."
+//     });
+//   }
+// };
+
+//pay fines
+exports.payFine = (req, res) => {
+
+  const borrowedId = parseInt(req.params.id);
+
+  try {
+
+    const fine = db.prepare(`
+      SELECT *
+      FROM borrowed_books
+      WHERE id = ?
+    `).get(borrowedId);
+
+    if (!fine) {
+      return res.status(404).json({
+        message: "Fine not found."
+      });
+    }
+
+    if (fine.fine_paid) {
+      return res.status(400).json({
+        message: "Fine already paid."
+      });
+    }
+
+    const transaction = db.transaction(() => {
+
+      db.prepare(`
+        UPDATE borrowed_books
+        SET
+          fine_paid = 1,
+          fine_paid_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+      `).run(borrowedId);
+
+      db.prepare(`
+        INSERT INTO fine_payments (
+          borrowed_book_id,
+          amount,
+          payment_method,
+          payment_status,
+          received_by,
+          paid_at
+        )
+        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      `).run(
+        borrowedId,
+        fine.fine_amount,
+        "cash",
+        "paid",
+        req.session.user.id // admin id
+      );
+
+    });
+
+    transaction();
+
+    res.json({
+      message: "Fine collected successfully."
+    });
+
+  } catch (err) {
+
+    console.log(err);
+
+    res.status(500).json({
+      message: "Failed to collect fine."
+    });
+
+  }
+
+};
+
 // get readers
 exports.getReaders = (req, res) => {
   try {
