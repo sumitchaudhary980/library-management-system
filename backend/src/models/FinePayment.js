@@ -20,25 +20,44 @@ const createFinePaymentTable = () => {
 
       transaction_id TEXT,
 
-      received_by INTEGER,
-
       remarks TEXT,
 
       paid_at DATETIME,
 
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 
       FOREIGN KEY (borrowed_book_id)
         REFERENCES borrowed_books(id)
-        ON DELETE CASCADE,
-
-      FOREIGN KEY (received_by)
-        REFERENCES users(id)
-        ON DELETE SET NULL
+        ON DELETE CASCADE
 
     );
   `);
+
+  // Automatically update older databases
+  try {
+    db.exec(`
+      ALTER TABLE fine_payments
+      ADD COLUMN product_code TEXT;
+    `);
+  } catch (_) {}
+
+  try {
+    db.exec(`
+      ALTER TABLE fine_payments
+      ADD COLUMN signature TEXT;
+    `);
+  } catch (_) {}
+
+  try {
+    db.exec(`
+      ALTER TABLE fine_payments
+      ADD COLUMN received_by INTEGER
+      REFERENCES users(id)
+      ON DELETE SET NULL;
+    `);
+  } catch (_) {}
 
   db.exec(`
     CREATE TRIGGER IF NOT EXISTS update_fine_payments_updated_at

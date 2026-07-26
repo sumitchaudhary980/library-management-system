@@ -9,8 +9,9 @@ const startFineCron = require("./jobs/fineCron");
 
 require("dotenv").config({
   path: path.join(__dirname, "../../.env"),
+  
 });
-
+console.log("ESEWA_STATUS_CHECK_URL loaded as:", process.env.ESEWA_STATUS_CHECK_URL);
 if (!process.env.SESSION_SECRET) {
   throw new Error("SESSION_SECRET is missing");
 }
@@ -77,6 +78,12 @@ app.use(
           "https://cdn.jsdelivr.net",
           "https://fonts.gstatic.com",
           "https://cdnjs.cloudflare.com"
+        ],
+
+        formAction: [
+          "'self'",
+          "https://rc-epay.esewa.com.np",
+          "https://epay.esewa.com.np"
         ]
       }
     }

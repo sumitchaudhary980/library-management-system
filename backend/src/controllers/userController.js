@@ -3,6 +3,8 @@ const streamifier = require("streamifier");
 const db = require("../config/db");
 const bcrypt = require("bcrypt");
 const transporter = require("../config/mail");
+const crypto = require("crypto");
+const axios = require("axios");
 
 //Home
 exports.getHomeData = (req, res) => {
@@ -825,60 +827,234 @@ exports.getFines = (req, res) => {
   }
 };
 
-//pay fines
-// exports.payFine = (req, res) => {
+exports.payFine = (req, res) => {
+  try {
+    const borrowedId = parseInt(req.params.id);
+    const userId = req.session.user.id;
 
-//   const userId = req.session.user.id;
-//   const borrowedId = parseInt(req.params.id);
+    const appUrl = process.env.APP_URL;
+    const productCode = process.env.ESEWA_PRODUCT_CODE;
 
-//   try {
+    const fine = db.prepare(`
+            SELECT *
+            FROM borrowed_books
+            WHERE id = ?
+              AND user_id = ?
+        `).get(borrowedId, userId);
 
-//     const fine = db.prepare(`
-//       SELECT *
-//       FROM borrowed_books
-//       WHERE
-//         id = ?
-//         AND user_id = ?
-//     `).get(
-//       borrowedId,
-//       userId
-//     );
+    if (!fine) {
+      return res.status(404).json({
+        message: "Fine not found."
+      });
+    }
 
-//     if (!fine) {
-//       return res.status(404).json({
-//         message: "Fine not found."
-//       });
-//     }
+    if (fine.fine_paid) {
+      return res.status(400).json({
+        message: "Fine already paid."
+      });
+    }
 
-//     if (fine.fine_paid) {
-//       return res.status(400).json({
-//         message: "Fine already paid."
-//       });
-//     }
+    if (Number(fine.fine_amount) <= 0) {
+      return res.status(400).json({
+        message: "No fine to pay."
+      });
+    }
 
-//     db.prepare(`
-//       UPDATE borrowed_books
-//       SET
-//         fine_paid = 1,
-//         fine_paid_at = CURRENT_TIMESTAMP
-//       WHERE id = ?
-//     `).run(borrowedId);
+    const transactionId = crypto.randomUUID();
+    const amount = Number(fine.fine_amount).toFixed(2);
 
-//     res.json({
-//       message: "Fine paid successfully."
-//     });
+    db.prepare(`
+            INSERT INTO fine_payments(
+                borrowed_book_id,
+                amount,
+                payment_method,
+                payment_status,
+                transaction_id
+            )
+            VALUES(?,?,?,?,?)
+        `).run(
+      borrowedId,
+      amount,
+      "esewa",
+      "pending",
+      transactionId
+    );
 
-//   } catch (err) {
+    // Mark older abandoned pending attempts for this fine as failed
+    db.prepare(`
+            UPDATE fine_payments
+            SET payment_status = 'failed'
+            WHERE borrowed_book_id = ?
+              AND transaction_id != ?
+              AND payment_status = 'pending'
+        `).run(borrowedId, transactionId);
 
-//     console.log(err);
+    const message =
+      `total_amount=${amount},transaction_uuid=${transactionId},product_code=${productCode}`;
 
-//     res.status(500).json({
-//       message: "Failed to pay fine."
-//     });
+    const signature = crypto
+      .createHmac("sha256", process.env.ESEWA_SECRET_KEY)
+      .update(message)
+      .digest("base64");
 
-//   }
+    res.json({
+      gatewayUrl: process.env.ESEWA_URL,
+      params: {
+        amount: amount,
+        tax_amount: "0",
+        total_amount: amount,
+        transaction_uuid: transactionId,
+        product_code: productCode,
+        product_service_charge: "0",
+        product_delivery_charge: "0",
+        success_url: `${appUrl}/api/user/fines/esewa/success`,
+        failure_url: `${appUrl}/api/user/fines/esewa/failure`,
+        signed_field_names: "total_amount,transaction_uuid,product_code",
+        signature: signature
+      }
+    });
 
-// };
+  } catch (err) {
+    console.log(err);
+
+    res.status(500).json({
+      message: "Failed to initiate payment."
+    });
+  }
+};
+
+// ESEWA SUCCESS CALLBACK
+exports.esewaSuccess = async (req, res) => {
+  try {
+    const encodedData = req.query.data;
+
+    if (!encodedData) {
+      return res.redirect(`${process.env.APP_URL}/fines?payment=failed`);
+    }
+
+    // Decode the base64 payload eSewa sends back
+    let decoded;
+    try {
+      decoded = JSON.parse(
+        Buffer.from(encodedData, "base64").toString("utf-8")
+      );
+    } catch (e) {
+      console.log("Invalid eSewa payload:", e);
+      return res.redirect(`${process.env.APP_URL}/fines?payment=failed`);
+    }
+
+    const {
+      transaction_uuid,
+      total_amount,
+      status
+    } = decoded;
+
+    if (!transaction_uuid) {
+      return res.redirect(`${process.env.APP_URL}/fines?payment=failed`);
+    }
+
+    // Look up the pending payment tied to this transaction
+    const payment = db.prepare(`
+            SELECT *
+            FROM fine_payments
+            WHERE transaction_id = ?
+            AND payment_status = 'pending'
+        `).get(transaction_uuid);
+
+    if (!payment) {
+      // Either already processed, or forged transaction_uuid
+      return res.redirect(`${process.env.APP_URL}/fines?payment=failed`);
+    }
+
+    // CRITICAL: verify with eSewa's server-to-server status check API
+    // Never trust the redirect/query params alone
+    const statusRes = await axios.get(
+      process.env.ESEWA_STATUS_CHECK_URL,
+      {
+        params: {
+          product_code: process.env.ESEWA_PRODUCT_CODE,
+          total_amount: payment.amount,
+          transaction_uuid: payment.transaction_id
+        }
+      }
+    );
+
+    const verifiedStatus = statusRes.data.status;
+
+    if (verifiedStatus !== "COMPLETE") {
+      db.prepare(`
+                UPDATE fine_payments
+                SET payment_status = 'failed'
+                WHERE transaction_id = ?
+            `).run(transaction_uuid);
+
+      return res.redirect(`${process.env.APP_URL}/fines?payment=failed`);
+    }
+
+    // Confirm the amount eSewa verified matches what we expect
+    // (defense against any tampering / mismatched transactions)
+    if (Number(statusRes.data.total_amount) !== Number(payment.amount)) {
+      console.log("Amount mismatch on transaction:", transaction_uuid);
+
+      db.prepare(`
+                UPDATE fine_payments
+                SET payment_status = 'failed'
+                WHERE transaction_id = ?
+            `).run(transaction_uuid);
+
+      return res.redirect(`${process.env.APP_URL}/fines?payment=failed`);
+    }
+
+    // Everything checks out — mark as paid, atomically
+    const markPaid = db.transaction(() => {
+      db.prepare(`
+        UPDATE fine_payments
+        SET payment_status = 'paid'
+        WHERE transaction_id = ?
+    `).run(transaction_uuid);
+
+      db.prepare(`
+                UPDATE borrowed_books
+                SET
+                    fine_paid = 1,
+                    fine_paid_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            `).run(payment.borrowed_book_id);
+    });
+
+    markPaid();
+
+    return res.redirect(`${process.env.APP_URL}/fines?payment=success`);
+
+  } catch (err) {
+    console.log(err);
+    return res.redirect(`${process.env.APP_URL}/fines?payment=error`);
+  }
+};
+
+
+// ESEWA FAILURE CALLBACK
+exports.esewaFailure = (req, res) => {
+  try {
+    const transactionId = req.query.transaction_uuid;
+
+    if (transactionId) {
+      db.prepare(`
+                UPDATE fine_payments
+                SET payment_status = 'failed'
+                WHERE transaction_id = ?
+                AND payment_status = 'pending'
+            `).run(transactionId);
+    }
+
+    return res.redirect(`${process.env.APP_URL}/fines?payment=failed`);
+
+  } catch (err) {
+    console.log(err);
+    return res.redirect(`${process.env.APP_URL}/fines?payment=error`);
+  }
+};
+
 //update profile
 exports.updateProfile = async (req, res) => {
   try {
