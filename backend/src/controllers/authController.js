@@ -728,12 +728,10 @@ exports.resetPassword = async (req, res) => {
   try {
 
     const {
+      token,
       password,
       confirmPassword
     } = req.body;
-
-
-    const { token } = req.query;
 
 
 
