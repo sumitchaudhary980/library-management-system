@@ -35,7 +35,7 @@ document.getElementById("returnedTo").max = today;
 
 
 // Show payment result toast based on eSewa redirect query param
-(function handlePaymentRedirect(){
+(function handlePaymentRedirect() {
 
     const urlParams = new URLSearchParams(window.location.search);
     const paymentStatus = urlParams.get("payment");
@@ -134,38 +134,41 @@ async function loadFines(page = 1) {
                 </td>
 
 
-                <td class="py-3 px-4 fw-semibold text-danger text-nowrap">
+               <td class="py-3 px-4 fw-bold text-center text-nowrap">
+    ${Number(fine.fine_amount) > 0
+                    ? `<span class="${fine.fine_paid ? "text-success" : "text-danger"}">
                     Rs. ${Number(fine.fine_amount).toLocaleString()}
-                </td>
+               </span>`
+                    : `<span class="text-muted">No Fine</span>`
+                }
+</td>
 
 
                 <td class="py-3 px-4 text-nowrap">
 
-                    ${
-                        fine.fine_paid
-                        ?
-                        `<span class="badge bg-success">Paid</span>`
-                        :
-                        `<span class="badge bg-danger">Unpaid</span>`
-                    }
+                    ${fine.fine_paid
+                    ?
+                    `<span class="badge bg-success">Paid</span>`
+                    :
+                    `<span class="badge bg-danger">Unpaid</span>`
+                }
 
                 </td>
 
 
                 <td class="py-3 px-4 text-center text-nowrap">
 
-                    ${
-                        fine.fine_paid
+                    ${fine.fine_paid
 
-                        ?
+                    ?
 
-                        `<button class="btn btn-secondary btn-sm px-3" disabled>
+                    `<button class="btn btn-secondary btn-sm px-3" disabled>
                             Paid
                         </button>`
 
-                        :
+                    :
 
-                        `<button 
+                    `<button 
                             class="btn btn-sm text-white px-3 pay-fine-btn"
                             data-id="${fine.id}"
                             style="background:#002147;border-radius:10px;">
@@ -175,7 +178,7 @@ async function loadFines(page = 1) {
 
                         </button>`
 
-                    }
+                }
 
                 </td>
 
@@ -261,7 +264,7 @@ async function loadFines(page = 1) {
 
 
     }
-    catch(err){
+    catch (err) {
 
         console.log(err);
         showToast("Failed to load fines");
@@ -273,17 +276,17 @@ async function loadFines(page = 1) {
 
 
 
-async function payFine(id){
+async function payFine(id) {
 
-    try{
+    try {
 
         console.log("Paying fine:", id);
 
-        const response = await fetch(`/api/user/fines/${id}/pay`,{
+        const response = await fetch(`/api/user/fines/${id}/pay`, {
 
-            method:"POST",
+            method: "POST",
 
-            credentials:"include"
+            credentials: "include"
 
         });
 
@@ -291,7 +294,7 @@ async function payFine(id){
         const data = await response.json();
 
 
-        if(!response.ok){
+        if (!response.ok) {
 
             showToast(data.message || "Failed to start payment.");
 
@@ -300,7 +303,7 @@ async function payFine(id){
         }
 
 
-        if(!data.gatewayUrl || !data.params){
+        if (!data.gatewayUrl || !data.params) {
 
             showToast("Payment could not be started.");
 
@@ -330,7 +333,7 @@ async function payFine(id){
         form.submit();
 
     }
-    catch(err){
+    catch (err) {
 
         console.log(err);
 
@@ -342,32 +345,32 @@ async function payFine(id){
 
 
 
-function triggerSearch(){
+function triggerSearch() {
 
     clearTimeout(searchTimer);
 
 
-    searchTimer=setTimeout(()=>{
+    searchTimer = setTimeout(() => {
 
 
         currentTitle =
-        document.getElementById("searchBook").value.trim();
+            document.getElementById("searchBook").value.trim();
 
 
         currentStatus =
-        document.getElementById("fineStatus").value;
+            document.getElementById("fineStatus").value;
 
 
         currentReturnedFrom =
-        document.getElementById("returnedFrom").value;
+            document.getElementById("returnedFrom").value;
 
 
         currentReturnedTo =
-        document.getElementById("returnedTo").value;
+            document.getElementById("returnedTo").value;
 
 
         currentSort =
-        document.getElementById("sortBy").value;
+            document.getElementById("sortBy").value;
 
 
 
@@ -375,7 +378,7 @@ function triggerSearch(){
 
 
 
-    },300);
+    }, 300);
 
 
 }
@@ -385,78 +388,78 @@ function triggerSearch(){
 
 
 document.getElementById("searchBook")
-.addEventListener("input",triggerSearch);
+    .addEventListener("input", triggerSearch);
 
 
 document.getElementById("fineStatus")
-.addEventListener("change",triggerSearch);
+    .addEventListener("change", triggerSearch);
 
 
 document.getElementById("returnedFrom")
-.addEventListener("change",triggerSearch);
+    .addEventListener("change", triggerSearch);
 
 
 document.getElementById("returnedTo")
-.addEventListener("change",triggerSearch);
+    .addEventListener("change", triggerSearch);
 
 
 document.getElementById("sortBy")
-.addEventListener("change",triggerSearch);
+    .addEventListener("change", triggerSearch);
 
 
 
 
 
 document.getElementById("returnedFrom")
-.addEventListener("change",()=>{
+    .addEventListener("change", () => {
 
 
-    const from =
-    document.getElementById("returnedFrom").value;
+        const from =
+            document.getElementById("returnedFrom").value;
 
 
-    const to =
-    document.getElementById("returnedTo");
+        const to =
+            document.getElementById("returnedTo");
 
 
-    to.min = from || "";
+        to.min = from || "";
 
 
-    if(to.value && to.value < from){
+        if (to.value && to.value < from) {
 
-        to.value="";
+            to.value = "";
 
-    }
+        }
 
 
-});
+    });
 
 
 
 
 
 document.getElementById("clearFilters")
-.addEventListener("click",()=>{
+    .addEventListener("click", () => {
 
 
-    document.getElementById("searchBook").value="";
-    document.getElementById("fineStatus").value="";
-    document.getElementById("returnedFrom").value="";
-    document.getElementById("returnedTo").value="";
-    document.getElementById("sortBy").value="latest";
+        document.getElementById("searchBook").value = "";
+        document.getElementById("fineStatus").value = "";
+        document.getElementById("returnedFrom").value = "";
+        document.getElementById("returnedTo").value = "";
+        document.getElementById("sortBy").value = "latest";
 
 
-    currentTitle="";
-    currentStatus="";
-    currentReturnedFrom="";
-    currentReturnedTo="";
-    currentSort="latest";
+        currentTitle = "";
+        currentStatus = "";
+        currentReturnedFrom = "";
+        currentReturnedTo = "";
+        currentSort = "latest";
 
 
-    loadFines(1);
+        loadFines(1);
 
 
-});
+    });
 
 
 
@@ -464,13 +467,13 @@ document.getElementById("clearFilters")
 
 // CSP SAFE CLICK HANDLER
 
-document.addEventListener("click",(e)=>{
+document.addEventListener("click", (e) => {
 
 
     const payBtn = e.target.closest(".pay-fine-btn");
 
 
-    if(payBtn){
+    if (payBtn) {
 
         payFine(payBtn.dataset.id);
 
@@ -483,7 +486,7 @@ document.addEventListener("click",(e)=>{
     const pageBtn = e.target.closest(".page-btn");
 
 
-    if(pageBtn){
+    if (pageBtn) {
 
         loadFines(Number(pageBtn.dataset.page));
 
