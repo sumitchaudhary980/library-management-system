@@ -11,7 +11,6 @@ require("dotenv").config({
   path: path.join(__dirname, "../../.env"),
   
 });
-console.log("ESEWA_STATUS_CHECK_URL loaded as:", process.env.ESEWA_STATUS_CHECK_URL);
 if (!process.env.SESSION_SECRET) {
   throw new Error("SESSION_SECRET is missing");
 }
@@ -97,7 +96,7 @@ app.use(cookieParser());
 
 
 // Apply rate limiter only to API routes
-// app.use("/api", rateLimiter);
+app.use("/api", rateLimiter);
 
 
 app.use(
