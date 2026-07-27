@@ -863,32 +863,39 @@ exports.payFine = (req, res) => {
     const transactionId = crypto.randomUUID();
     const amount = Number(fine.fine_amount).toFixed(2);
 
-    db.prepare(`
-            INSERT INTO fine_payments(
-                borrowed_book_id,
-                amount,
-                payment_method,
-                payment_status,
-                transaction_id
-            )
-            VALUES(?,?,?,?,?)
-        `).run(
-      borrowedId,
-      amount,
-      "esewa",
-      "pending",
-      transactionId
-    );
+    const createPayment = db.transaction(() => {
 
-    // Mark older abandoned pending attempts for this fine as failed
-    db.prepare(`
-            UPDATE fine_payments
-            SET payment_status = 'failed'
-            WHERE borrowed_book_id = ?
-              AND transaction_id != ?
-              AND payment_status = 'pending'
-        `).run(borrowedId, transactionId);
+      db.prepare(`
+        INSERT INTO fine_payments(
+            borrowed_book_id,
+            amount,
+            payment_method,
+            payment_status,
+            transaction_id
+        )
+        VALUES(?,?,?,?,?)
+    `).run(
+        borrowedId,
+        amount,
+        "esewa",
+        "pending",
+        transactionId
+      );
 
+      db.prepare(`
+        UPDATE fine_payments
+        SET payment_status = 'failed'
+        WHERE borrowed_book_id = ?
+          AND transaction_id != ?
+          AND payment_status = 'pending'
+    `).run(
+        borrowedId,
+        transactionId
+      );
+
+    });
+
+    createPayment();
     const message =
       `total_amount=${amount},transaction_uuid=${transactionId},product_code=${productCode}`;
 
@@ -1006,7 +1013,26 @@ exports.esewaSuccess = async (req, res) => {
     }
 
     // Everything checks out — mark as paid, atomically
-    const markPaid = db.transaction(() => {
+    const completePayment = db.transaction(() => {
+
+      const currentPayment = db.prepare(`
+        SELECT *
+        FROM fine_payments
+        WHERE transaction_id = ?
+    `).get(transaction_uuid);
+
+      if (!currentPayment) {
+        throw new Error("Payment not found.");
+      }
+
+      if (currentPayment.payment_status === "paid") {
+        return;
+      }
+
+      if (currentPayment.payment_status !== "pending") {
+        throw new Error("Invalid payment state.");
+      }
+
       db.prepare(`
         UPDATE fine_payments
         SET payment_status = 'paid'
@@ -1014,15 +1040,17 @@ exports.esewaSuccess = async (req, res) => {
     `).run(transaction_uuid);
 
       db.prepare(`
-                UPDATE borrowed_books
-                SET
-                    fine_paid = 1,
-                    fine_paid_at = CURRENT_TIMESTAMP
-                WHERE id = ?
-            `).run(payment.borrowed_book_id);
+        UPDATE borrowed_books
+        SET
+            fine_paid = 1,
+            fine_paid_at = CURRENT_TIMESTAMP
+        WHERE id = ?
+          AND fine_paid = 0
+    `).run(currentPayment.borrowed_book_id);
+
     });
 
-    markPaid();
+    completePayment();
 
     return res.redirect(`${process.env.APP_URL}/fines?payment=success`);
 
@@ -1039,12 +1067,32 @@ exports.esewaFailure = (req, res) => {
     const transactionId = req.query.transaction_uuid;
 
     if (transactionId) {
-      db.prepare(`
-                UPDATE fine_payments
-                SET payment_status = 'failed'
-                WHERE transaction_id = ?
-                AND payment_status = 'pending'
-            `).run(transactionId);
+
+      const failPayment = db.transaction(() => {
+
+        const payment = db.prepare(`
+            SELECT *
+            FROM fine_payments
+            WHERE transaction_id = ?
+        `).get(transactionId);
+
+        if (!payment) {
+          return;
+        }
+
+        if (payment.payment_status !== "pending") {
+          return;
+        }
+
+        db.prepare(`
+            UPDATE fine_payments
+            SET payment_status = 'failed'
+            WHERE transaction_id = ?
+        `).run(transactionId);
+
+      });
+
+      failPayment();
     }
 
     return res.redirect(`${process.env.APP_URL}/fines?payment=failed`);
