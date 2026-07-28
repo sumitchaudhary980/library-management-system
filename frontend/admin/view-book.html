@@ -169,26 +169,32 @@
                 />
               </div>
 
-              <div class="col-lg-8">
-                <div class="p-4 p-lg-5">
-                  <h2
-                    id="bookTitle"
-                    class="font-serif fw-bold text-primary-dark mb-3"
-                  ></h2>
+             <div class="col-lg-8">
+                <div class="p-4 p-lg-5 h-100 d-flex flex-column">
+                  <div
+                    class="d-flex justify-content-between align-items-start flex-wrap gap-3"
+                  >
+                    <div>
+                      <h2
+                        id="bookTitle"
+                        class="font-serif fw-bold text-primary-dark mb-2"
+                      ></h2>
 
-                  <div class="d-flex flex-wrap gap-2 mb-4">
-                    <span
-                      id="bookGenreBadge"
-                      class="badge px-3 py-2"
-                      style="
-                        background: #eef4ff;
-                        color: #002147;
-                        font-size: 0.9rem;
-                        border-radius: 30px;
-                      "
-                    ></span>
+                      <div class="d-flex flex-wrap gap-2 mt-3">
+                        <span
+                          id="bookGenreBadge"
+                          class="badge px-3 py-2"
+                          style="
+                            background: #eef4ff;
+                            color: #002147;
+                            border-radius: 30px;
+                            font-size: 0.9rem;
+                          "
+                        ></span>
 
-                    <span id="bookStockBadge"></span>
+                        <span id="bookStockBadge"></span>
+                      </div>
+                    </div>
                   </div>
 
                   <hr class="my-4" />
@@ -196,32 +202,32 @@
                   <div class="row g-4">
                     <div class="col-md-6">
                       <div
-                        class="border rounded-4 p-4 h-100"
-                        style="background: #ffffff"
+                        class="border rounded-4 h-100 p-4"
+                        style="background: #fff"
                       >
                         <small class="text-muted text-uppercase fw-semibold">
                           Author
                         </small>
 
-                        <h4
+                        <h5
                           id="bookAuthor"
                           class="mt-2 mb-0 fw-bold text-primary-dark"
-                        ></h4>
+                        ></h5>
                       </div>
                     </div>
 
                     <div class="col-md-6">
                       <div
-                        class="border rounded-4 p-4 h-100"
-                        style="background: #ffffff"
+                        class="border rounded-4 h-100 p-4"
+                        style="background: #fff"
                       >
                         <small class="text-muted text-uppercase fw-semibold">
-                          Genre
+                          Available Copies
                         </small>
 
                         <h4
-                          id="bookGenre"
-                          class="mt-2 mb-0 fw-bold text-primary-dark"
+                          id="bookStock"
+                          class="mt-2 mb-0 fw-bold text-success"
                         ></h4>
                       </div>
                     </div>
@@ -229,13 +235,28 @@
                     <div class="col-12">
                       <div
                         class="border rounded-4 p-4"
-                        style="background: #ffffff"
+                        style="background: #fff"
                       >
-                        <small class="text-muted text-uppercase fw-semibold">
-                          Stock Quantity
-                        </small>
+                        <div class="d-flex align-items-center mb-3">
+                          <i
+                            class="fas fa-align-left me-2"
+                            style="color: #002147"
+                          ></i>
 
-                        <h3 id="bookStock" class="mt-2 mb-0 fw-bold"></h3>
+                          <h5 class="mb-0 fw-bold text-primary-dark">
+                            Description
+                          </h5>
+                        </div>
+
+                        <p
+                          id="bookDescription"
+                          class="text-muted mb-0"
+                          style="
+                            line-height: 1.9;
+                            text-align: justify;
+                            font-size: 0.97rem;
+                          "
+                        ></p>
                       </div>
                     </div>
                   </div>

@@ -4,6 +4,7 @@ const db = require("../config/db");
 const transporter = require("../config/mail");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
+const axios = require("axios");
 
 exports.getDashboardData = (req, res) => {
   try {
@@ -391,6 +392,7 @@ exports.getBooks = (req, res) => {
 
 // create books
 
+
 exports.createBook = async (req, res) => {
   const { title, authorId, genreId, stock } = req.body;
 
@@ -425,8 +427,15 @@ exports.createBook = async (req, res) => {
   const stockQuantity = parseInt(stock);
 
   try {
+    // Check author and get author name
     const author = db
-      .prepare(`SELECT id FROM authors WHERE id = ?`)
+      .prepare(
+        `
+        SELECT id, name
+        FROM authors
+        WHERE id = ?
+      `
+      )
       .get(authorId);
 
     if (!author) {
@@ -437,8 +446,15 @@ exports.createBook = async (req, res) => {
       });
     }
 
+    // Check genre
     const genre = db
-      .prepare(`SELECT id FROM genres WHERE id = ?`)
+      .prepare(
+        `
+        SELECT id
+        FROM genres
+        WHERE id = ?
+      `
+      )
       .get(genreId);
 
     if (!genre) {
@@ -449,10 +465,12 @@ exports.createBook = async (req, res) => {
       });
     }
 
+    // Check duplicate
     const duplicate = db
       .prepare(
         `
-        SELECT id FROM books
+        SELECT id
+        FROM books
         WHERE LOWER(title) = LOWER(?)
         AND author_id = ?
       `
@@ -467,6 +485,30 @@ exports.createBook = async (req, res) => {
       });
     }
 
+    // Fetch description from Google Books API
+    let description = "";
+
+    try {
+      const response = await axios.get(
+        `https://www.googleapis.com/books/v1/volumes?q=intitle:${encodeURIComponent(
+          title.trim()
+        )}+inauthor:${encodeURIComponent(
+          author.name
+        )}&key=${process.env.GOOGLE_BOOKS_API_KEY}`
+      );
+
+      if (
+        response.data.items &&
+        response.data.items.length > 0 &&
+        response.data.items[0].volumeInfo.description
+      ) {
+        description = response.data.items[0].volumeInfo.description;
+      }
+    } catch (error) {
+      console.log("Google Books API Error:", error.message);
+    }
+
+    // Upload cover image
     const uploadResult = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
@@ -482,21 +524,24 @@ exports.createBook = async (req, res) => {
       streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
     });
 
+    // Insert book
     const result = db
       .prepare(
         `
         INSERT INTO books (
           title,
+          description,
           author_id,
           genre_id,
           stock_quantity,
           cover_image,
           cover_public_id
-        ) VALUES (?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
       `
       )
       .run(
         title.trim(),
+        description,
         authorId,
         genreId,
         stockQuantity,
@@ -510,6 +555,7 @@ exports.createBook = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
+
     return res.status(500).json({
       message: "Failed to add book",
     });
@@ -521,7 +567,9 @@ exports.getBook = (req, res) => {
   const id = req.params.id;
 
   try {
-    const book = db.prepare(`
+    const book = db
+      .prepare(
+        `
       SELECT
         books.*,
         authors.name AS author_name,
@@ -532,7 +580,9 @@ exports.getBook = (req, res) => {
       JOIN genres
       ON books.genre_id = genres.id
       WHERE books.id = ?
-    `).get(id);
+    `,
+      )
+      .get(id);
 
     if (!book) {
       return res.status(404).json({
@@ -541,7 +591,6 @@ exports.getBook = (req, res) => {
     }
 
     res.json(book);
-
   } catch (err) {
     console.log(err);
 
