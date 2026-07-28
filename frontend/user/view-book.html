@@ -142,59 +142,58 @@
             class="card border-0 shadow-sm overflow-hidden"
             style="border-radius: 18px"
           >
-            <div class="row g-0">
-              <div
-                class="col-lg-4 d-flex align-items-center justify-content-center p-5"
-                style="background: #f8fafc"
-              >
-                <img
-                  id="coverImage"
-                  src=""
-                  alt="Book Cover"
-                  class="img-fluid shadow"
-                  style="
-                    width: 270px;
-                    max-width: 100%;
-                    border-radius: 14px;
-                    object-fit: cover;
-                  "
-                />
+            <div class="row g-0 align-items-start">
+              <div class="col-lg-4 p-5" style="background: #f8fafc">
+                <div class="position-sticky" style="top: 20px">
+                  <img
+                    id="coverImage"
+                    src=""
+                    alt="Book Cover"
+                    class="img-fluid shadow d-block mx-auto"
+                    style="
+                      width: 270px;
+                      max-width: 100%;
+                      height: 380px;
+                      border-radius: 14px;
+                      object-fit: cover;
+                    "
+                  />
+                </div>
               </div>
 
               <div class="col-lg-8">
-                <div class="p-4 p-lg-5 h-100 d-flex flex-column">
-                  <div
-                    class="d-flex justify-content-between align-items-start flex-wrap gap-3"
-                  >
-                    <div>
-                      <h2
-                        id="bookTitle"
-                        class="font-serif fw-bold text-primary-dark mb-2"
-                      ></h2>
+                <div class="p-4 p-lg-5">
+                  <!-- Title + Badges -->
+                  <div>
+                    <h2
+                      id="bookTitle"
+                      class="font-serif fw-bold text-primary-dark mb-2"
+                    ></h2>
 
-                      <div class="d-flex flex-wrap gap-2 mt-3">
-                        <span
-                          id="bookGenreBadge"
-                          class="badge px-3 py-2"
-                          style="
-                            background: #eef4ff;
-                            color: #002147;
-                            border-radius: 30px;
-                            font-size: 0.9rem;
-                          "
-                        ></span>
+                    <div class="d-flex flex-wrap gap-2 mt-3">
+                      <span
+                        id="bookGenreBadge"
+                        class="badge px-3 py-2"
+                        style="
+                          background: #eef4ff;
+                          color: #002147;
+                          border-radius: 30px;
+                          font-size: 0.9rem;
+                        "
+                      ></span>
 
-                        <span id="bookStockBadge"></span>
-                      </div>
+                      <span id="bookStockBadge"></span>
                     </div>
                   </div>
 
                   <hr class="my-4" />
 
+                  <!-- Details -->
                   <div class="row g-4">
+                    <!-- Author -->
                     <div class="col-md-6">
                       <div
-                        class="border rounded-4 h-100 p-4"
+                        class="border rounded-4 p-4 h-100"
                         style="background: #fff"
                       >
                         <small class="text-muted text-uppercase fw-semibold">
@@ -208,9 +207,10 @@
                       </div>
                     </div>
 
+                    <!-- Available Copies -->
                     <div class="col-md-6">
                       <div
-                        class="border rounded-4 h-100 p-4"
+                        class="border rounded-4 p-4 h-100"
                         style="background: #fff"
                       >
                         <small class="text-muted text-uppercase fw-semibold">
@@ -224,6 +224,7 @@
                       </div>
                     </div>
 
+                    <!-- Description -->
                     <div class="col-12">
                       <div
                         class="border rounded-4 p-4"
