@@ -1066,7 +1066,7 @@ exports.getFineUsers = (req, res) => {
 // };
 
 //pay fines
-exports.payFine = (req, res) => {
+exports.payFine = async (req, res) => {
 
   const borrowedId = parseInt(req.params.id);
 
@@ -1121,6 +1121,303 @@ exports.payFine = (req, res) => {
     });
 
     transaction();
+     const paymentInfo = db.prepare(`
+SELECT
+    fp.transaction_id,
+    fp.payment_method,
+    fp.amount,
+
+    bb.borrowed_at,
+    bb.due_date,
+    bb.fine_paid_at,
+
+    b.title,
+    b.cover_image,
+
+    u.first_name,
+    u.last_name,
+    u.email
+
+FROM fine_payments fp
+
+INNER JOIN borrowed_books bb
+ON fp.borrowed_book_id = bb.id
+
+INNER JOIN books b
+ON bb.book_id = b.id
+
+INNER JOIN users u
+ON bb.user_id = u.id
+
+WHERE fp.borrowed_book_id = ?
+ORDER BY fp.id DESC
+LIMIT 1
+`).get(borrowedId);
+
+const borrowedOn = paymentInfo.borrowed_at;
+const dueOn = paymentInfo.due_date;
+const collectedOn = paymentInfo.fine_paid_at;
+
+ const paidOn = paymentInfo.fine_paid_at
+  ? paymentInfo.fine_paid_at.replace("T", " ")
+  : "-";
+
+ await transporter.sendMail({
+      to: paymentInfo.email,
+      cc: process.env.ADMIN_EMAIL || undefined,
+      subject: "Fine Payment Receipt - Kaiser Library",
+      html: `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+</head>
+
+<body style="margin:0;padding:40px 0;background:#f4f6f9;font-family:Arial,Helvetica,sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0">
+<tr>
+<td align="center">
+
+<table width="650" cellpadding="0" cellspacing="0"
+style="
+background:#ffffff;
+border-radius:14px;
+overflow:hidden;
+box-shadow:0 8px 30px rgba(0,0,0,.08);
+">
+
+<!-- HEADER -->
+<tr>
+<td
+align="center"
+style="
+padding:40px;
+background:linear-gradient(135deg,#123458,#1e5a92);
+color:#fff;
+">
+
+<h1 style="margin:0;font-size:30px;">
+📚 Kaiser Library
+</h1>
+
+<p style="margin-top:12px;font-size:17px;">
+Cash Fine Collection Receipt
+</p>
+
+</td>
+</tr>
+
+<!-- CONTENT -->
+<tr>
+<td style="padding:40px;">
+
+<h2
+style="
+margin-top:0;
+color:#123458;
+">
+Hello ${paymentInfo.first_name},
+</h2>
+
+<p
+style="
+font-size:15px;
+line-height:1.8;
+color:#555;
+">
+Your library fine has been collected successfully by a librarian.
+
+Below is your receipt for the cash payment.
+</p>
+
+<!-- BOOK IMAGE -->
+<div style="text-align:center;margin:35px 0;">
+
+<img
+src="${paymentInfo.cover_image}"
+style="
+width:170px;
+border-radius:12px;
+box-shadow:0 6px 20px rgba(0,0,0,.15);
+">
+
+</div>
+
+<!-- BOOK TITLE -->
+<h2
+style="
+text-align:center;
+color:#123458;
+margin-bottom:35px;
+">
+${paymentInfo.title}
+</h2>
+
+<!-- DETAILS TABLE -->
+<table
+width="100%"
+cellpadding="15"
+cellspacing="0"
+style="
+border-collapse:collapse;
+border:1px solid #e5e7eb;
+border-radius:10px;
+overflow:hidden;
+">
+
+<tr style="background:#f8fafc;">
+<td width="40%"><strong>Payment Status</strong></td>
+<td style="color:#28a745;font-weight:bold;">
+PAID
+</td>
+</tr>
+
+<tr>
+<td><strong>Fine Amount</strong></td>
+<td>
+Rs. ${Number(paymentInfo.amount).toLocaleString()}
+</td>
+</tr>
+
+<tr style="background:#f8fafc;">
+<td><strong>Cash Collected On</strong></td><td>
+${paidOn}
+</td>
+</tr>
+
+<tr style="background:#f8fafc;">
+<td><strong>Payment Method</strong></td>
+<td>CASH</td>
+</tr>
+
+<tr style="background:#f8fafc;">
+<td><strong>Borrow Date</strong></td>
+<td>
+${new Date(paymentInfo.borrowed_at).toLocaleDateString()}
+</td>
+</tr>
+
+<tr>
+<td><strong>Due Date</strong></td>
+<td>
+${new Date(paymentInfo.due_date).toLocaleDateString()}
+</td>
+</tr>
+
+
+
+</table>
+
+<!-- SUCCESS BOX -->
+<div
+style="
+margin-top:35px;
+padding:20px;
+background:#ecfdf3;
+border-left:5px solid #22c55e;
+border-radius:8px;
+">
+
+<h3
+style="
+margin:0 0 10px;
+color:#15803d;
+">
+✔ Cash Payment Received
+</h3>
+
+<p
+style="
+margin:0;
+line-height:1.8;
+color:#444;
+">
+Your payment has been verified successfully.
+
+The librarian can now process the return of your book.
+
+Thank you for using Kaiser Library.
+</p>
+
+</div>
+
+<!-- BUTTON -->
+<div
+style="
+text-align:center;
+margin:40px 0 20px;
+">
+
+<a
+href="${process.env.APP_URL}/fines"
+style="
+display:inline-block;
+padding:15px 35px;
+background:#123458;
+color:#fff;
+text-decoration:none;
+font-weight:bold;
+border-radius:8px;
+">
+View My Fines
+</a>
+
+</div>
+
+<hr
+style="
+margin:35px 0;
+border:none;
+border-top:1px solid #eee;
+">
+
+<p
+style="
+font-size:14px;
+line-height:1.8;
+color:#666;
+">
+If you did not make this payment, please contact the library administrator immediately.
+</p>
+
+<p
+style="
+margin-top:30px;
+color:#555;
+">
+Regards,<br>
+<strong>Kaiser Library Team</strong>
+</p>
+
+</td>
+</tr>
+
+<!-- FOOTER -->
+<tr>
+<td
+align="center"
+style="
+background:#f8fafc;
+padding:18px;
+font-size:13px;
+color:#888;
+">
+© ${new Date().getFullYear()} Kaiser Library. All Rights Reserved.
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>
+`,
+    });
+    
 
     res.json({
       message: "Fine collected successfully."
@@ -1530,9 +1827,7 @@ exports.returnBook = (req, res) => {
 
 
     transaction();
-
-
-
+   
     res.json({
       message: "Book returned successfully."
     });

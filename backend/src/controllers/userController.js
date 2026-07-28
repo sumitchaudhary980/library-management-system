@@ -11,68 +11,78 @@ exports.getHomeData = (req, res) => {
   const userId = req.session.user.id;
 
   try {
-
-    const user = db.prepare(`
+    const user = db
+      .prepare(
+        `
       SELECT first_name
       FROM users
       WHERE id = ?
-    `).get(userId);
+    `,
+      )
+      .get(userId);
 
-
-    const borrowedBooks = db.prepare(`
+    const borrowedBooks = db
+      .prepare(
+        `
       SELECT COUNT(*) AS total
       FROM borrowed_books
       WHERE
         user_id = ?
         AND returned = 0
-    `).get(userId).total;
+    `,
+      )
+      .get(userId).total;
 
-
-    const returnedBooks = db.prepare(`
+    const returnedBooks = db
+      .prepare(
+        `
       SELECT COUNT(*) AS total
       FROM borrowed_books
       WHERE
         user_id = ?
         AND returned = 1
-    `).get(userId).total;
+    `,
+      )
+      .get(userId).total;
 
-
-    const dueBooks = db.prepare(`
+    const dueBooks = db
+      .prepare(
+        `
       SELECT COUNT(*) AS total
       FROM borrowed_books
       WHERE
         user_id = ?
         AND returned = 0
         AND DATE(due_date) <= DATE('now', '+3 day')
-    `).get(userId).total;
+    `,
+      )
+      .get(userId).total;
 
-
-    const fineAmount = db.prepare(`
+    const fineAmount = db
+      .prepare(
+        `
       SELECT COALESCE(SUM(fine_amount), 0) AS total
       FROM borrowed_books
       WHERE
         user_id = ?
         AND fine_paid = 0
-    `).get(userId).total;
-
+    `,
+      )
+      .get(userId).total;
 
     res.json({
       firstName: user.first_name,
       borrowedBooks,
       returnedBooks,
       dueBooks,
-      fineAmount
+      fineAmount,
     });
-
-
   } catch (err) {
-
     console.log(err);
 
     res.status(500).json({
-      message: "Failed to load dashboard"
+      message: "Failed to load dashboard",
     });
-
   }
 };
 //Books
@@ -87,7 +97,9 @@ exports.getBooks = (req, res) => {
   const offset = (page - 1) * limit;
 
   try {
-    const total = db.prepare(`
+    const total = db
+      .prepare(
+        `
       SELECT COUNT(*) AS total
       FROM books
       INNER JOIN authors
@@ -98,13 +110,13 @@ exports.getBooks = (req, res) => {
         books.title LIKE ?
         AND authors.name LIKE ?
         AND genres.name LIKE ?
-    `).get(
-      `%${title}%`,
-      `%${author}%`,
-      `%${genre}%`
-    ).total;
+    `,
+      )
+      .get(`%${title}%`, `%${author}%`, `%${genre}%`).total;
 
-    const books = db.prepare(`
+    const books = db
+      .prepare(
+        `
       SELECT
         books.id,
         books.title,
@@ -124,13 +136,9 @@ exports.getBooks = (req, res) => {
       ORDER BY books.id DESC
       LIMIT ?
       OFFSET ?
-    `).all(
-      `%${title}%`,
-      `%${author}%`,
-      `%${genre}%`,
-      limit,
-      offset
-    );
+    `,
+      )
+      .all(`%${title}%`, `%${author}%`, `%${genre}%`, limit, offset);
 
     res.json({
       books,
@@ -138,7 +146,6 @@ exports.getBooks = (req, res) => {
       page,
       totalPages: Math.ceil(total / limit),
     });
-
   } catch (err) {
     console.log(err);
 
@@ -152,7 +159,9 @@ exports.getBook = (req, res) => {
   const id = req.params.id;
 
   try {
-    const book = db.prepare(`
+    const book = db
+      .prepare(
+        `
       SELECT
         books.*,
         authors.name AS author_name,
@@ -163,7 +172,9 @@ exports.getBook = (req, res) => {
       JOIN genres
       ON books.genre_id = genres.id
       WHERE books.id = ?
-    `).get(id);
+    `,
+      )
+      .get(id);
 
     if (!book) {
       return res.status(404).json({
@@ -172,7 +183,6 @@ exports.getBook = (req, res) => {
     }
 
     res.json(book);
-
   } catch (err) {
     console.log(err);
 
@@ -184,7 +194,9 @@ exports.getBook = (req, res) => {
 
 exports.getProfile = (req, res) => {
   try {
-    const user = db.prepare(`
+    const user = db
+      .prepare(
+        `
       SELECT
         id,
         first_name,
@@ -199,7 +211,9 @@ exports.getProfile = (req, res) => {
         created_at
       FROM users
       WHERE id = ?
-    `).get(req.session.user.id);
+    `,
+      )
+      .get(req.session.user.id);
 
     if (!user) {
       return res.status(404).json({
@@ -210,7 +224,6 @@ exports.getProfile = (req, res) => {
     res.json({
       user,
     });
-
   } catch (err) {
     console.log(err);
 
@@ -219,7 +232,6 @@ exports.getProfile = (req, res) => {
     });
   }
 };
-
 
 //borrow book
 exports.borrowBook = (req, res) => {
@@ -233,7 +245,7 @@ exports.borrowBook = (req, res) => {
         SELECT id, stock_quantity
         FROM books
         WHERE id = ?
-      `
+      `,
       )
       .get(bookId);
 
@@ -258,7 +270,7 @@ exports.borrowBook = (req, res) => {
           user_id = ?
           AND book_id = ?
           AND returned = 0
-      `
+      `,
       )
       .get(userId, bookId);
 
@@ -283,7 +295,7 @@ exports.borrowBook = (req, res) => {
          fine_amount
       )
 VALUES (?, ?, ?, 0, 0, 0)
-      `
+      `,
       ).run(userId, bookId, dueDate.toISOString());
 
       db.prepare(
@@ -291,7 +303,7 @@ VALUES (?, ?, ?, 0, 0, 0)
         UPDATE books
         SET stock_quantity = stock_quantity - 1
         WHERE id = ?
-      `
+      `,
       ).run(bookId);
     });
 
@@ -308,7 +320,6 @@ VALUES (?, ?, ?, 0, 0, 0)
     });
   }
 };
-
 
 //get borrowed books
 exports.getBorrowedBooks = (req, res) => {
@@ -327,7 +338,6 @@ exports.getBorrowedBooks = (req, res) => {
   const offset = (page - 1) * limit;
 
   try {
-
     let dateFilter = "";
 
     if (borrowedFrom) {
@@ -351,7 +361,6 @@ exports.getBorrowedBooks = (req, res) => {
     `;
 
     switch (sort) {
-
       case "due_desc":
         orderBy = `
           DATE(borrowed_books.due_date) DESC
@@ -396,10 +405,7 @@ exports.getBorrowedBooks = (req, res) => {
         ${dateFilter}
     `;
 
-    const totalParams = [
-      userId,
-      `%${title}%`
-    ];
+    const totalParams = [userId, `%${title}%`];
 
     if (borrowedFrom) {
       totalParams.push(borrowedFrom);
@@ -409,10 +415,7 @@ exports.getBorrowedBooks = (req, res) => {
       totalParams.push(borrowedTo);
     }
 
-    const total = db
-      .prepare(totalQuery)
-      .get(...totalParams)
-      .total;
+    const total = db.prepare(totalQuery).get(...totalParams).total;
 
     // FETCH BOOKS
 
@@ -455,10 +458,7 @@ exports.getBorrowedBooks = (req, res) => {
   OFFSET ?
 `;
 
-    const booksParams = [
-      userId,
-      `%${title}%`
-    ];
+    const booksParams = [userId, `%${title}%`];
 
     if (borrowedFrom) {
       booksParams.push(borrowedFrom);
@@ -471,42 +471,35 @@ exports.getBorrowedBooks = (req, res) => {
     booksParams.push(limit);
     booksParams.push(offset);
 
-    const books = db
-      .prepare(booksQuery)
-      .all(...booksParams);
+    const books = db.prepare(booksQuery).all(...booksParams);
 
     const today = new Date();
 
-    const formattedBooks = books.map(book => {
-
+    const formattedBooks = books.map((book) => {
       const dueDate = new Date(book.due_date);
 
       const remainingDays = Math.ceil(
-        (dueDate - today) / (1000 * 60 * 60 * 24)
+        (dueDate - today) / (1000 * 60 * 60 * 24),
       );
 
       return {
         ...book,
-        remaining_days: remainingDays
+        remaining_days: remainingDays,
       };
-
     });
 
     res.json({
       books: formattedBooks,
       total,
       page,
-      totalPages: Math.ceil(total / limit)
+      totalPages: Math.ceil(total / limit),
     });
-
   } catch (err) {
-
     console.log(err);
 
     res.status(500).json({
-      message: "Server error"
+      message: "Server error",
     });
-
   }
 };
 
@@ -516,65 +509,63 @@ exports.renewBook = (req, res) => {
   const borrowedId = parseInt(req.params.id);
 
   try {
-    const borrowed = db.prepare(`
+    const borrowed = db
+      .prepare(
+        `
       SELECT *
       FROM borrowed_books
       WHERE
         id = ?
         AND user_id = ?
         AND returned = 0
-    `).get(borrowedId, userId);
+    `,
+      )
+      .get(borrowedId, userId);
 
     if (!borrowed) {
       return res.status(404).json({
-        message: "Borrowed book not found."
+        message: "Borrowed book not found.",
       });
     }
 
-    if (
-      borrowed.fine_amount > 0 &&
-      borrowed.fine_paid === 0
-    ) {
+    if (borrowed.fine_amount > 0 && borrowed.fine_paid === 0) {
       return res.status(400).json({
-        message: "Please clear the fine before renewing this book."
+        message: "Please clear the fine before renewing this book.",
       });
     }
 
     if (borrowed.renewed) {
       return res.status(400).json({
-        message: "This book has already been renewed."
+        message: "This book has already been renewed.",
       });
     }
 
     const dueDate = new Date(borrowed.due_date);
     dueDate.setDate(dueDate.getDate() + 7);
 
-    db.prepare(`
+    db.prepare(
+      `
       UPDATE borrowed_books
       SET
         due_date = ?,
         renewed = 1
       WHERE id = ?
-    `).run(
-      dueDate.toISOString(),
-      borrowedId
-    );
+    `,
+    ).run(dueDate.toISOString(), borrowedId);
 
     res.json({
-      message: "Book renewed successfully."
+      message: "Book renewed successfully.",
     });
-
   } catch (err) {
     console.log(err);
 
     res.status(500).json({
-      message: "Failed to renew book."
+      message: "Failed to renew book.",
     });
   }
 };
 
 //return borrowed book
-
 
 // get borrow history
 exports.getBorrowHistory = (req, res) => {
@@ -597,10 +588,7 @@ exports.getBorrowHistory = (req, res) => {
     AND books.title LIKE ?
   `;
 
-  const params = [
-    userId,
-    `%${title}%`
-  ];
+  const params = [userId, `%${title}%`];
 
   if (borrowedFrom) {
     whereClause += ` AND DATE(borrowed_books.borrowed_at) >= DATE(?)`;
@@ -642,8 +630,9 @@ exports.getBorrowHistory = (req, res) => {
   }
 
   try {
-
-    const total = db.prepare(`
+    const total = db
+      .prepare(
+        `
       SELECT COUNT(*) AS total
       FROM borrowed_books
 
@@ -657,9 +646,13 @@ exports.getBorrowHistory = (req, res) => {
         ON books.genre_id = genres.id
 
       WHERE ${whereClause}
-    `).get(...params).total;
+    `,
+      )
+      .get(...params).total;
 
-    const books = db.prepare(`
+    const books = db
+      .prepare(
+        `
       SELECT
 
         borrowed_books.id AS borrowed_id,
@@ -691,27 +684,22 @@ exports.getBorrowHistory = (req, res) => {
 
       LIMIT ?
       OFFSET ?
-    `).all(
-      ...params,
-      limit,
-      offset
-    );
+    `,
+      )
+      .all(...params, limit, offset);
 
     res.json({
       books,
       total,
       page,
-      totalPages: Math.ceil(total / limit)
+      totalPages: Math.ceil(total / limit),
     });
-
   } catch (err) {
-
     console.error(err);
 
     res.status(500).json({
-      message: "Failed to load borrow history"
+      message: "Failed to load borrow history",
     });
-
   }
 };
 
@@ -730,7 +718,6 @@ exports.getFines = (req, res) => {
   const sort = req.query.sort || "latest";
 
   try {
-
     let where = `
       bb.user_id = ?
       AND bb.fine_amount > 0
@@ -777,14 +764,20 @@ exports.getFines = (req, res) => {
         break;
     }
 
-    const total = db.prepare(`
+    const total = db
+      .prepare(
+        `
       SELECT COUNT(*) AS total
       FROM borrowed_books bb
       JOIN books b ON bb.book_id = b.id
       WHERE ${where}
-    `).get(...params).total;
+    `,
+      )
+      .get(...params).total;
 
-    const fines = db.prepare(`
+    const fines = db
+      .prepare(
+        `
       SELECT
     bb.id,
     bb.due_date,
@@ -806,23 +799,20 @@ exports.getFines = (req, res) => {
 
       LIMIT ?
       OFFSET ?
-    `).all(
-      ...params,
-      limit,
-      offset
-    );
+    `,
+      )
+      .all(...params, limit, offset);
 
     res.json({
       fines,
       total,
-      totalPages: Math.ceil(total / limit)
+      totalPages: Math.ceil(total / limit),
     });
-
   } catch (err) {
     console.log(err);
 
     res.status(500).json({
-      message: "Failed to load fines."
+      message: "Failed to load fines.",
     });
   }
 };
@@ -835,28 +825,46 @@ exports.payFine = (req, res) => {
     const appUrl = process.env.APP_URL;
     const productCode = process.env.ESEWA_PRODUCT_CODE;
 
-    const fine = db.prepare(`
-            SELECT *
-            FROM borrowed_books
-            WHERE id = ?
-              AND user_id = ?
-        `).get(borrowedId, userId);
+    const fine = db
+      .prepare(
+        `
+SELECT
+    bb.*,
+    b.title,
+    b.cover_image,
+    u.first_name,
+    u.last_name,
+    u.email
+FROM borrowed_books bb
+
+INNER JOIN books b
+ON bb.book_id = b.id
+
+INNER JOIN users u
+ON bb.user_id = u.id
+
+WHERE
+    bb.id = ?
+    AND bb.user_id = ?
+`,
+      )
+      .get(borrowedId, userId);
 
     if (!fine) {
       return res.status(404).json({
-        message: "Fine not found."
+        message: "Fine not found.",
       });
     }
 
     if (fine.fine_paid) {
       return res.status(400).json({
-        message: "Fine already paid."
+        message: "Fine already paid.",
       });
     }
 
     if (Number(fine.fine_amount) <= 0) {
       return res.status(400).json({
-        message: "No fine to pay."
+        message: "No fine to pay.",
       });
     }
 
@@ -864,8 +872,8 @@ exports.payFine = (req, res) => {
     const amount = Number(fine.fine_amount).toFixed(2);
 
     const createPayment = db.transaction(() => {
-
-      db.prepare(`
+      db.prepare(
+        `
         INSERT INTO fine_payments(
             borrowed_book_id,
             amount,
@@ -874,30 +882,22 @@ exports.payFine = (req, res) => {
             transaction_id
         )
         VALUES(?,?,?,?,?)
-    `).run(
-        borrowedId,
-        amount,
-        "esewa",
-        "pending",
-        transactionId
-      );
+    `,
+      ).run(borrowedId, amount, "esewa", "pending", transactionId);
 
-      db.prepare(`
+      db.prepare(
+        `
         UPDATE fine_payments
         SET payment_status = 'failed'
         WHERE borrowed_book_id = ?
           AND transaction_id != ?
           AND payment_status = 'pending'
-    `).run(
-        borrowedId,
-        transactionId
-      );
-
+    `,
+      ).run(borrowedId, transactionId);
     });
 
     createPayment();
-    const message =
-      `total_amount=${amount},transaction_uuid=${transactionId},product_code=${productCode}`;
+    const message = `total_amount=${amount},transaction_uuid=${transactionId},product_code=${productCode}`;
 
     const signature = crypto
       .createHmac("sha256", process.env.ESEWA_SECRET_KEY)
@@ -917,15 +917,14 @@ exports.payFine = (req, res) => {
         success_url: `${appUrl}/api/user/fines/esewa/success`,
         failure_url: `${appUrl}/api/user/fines/esewa/failure`,
         signed_field_names: "total_amount,transaction_uuid,product_code",
-        signature: signature
-      }
+        signature: signature,
+      },
     });
-
   } catch (err) {
     console.log(err);
 
     res.status(500).json({
-      message: "Failed to initiate payment."
+      message: "Failed to initiate payment.",
     });
   }
 };
@@ -943,30 +942,30 @@ exports.esewaSuccess = async (req, res) => {
     let decoded;
     try {
       decoded = JSON.parse(
-        Buffer.from(encodedData, "base64").toString("utf-8")
+        Buffer.from(encodedData, "base64").toString("utf-8"),
       );
     } catch (e) {
       console.log("Invalid eSewa payload:", e);
       return res.redirect(`${process.env.APP_URL}/fines?payment=failed`);
     }
 
-    const {
-      transaction_uuid,
-      total_amount,
-      status
-    } = decoded;
+    const { transaction_uuid, total_amount, status } = decoded;
 
     if (!transaction_uuid) {
       return res.redirect(`${process.env.APP_URL}/fines?payment=failed`);
     }
 
     // Look up the pending payment tied to this transaction
-    const payment = db.prepare(`
+    const payment = db
+      .prepare(
+        `
             SELECT *
             FROM fine_payments
             WHERE transaction_id = ?
             AND payment_status = 'pending'
-        `).get(transaction_uuid);
+        `,
+      )
+      .get(transaction_uuid);
 
     if (!payment) {
       // Either already processed, or forged transaction_uuid
@@ -975,25 +974,24 @@ exports.esewaSuccess = async (req, res) => {
 
     // CRITICAL: verify with eSewa's server-to-server status check API
     // Never trust the redirect/query params alone
-    const statusRes = await axios.get(
-      process.env.ESEWA_STATUS_CHECK_URL,
-      {
-        params: {
-          product_code: process.env.ESEWA_PRODUCT_CODE,
-          total_amount: payment.amount,
-          transaction_uuid: payment.transaction_id
-        }
-      }
-    );
+    const statusRes = await axios.get(process.env.ESEWA_STATUS_CHECK_URL, {
+      params: {
+        product_code: process.env.ESEWA_PRODUCT_CODE,
+        total_amount: payment.amount,
+        transaction_uuid: payment.transaction_id,
+      },
+    });
 
     const verifiedStatus = statusRes.data.status;
 
     if (verifiedStatus !== "COMPLETE") {
-      db.prepare(`
+      db.prepare(
+        `
                 UPDATE fine_payments
                 SET payment_status = 'failed'
                 WHERE transaction_id = ?
-            `).run(transaction_uuid);
+            `,
+      ).run(transaction_uuid);
 
       return res.redirect(`${process.env.APP_URL}/fines?payment=failed`);
     }
@@ -1003,23 +1001,28 @@ exports.esewaSuccess = async (req, res) => {
     if (Number(statusRes.data.total_amount) !== Number(payment.amount)) {
       console.log("Amount mismatch on transaction:", transaction_uuid);
 
-      db.prepare(`
+      db.prepare(
+        `
                 UPDATE fine_payments
                 SET payment_status = 'failed'
                 WHERE transaction_id = ?
-            `).run(transaction_uuid);
+            `,
+      ).run(transaction_uuid);
 
       return res.redirect(`${process.env.APP_URL}/fines?payment=failed`);
     }
 
     // Everything checks out — mark as paid, atomically
     const completePayment = db.transaction(() => {
-
-      const currentPayment = db.prepare(`
+      const currentPayment = db
+        .prepare(
+          `
         SELECT *
         FROM fine_payments
         WHERE transaction_id = ?
-    `).get(transaction_uuid);
+    `,
+        )
+        .get(transaction_uuid);
 
       if (!currentPayment) {
         throw new Error("Payment not found.");
@@ -1033,33 +1036,331 @@ exports.esewaSuccess = async (req, res) => {
         throw new Error("Invalid payment state.");
       }
 
-      db.prepare(`
+      db.prepare(
+        `
         UPDATE fine_payments
         SET payment_status = 'paid'
         WHERE transaction_id = ?
-    `).run(transaction_uuid);
+    `,
+      ).run(transaction_uuid);
 
-      db.prepare(`
+      db.prepare(
+        `
         UPDATE borrowed_books
         SET
             fine_paid = 1,
-            fine_paid_at = CURRENT_TIMESTAMP
+            fine_paid_at = CURRENT_TIMESTAMP,
+            returned = 1,
+            returned_at = CURRENT_TIMESTAMP
         WHERE id = ?
           AND fine_paid = 0
-    `).run(currentPayment.borrowed_book_id);
-
+    `,
+      ).run(currentPayment.borrowed_book_id);
     });
 
     completePayment();
+    const paymentInfo = db
+      .prepare(
+        `
+SELECT
+    fp.transaction_id,
+    fp.payment_method,
+    fp.amount,
+
+    bb.borrowed_at,
+    bb.due_date,
+    bb.fine_paid_at,
+
+    b.title,
+    b.cover_image,
+
+    u.first_name,
+    u.last_name,
+    u.email
+
+FROM fine_payments fp
+
+INNER JOIN borrowed_books bb
+ON fp.borrowed_book_id = bb.id
+
+INNER JOIN books b
+ON bb.book_id = b.id
+
+INNER JOIN users u
+ON bb.user_id = u.id
+
+WHERE fp.transaction_id = ?
+`,
+      )
+      .get(transaction_uuid);
+
+      const paidOn = paymentInfo.fine_paid_at
+  ? paymentInfo.fine_paid_at.replace("T", " ")
+  : "-";
+    await transporter.sendMail({
+      to: paymentInfo.email,
+      cc: process.env.ADMIN_EMAIL || undefined,
+      subject: "Fine Payment Receipt - Kaiser Library",
+      html: `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+</head>
+
+<body style="margin:0;padding:40px 0;background:#f4f6f9;font-family:Arial,Helvetica,sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0">
+<tr>
+<td align="center">
+
+<table width="650" cellpadding="0" cellspacing="0"
+style="
+background:#ffffff;
+border-radius:14px;
+overflow:hidden;
+box-shadow:0 8px 30px rgba(0,0,0,.08);
+">
+
+<!-- HEADER -->
+<tr>
+<td
+align="center"
+style="
+padding:40px;
+background:linear-gradient(135deg,#123458,#1e5a92);
+color:#fff;
+">
+
+<h1 style="margin:0;font-size:30px;">
+📚 Kaiser Library
+</h1>
+
+<p style="margin-top:12px;font-size:17px;">
+Fine Payment Successful
+</p>
+
+</td>
+</tr>
+
+<!-- CONTENT -->
+<tr>
+<td style="padding:40px;">
+
+<h2
+style="
+margin-top:0;
+color:#123458;
+">
+Hello ${paymentInfo.first_name},
+</h2>
+
+<p
+style="
+font-size:15px;
+line-height:1.8;
+color:#555;
+">
+Your fine payment has been received successfully.
+Below is your payment receipt.
+</p>
+
+<!-- BOOK IMAGE -->
+<div style="text-align:center;margin:35px 0;">
+
+<img
+src="${paymentInfo.cover_image}"
+style="
+width:170px;
+border-radius:12px;
+box-shadow:0 6px 20px rgba(0,0,0,.15);
+">
+
+</div>
+
+<!-- BOOK TITLE -->
+<h2
+style="
+text-align:center;
+color:#123458;
+margin-bottom:35px;
+">
+${paymentInfo.title}
+</h2>
+
+<!-- DETAILS TABLE -->
+<table
+width="100%"
+cellpadding="15"
+cellspacing="0"
+style="
+border-collapse:collapse;
+border:1px solid #e5e7eb;
+border-radius:10px;
+overflow:hidden;
+">
+
+<tr style="background:#f8fafc;">
+<td width="40%"><strong>Payment Status</strong></td>
+<td style="color:#28a745;font-weight:bold;">
+PAID
+</td>
+</tr>
+
+<tr>
+<td><strong>Fine Amount</strong></td>
+<td>
+Rs. ${Number(paymentInfo.amount).toLocaleString()}
+</td>
+</tr>
+
+<tr style="background:#f8fafc;">
+<td><strong>Paid On</strong></td>
+<td>
+${paidOn}
+</td>
+</tr>
+
+<tr>
+<td><strong>Transaction ID</strong></td>
+<td style="word-break:break-word;">
+${paymentInfo.transaction_id}
+</td>
+</tr>
+
+<tr style="background:#f8fafc;">
+<td><strong>Borrow Date</strong></td>
+<td>
+${new Date(paymentInfo.borrowed_at).toLocaleDateString()}
+</td>
+</tr>
+
+<tr>
+<td><strong>Due Date</strong></td>
+<td>
+${new Date(paymentInfo.due_date).toLocaleDateString()}
+</td>
+</tr>
+
+
+
+</table>
+
+<!-- SUCCESS BOX -->
+<div
+style="
+margin-top:35px;
+padding:20px;
+background:#ecfdf3;
+border-left:5px solid #22c55e;
+border-radius:8px;
+">
+
+<h3
+style="
+margin:0 0 10px;
+color:#15803d;
+">
+✔ Payment Completed
+</h3>
+
+<p
+style="
+margin:0;
+line-height:1.8;
+color:#444;
+">
+Your payment has been verified successfully.
+
+The librarian can now process the return of your book.
+
+Thank you for using Kaiser Library.
+</p>
+
+</div>
+
+<!-- BUTTON -->
+<div
+style="
+text-align:center;
+margin:40px 0 20px;
+">
+
+<a
+href="${process.env.APP_URL}/fines"
+style="
+display:inline-block;
+padding:15px 35px;
+background:#123458;
+color:#fff;
+text-decoration:none;
+font-weight:bold;
+border-radius:8px;
+">
+View My Fines
+</a>
+
+</div>
+
+<hr
+style="
+margin:35px 0;
+border:none;
+border-top:1px solid #eee;
+">
+
+<p
+style="
+font-size:14px;
+line-height:1.8;
+color:#666;
+">
+If you did not make this payment, please contact the library administrator immediately.
+</p>
+
+<p
+style="
+margin-top:30px;
+color:#555;
+">
+Regards,<br>
+<strong>Kaiser Library Team</strong>
+</p>
+
+</td>
+</tr>
+
+<!-- FOOTER -->
+<tr>
+<td
+align="center"
+style="
+background:#f8fafc;
+padding:18px;
+font-size:13px;
+color:#888;
+">
+© ${new Date().getFullYear()} Kaiser Library. All Rights Reserved.
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
+</table>
+
+</body>
+</html>
+`,
+    });
 
     return res.redirect(`${process.env.APP_URL}/fines?payment=success`);
-
   } catch (err) {
     console.log(err);
     return res.redirect(`${process.env.APP_URL}/fines?payment=error`);
   }
 };
-
 
 // ESEWA FAILURE CALLBACK
 exports.esewaFailure = (req, res) => {
@@ -1067,14 +1368,16 @@ exports.esewaFailure = (req, res) => {
     const transactionId = req.query.transaction_uuid;
 
     if (transactionId) {
-
       const failPayment = db.transaction(() => {
-
-        const payment = db.prepare(`
+        const payment = db
+          .prepare(
+            `
             SELECT *
             FROM fine_payments
             WHERE transaction_id = ?
-        `).get(transactionId);
+        `,
+          )
+          .get(transactionId);
 
         if (!payment) {
           return;
@@ -1084,19 +1387,19 @@ exports.esewaFailure = (req, res) => {
           return;
         }
 
-        db.prepare(`
+        db.prepare(
+          `
             UPDATE fine_payments
             SET payment_status = 'failed'
             WHERE transaction_id = ?
-        `).run(transactionId);
-
+        `,
+        ).run(transactionId);
       });
 
       failPayment();
     }
 
     return res.redirect(`${process.env.APP_URL}/fines?payment=failed`);
-
   } catch (err) {
     console.log(err);
     return res.redirect(`${process.env.APP_URL}/fines?payment=error`);
@@ -1127,7 +1430,7 @@ exports.updateProfile = async (req, res) => {
     if (Object.keys(errors).length) {
       return res.status(400).json({
         message: "Validation failed",
-        errors
+        errors,
       });
     }
 
@@ -1146,12 +1449,12 @@ exports.updateProfile = async (req, res) => {
         const uploadStream = cloudinary.uploader.upload_stream(
           {
             folder: "kaiser-library/profile",
-            resource_type: "image"
+            resource_type: "image",
           },
           (err, result) => {
             if (err) return reject(err);
             resolve(result);
-          }
+          },
         );
 
         streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
@@ -1166,7 +1469,8 @@ exports.updateProfile = async (req, res) => {
       profilePublicId = uploadResult.public_id;
     }
 
-    db.prepare(`
+    db.prepare(
+      `
       UPDATE users SET
         first_name=?,
         last_name=?,
@@ -1176,7 +1480,8 @@ exports.updateProfile = async (req, res) => {
         profile_image=?,
         profile_image_public_id=?
       WHERE id=?
-    `).run(
+    `,
+    ).run(
       first_name.trim(),
       last_name.trim(),
       gender,
@@ -1184,11 +1489,10 @@ exports.updateProfile = async (req, res) => {
       address.trim(),
       profileImage,
       profilePublicId,
-      userId
+      userId,
     );
 
     res.json({ message: "Profile updated successfully" });
-
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Failed to update profile" });
@@ -1197,13 +1501,7 @@ exports.updateProfile = async (req, res) => {
 
 exports.changePassword = async (req, res) => {
   try {
-
-    const {
-      currentPassword,
-      password,
-      confirmPassword
-    } = req.body;
-
+    const { currentPassword, password, confirmPassword } = req.body;
 
     if (!currentPassword || !password || !confirmPassword) {
       return res.status(400).json({
@@ -1211,13 +1509,11 @@ exports.changePassword = async (req, res) => {
       });
     }
 
-
     if (password !== confirmPassword) {
       return res.status(400).json({
         message: "Passwords do not match",
       });
     }
-
 
     if (password.length < 8) {
       return res.status(400).json({
@@ -1225,15 +1521,15 @@ exports.changePassword = async (req, res) => {
       });
     }
 
-
-
-    const user = db.prepare(`
+    const user = db
+      .prepare(
+        `
       SELECT *
       FROM users
       WHERE id = ?
-    `).get(req.session.user.id);
-
-
+    `,
+      )
+      .get(req.session.user.id);
 
     if (!user) {
       return res.status(404).json({
@@ -1241,14 +1537,10 @@ exports.changePassword = async (req, res) => {
       });
     }
 
-
-
-    const currentPasswordMatch =
-      await bcrypt.compare(
-        currentPassword,
-        user.password
-      );
-
+    const currentPasswordMatch = await bcrypt.compare(
+      currentPassword,
+      user.password,
+    );
 
     if (!currentPasswordMatch) {
       return res.status(400).json({
@@ -1256,60 +1548,38 @@ exports.changePassword = async (req, res) => {
       });
     }
 
-
-
-    const samePassword =
-      await bcrypt.compare(
-        password,
-        user.password
-      );
-
+    const samePassword = await bcrypt.compare(password, user.password);
 
     if (samePassword) {
       return res.status(400).json({
-        message:
-          "New password cannot be the same as current password",
+        message: "New password cannot be the same as current password",
       });
     }
 
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-
-    const hashedPassword =
-      await bcrypt.hash(password, 10);
-
-
-
-    db.prepare(`
+    db.prepare(
+      `
       UPDATE users
       SET
         password = ?,
         must_change_password = 0,
         updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
-    `).run(
-      hashedPassword,
-      user.id
-    );
+    `,
+    ).run(hashedPassword, user.id);
 
-
-
-    const changedAt =
-      new Date().toLocaleString(
-        "en-US",
-        {
-          dateStyle: "long",
-          timeStyle: "short",
-        }
-      );
+    const changedAt = new Date().toLocaleString("en-US", {
+      dateStyle: "long",
+      timeStyle: "short",
+    });
 
     await transporter.sendMail({
-
       to: user.email,
 
-      subject:
-        "Your Kaiser Library Password Has Been Changed",
+      subject: "Your Kaiser Library Password Has Been Changed",
 
-      html:`
+      html: `
 
 <!DOCTYPE html>
 <html>
@@ -1559,28 +1829,17 @@ color:#888;
 
 </html>
 
-`
-
+`,
     });
 
     return res.json({
-      message:
-        "Password changed successfully",
+      message: "Password changed successfully",
     });
-
-
   } catch (error) {
-
-    console.error(
-      "Change password error:",
-      error
-    );
-
+    console.error("Change password error:", error);
 
     return res.status(500).json({
-      message:
-        "Server error",
+      message: "Server error",
     });
-
   }
 };
