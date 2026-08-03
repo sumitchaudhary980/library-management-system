@@ -1296,7 +1296,7 @@ margin:40px 0 20px;
 ">
 
 
-href="${process.env.APP_URL}/fines"
+<a href="${process.env.APP_URL}/fines"
 style="
 display:inline-block;
 padding:15px 35px;
