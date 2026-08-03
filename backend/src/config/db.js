@@ -22,6 +22,17 @@ if (process.env.NODE_ENV === "production") {
         args: [],
       });
     },
+    async run(sql, args = []) {
+      const result = await turso.execute({
+        sql,
+        args,
+      });
+
+      return {
+        changes: result.rowsAffected,
+        lastInsertRowid: result.lastInsertRowid,
+      };
+    },
 
     prepare(sql) {
       return {
