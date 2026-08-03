@@ -8,77 +8,76 @@ if (process.env.NODE_ENV === "production") {
     authToken: process.env.TURSO_AUTH_TOKEN,
   });
 
-const db = {
+  const db = {
+    async execute(sql, args = []) {
+      return await turso.execute({
+        sql,
+        args,
+      });
+    },
 
-  async execute(sql, args = []) {
-    return await turso.execute({
-      sql,
-      args,
-    });
-  },
+    async exec(sql) {
+      return await turso.execute({
+        sql,
+        args: [],
+      });
+    },
 
+    prepare(sql) {
+      return {
+        async get(...params) {
+          const result = await turso.execute({
+            sql,
+            args: params,
+          });
 
-  async exec(sql) {
-    return await turso.execute(sql);
-  },
+          return result.rows[0] || undefined;
+        },
 
+        async all(...params) {
+          const result = await turso.execute({
+            sql,
+            args: params,
+          });
 
-  prepare(sql) {
-    return {
-      async get(...params) {
-        const result = await turso.execute({
-          sql,
-          args: params,
-        });
+          return result.rows;
+        },
 
-        return result.rows[0] || undefined;
-      },
+        async run(...params) {
+          const result = await turso.execute({
+            sql,
+            args: params,
+          });
 
-      async all(...params) {
-        const result = await turso.execute({
-          sql,
-          args: params,
-        });
+          return {
+            changes: result.rowsAffected,
+            lastInsertRowid: result.lastInsertRowid,
+          };
+        },
+      };
+    },
 
-        return result.rows;
-      },
+    transaction(callback) {
+      return async (...args) => {
+        await turso.execute("BEGIN");
 
-      async run(...params) {
-        const result = await turso.execute({
-          sql,
-          args: params,
-        });
+        try {
+          const result = await callback(...args);
 
-        return {
-          changes: result.rowsAffected,
-          lastInsertRowid: result.lastInsertRowid,
-        };
-      },
-    };
-  },
+          await turso.execute("COMMIT");
 
-
-  transaction(callback) {
-    return async (...args) => {
-      await turso.execute("BEGIN");
-
-      try {
-        const result = await callback(...args);
-        await turso.execute("COMMIT");
-        return result;
-      } catch (error) {
-        await turso.execute("ROLLBACK");
-        throw error;
-      }
-    };
-  },
-};
-
+          return result;
+        } catch (error) {
+          await turso.execute("ROLLBACK");
+          throw error;
+        }
+      };
+    },
+  };
 
   console.log("Connected to Turso");
 
   module.exports = db;
-
 
 } else {
 
@@ -86,9 +85,7 @@ const db = {
   const path = require("path");
   const fs = require("fs");
 
-
   const dbDir = path.join(__dirname, "..", "database");
-
 
   if (!fs.existsSync(dbDir)) {
     fs.mkdirSync(dbDir, {
@@ -96,18 +93,14 @@ const db = {
     });
   }
 
-
   const dbPath = path.join(
     dbDir,
     "kaiserlibrary.sqlite"
   );
 
-
   const db = new Database(dbPath);
 
-
   console.log("Connected to SQLite:", dbPath);
-
 
   module.exports = db;
 }
