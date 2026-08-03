@@ -84,8 +84,10 @@ async function loadFineDetails(page = 1) {
         }
 
         data.books.forEach(book => {
+            console.log(book);
 
             const returned = Number(book.returned) === 1;
+
             const finePaid = Number(book.fine_paid) === 1;
             const fineAmount = Number(book.fine_amount || 0);
             const paidAmount = Number(book.fine_paid_amount || 0);
@@ -127,8 +129,8 @@ async function loadFineDetails(page = 1) {
                <td class="py-3 px-4 fw-bold text-center text-nowrap">
 
 ${fineAmount > 0
-?
-`
+                    ?
+                    `
 <div>
 
     <span class="badge bg-danger mb-1">
@@ -141,68 +143,109 @@ ${fineAmount > 0
         Paid: Rs. ${paidAmount.toLocaleString()}
     </span>
 
-    ${
-        remainingFine > 0
-        ?
-        `
+    ${remainingFine > 0
+                        ?
+                        `
         <br>
         <span class="badge bg-warning text-dark">
             Due: Rs. ${remainingFine.toLocaleString()}
         </span>
         `
-        :
-        ""
-    }
+                        :
+                        ""
+                    }
 
 </div>
 `
-:
-`
+                    :
+                    `
 <span class="text-muted">
 No Fine
 </span>
 `
 
-}
+                }
 
 </td>
 
-                <td class="py-3 px-4 text-center text-nowrap">
+             <td class="py-3 px-4 text-center text-nowrap">
 
-                    ${returned
+${remainingFine > 0
                     ? `
-                            <button
-                                class="btn btn-secondary btn-sm"
-                                disabled>
-                                Returned
-                            </button>
-                            `
-                    : remainingFine > 0
-? `
-<button
-    class="btn btn-sm text-white"
-    style="background:#002147;border-radius:8px;"
-    onclick="collectCash(${book.id})">
-    
-    <i class="fas fa-money-bill-wave me-1"></i>
-    Collect Cash
+        <button
+            class="btn btn-sm text-white"
+            style="background:#002147;border-radius:8px;"
+            onclick="collectCash(${book.id})">
 
-</button>
-`
+            <i class="fas fa-money-bill-wave me-1"></i>
+            Collect Cash
+
+        </button>
+        `
+                    : returned
+                        ? `
+            <button
+                class="btn btn-secondary btn-sm"
+                disabled>
+                Returned
+            </button>
+            `
                         : `
-                            <button
-                                class="btn btn-sm text-white"
-                                style="background:#002147;border-radius:8px;"
-                                onclick="returnBook(${book.id})">
+            <button
+                class="btn btn-sm text-white"
+                style="background:#002147;border-radius:8px;"
+                onclick="returnBook(${book.id})">
 
-                                <i class="fas fa-rotate-left me-1"></i>
-                                Return
+                <i class="fas fa-rotate-left me-1"></i>
+                Return
 
-                            </button>
-                            `
+            </button>
+            `
                 }
 
-                </td>
+</td>
+<td class="py-3 px-4 text-center text-nowrap">
+
+    ${remainingFine > 0
+                    ? `
+        <button
+            class="btn btn-sm text-white"
+            style="background:#002147;border-radius:8px;"
+            onclick="collectCash(${book.id})">
+
+            <i class="fas fa-money-bill-wave me-1"></i>
+            Collect Cash
+
+        </button>
+        `
+                    : !returned
+                        ? `
+        <button
+            class="btn btn-sm text-white"
+            style="background:#002147;border-radius:8px;"
+            onclick="returnBook(${book.id})">
+
+            <i class="fas fa-rotate-left me-1"></i>
+            Return
+
+        </button>
+        `
+                        : `
+        `
+                }
+
+</td>
+
+<td class="py-3 px-4 text-center text-nowrap">
+
+    ${returned
+                    ? `<span class="badge bg-success">Returned</span>`
+                    : `<span class="badge bg-warning text-dark">Borrowed</span>`
+                }
+
+</td>
+
+
 
             </tr>
             `;
