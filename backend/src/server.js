@@ -24,7 +24,7 @@ const authRoute = require("./routes/authRoute");
 const adminRoute = require("./routes/adminRoute");
 const userRoute = require("./routes/userRoute");
 const rateLimiter = require("./middleware/rateLimiter");
-
+const cronRoute = require("./routes/cronRoute");
 
 const app = express();
 
@@ -216,8 +216,7 @@ app.use(cookieParser());
 // API limiter
 
 app.use("/api", rateLimiter);
-
-
+app.use("/api/cron", cronRoute);
 // SESSION
 
 app.use(
