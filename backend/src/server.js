@@ -6,7 +6,7 @@ const SQLiteStore = require("connect-sqlite3")(session);
 const cookieParser = require("cookie-parser");
 const helmet = require("helmet");
 const startFineCron = require("./jobs/fineCron");
-const { connect } = require("@tursodatabase/serverless");
+const { createClient } = require("@libsql/client");
 
 require("dotenv").config({
   path: path.join(__dirname, "../../.env"),
@@ -42,7 +42,7 @@ let sessionStore;
 
 if (process.env.NODE_ENV === "production") {
 
-  const sessionDB = connect({
+  const sessionDB = createClient({
     url: process.env.TURSO_SESSION_DATABASE_URL,
     authToken: process.env.TURSO_SESSION_AUTH_TOKEN,
   });

@@ -1,23 +1,18 @@
 require("dotenv").config();
 
 if (process.env.NODE_ENV === "production") {
-  const { connect } = require("@tursodatabase/serverless");
+  const { createClient } = require("@libsql/client");
 
-  const turso = connect({
+  const turso = createClient({
     url: process.env.TURSO_DATABASE_URL,
     authToken: process.env.TURSO_AUTH_TOKEN,
   });
 
   const db = {
-    // Replacement for better-sqlite3 db.exec()
     async exec(sql) {
-      return await turso.execute({
-        sql,
-        args: [],
-      });
+      return await turso.execute(sql);
     },
 
-    // Replacement for better-sqlite3 db.prepare()
     prepare(sql) {
       return {
         async get(...params) {
