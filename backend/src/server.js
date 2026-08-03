@@ -6,22 +6,25 @@ const SQLiteStore = require("connect-sqlite3")(session);
 const cookieParser = require("cookie-parser");
 const helmet = require("helmet");
 const startFineCron = require("./jobs/fineCron");
+const { connect } = require("@tursodatabase/serverless");
 
 require("dotenv").config({
   path: path.join(__dirname, "../../.env"),
-  
 });
+
 if (!process.env.SESSION_SECRET) {
   throw new Error("SESSION_SECRET is missing");
 }
 
 require("./config/initDb");
 startFineCron();
+
 const pageRoute = require("./routes/pageRoute");
 const authRoute = require("./routes/authRoute");
 const adminRoute = require("./routes/adminRoute");
 const userRoute = require("./routes/userRoute");
 const rateLimiter = require("./middleware/rateLimiter");
+
 
 const app = express();
 
@@ -30,11 +33,119 @@ app.set("trust proxy", 1);
 const PORT = process.env.PORT || 3000;
 
 const frontendPath = path.join(__dirname, "../../frontend");
-const sessionPath = path.join(__dirname, "database");
 
-if (!fs.existsSync(sessionPath)) {
-  fs.mkdirSync(sessionPath, { recursive: true });
+
+// ---------------- SESSION STORE ----------------
+
+let sessionStore;
+
+
+if (process.env.NODE_ENV === "production") {
+
+  const sessionDB = connect({
+    url: process.env.TURSO_SESSION_DATABASE_URL,
+    authToken: process.env.TURSO_SESSION_AUTH_TOKEN,
+  });
+
+
+  sessionStore = new session.Store();
+
+
+  sessionStore.get = async (sid, callback) => {
+    try {
+      const result = await sessionDB.execute({
+        sql: "SELECT sess FROM sessions WHERE sid = ?",
+        args: [sid],
+      });
+
+      if (!result.rows.length) {
+        return callback(null, null);
+      }
+
+      callback(null, JSON.parse(result.rows[0].sess));
+
+    } catch (err) {
+      callback(err);
+    }
+  };
+
+
+  sessionStore.set = async (sid, sess, callback) => {
+    try {
+      const expires = sess.cookie.expires
+        ? new Date(sess.cookie.expires).toISOString()
+        : null;
+
+
+      await sessionDB.execute({
+        sql: `
+          INSERT INTO sessions (sid, sess, expire)
+          VALUES (?, ?, ?)
+          ON CONFLICT(sid)
+          DO UPDATE SET 
+          sess = excluded.sess,
+          expire = excluded.expire
+        `,
+        args: [
+          sid,
+          JSON.stringify(sess),
+          expires,
+        ],
+      });
+
+
+      callback(null);
+
+    } catch (err) {
+      callback(err);
+    }
+  };
+
+
+  sessionStore.destroy = async (sid, callback) => {
+    try {
+
+      await sessionDB.execute({
+        sql: "DELETE FROM sessions WHERE sid = ?",
+        args: [sid],
+      });
+
+      callback(null);
+
+    } catch (err) {
+      callback(err);
+    }
+  };
+
+
+  console.log("Using Turso session store");
+
+
+} else {
+
+
+  const sessionPath = path.join(__dirname, "database");
+
+
+  if (!fs.existsSync(sessionPath)) {
+    fs.mkdirSync(sessionPath, {
+      recursive: true,
+    });
+  }
+
+
+  sessionStore = new SQLiteStore({
+    db: "sessions.sqlite",
+    dir: sessionPath,
+  });
+
+
+  console.log("Using SQLite session store");
+
 }
+
+
+// ---------------- SECURITY ----------------
 
 
 app.use(
@@ -57,7 +168,9 @@ app.use(
           "https://cdnjs.cloudflare.com"
         ],
 
-        scriptSrcAttr: ["'unsafe-inline'"],
+        scriptSrcAttr: [
+          "'unsafe-inline'"
+        ],
 
         fontSrc: [
           "'self'",
@@ -90,23 +203,29 @@ app.use(
 );
 
 
+
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+app.use(express.urlencoded({
+  extended: true
+}));
+
 app.use(cookieParser());
 
 
-// Apply rate limiter only to API routes
-// app.use("/api", rateLimiter);
+// API limiter
 
+app.use("/api", rateLimiter);
+
+
+// SESSION
 
 app.use(
   session({
+
     name: "sid",
 
-    store: new SQLiteStore({
-      db: "sessions.sqlite",
-      dir: sessionPath,
-    }),
+    store: sessionStore,
 
     secret: process.env.SESSION_SECRET,
 
@@ -117,32 +236,52 @@ app.use(
     rolling: true,
 
     cookie: {
+
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+
+      secure:
+        process.env.NODE_ENV === "production",
+
       sameSite: "lax",
-      maxAge: 1000 * 60 * 60 * 24 * 7,
+
+      maxAge:
+        1000 * 60 * 60 * 24 * 7,
+
     },
+
   })
 );
 
 
+
+// STATIC FILES
+
 app.use(
   "/assets",
-  express.static(path.join(frontendPath, "assets"), {
-    etag: true,
-    maxAge: "1d",
-  })
+  express.static(
+    path.join(frontendPath, "assets"),
+    {
+      etag: true,
+      maxAge: "1d",
+    }
+  )
 );
 
 
 app.use(
   "/errors",
-  express.static(path.join(frontendPath, "errors"), {
-    etag: true,
-    maxAge: "1d",
-  })
+  express.static(
+    path.join(frontendPath, "errors"),
+    {
+      etag: true,
+      maxAge: "1d",
+    }
+  )
 );
 
+
+
+// ROUTES
 
 app.use("/", pageRoute);
 
@@ -154,24 +293,35 @@ app.use("/api/user", userRoute);
 
 
 
+
+// 404
+
 app.use((req, res) => {
 
   if (req.originalUrl.startsWith("/api")) {
+
     return res.status(404).json({
       message: "Resource not found",
     });
+
   }
+
 
   res.status(404).sendFile(
     path.join(frontendPath, "errors", "404.html")
   );
+
 });
 
 
 
+
+// ERROR HANDLER
+
 app.use((err, req, res, next) => {
 
   console.error(err);
+
 
   const status = err.status || 500;
 
@@ -179,10 +329,12 @@ app.use((err, req, res, next) => {
   if (req.originalUrl.startsWith("/api")) {
 
     return res.status(status).json({
+
       message:
         process.env.NODE_ENV === "production"
           ? "Internal server error"
           : err.message,
+
     });
 
   }
@@ -196,15 +348,28 @@ app.use((err, req, res, next) => {
 
 
 
+
+// START SERVER
+
 const server = app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+
+  console.log(
+    `Server running on port ${PORT}`
+  );
+
 });
 
+
+
+
+// SHUTDOWN
 
 const shutdown = () => {
 
   server.close(() => {
+
     process.exit(0);
+
   });
 
 };
