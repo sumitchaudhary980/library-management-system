@@ -5,7 +5,7 @@ const session = require("express-session");
 const SQLiteStore = require("connect-sqlite3")(session);
 const cookieParser = require("cookie-parser");
 const helmet = require("helmet");
-const startFineCron = require("./jobs/fineCron");
+const {startFineCron} = require("./jobs/fineCron");
 const { createClient } = require("@libsql/client");
 
 require("dotenv").config({
@@ -17,7 +17,10 @@ if (!process.env.SESSION_SECRET) {
 }
 
 require("./config/initDb");
-startFineCron();
+
+if (process.env.NODE_ENV !== "production") {
+  startFineCron();
+}
 
 const pageRoute = require("./routes/pageRoute");
 const authRoute = require("./routes/authRoute");
