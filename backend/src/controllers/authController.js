@@ -29,7 +29,7 @@ exports.login = async (req, res) => {
   }
 
   try {
-    const user = db
+    const user = await db
       .prepare("SELECT * FROM users WHERE email = ? OR phone = ?")
       .get(email, email);
 
@@ -157,7 +157,7 @@ exports.changePassword = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    db.prepare(`
+    await db.prepare(`
       UPDATE users
       SET
         password = ?,
@@ -166,7 +166,7 @@ exports.changePassword = async (req, res) => {
       WHERE id = ?
     `).run(hashedPassword, userId);
 
-    const user = db
+    const user = await db
       .prepare("SELECT * FROM users WHERE id = ?")
       .get(userId);
 
@@ -293,7 +293,7 @@ exports.forgotPassword = async (req, res) => {
     // ===============================
 
 
-    const user = db.prepare(`
+    const user = await db.prepare(`
       SELECT
         id,
         first_name,
@@ -379,7 +379,7 @@ exports.forgotPassword = async (req, res) => {
 
 
     // Store HASH only
-    db.prepare(`
+    await db.prepare(`
       UPDATE users
 
       SET
@@ -525,7 +525,7 @@ exports.forgotPassword = async (req, res) => {
                 "
               >
 
-                <a
+                
                   href="${resetLink}"
                   style="
                     background:#123458;
@@ -601,7 +601,7 @@ exports.forgotPassword = async (req, res) => {
 
               <p style="word-break:break-word;">
 
-                <a
+                
                   href="${resetLink}"
                   style="
                     color:#123458;
@@ -801,7 +801,7 @@ exports.resetPassword = async (req, res) => {
     // Find user using hashed token
     // ===============================
 
-    const user = db.prepare(`
+    const user = await db.prepare(`
 
       SELECT
         id,
@@ -847,7 +847,7 @@ exports.resetPassword = async (req, res) => {
     if (expired) {
 
 
-      db.prepare(`
+      await db.prepare(`
 
         UPDATE users
 
@@ -891,7 +891,7 @@ exports.resetPassword = async (req, res) => {
     // Update password and remove token
     // ===============================
 
-    db.prepare(`
+    await db.prepare(`
   UPDATE users
   SET
     password = ?,
@@ -907,24 +907,23 @@ exports.resetPassword = async (req, res) => {
 
 
     // Destroy all sessions of this user
-    const Database = require("better-sqlite3");
-    const path = require("path");
+    // NOTE: see flagged issue below this file — this block needs to be
+    // conditional on environment before deploying to production.
+    if (process.env.NODE_ENV !== "production") {
+      const Database = require("better-sqlite3");
+      const path = require("path");
 
-    console.log(
-      "Session DB:",
-      path.join(__dirname, "../database/sessions.sqlite")
-    );
+      const sessionDb = new Database(
+        path.join(__dirname, "../database/sessions.sqlite")
+      );
 
-    const sessionDb = new Database(
-      path.join(__dirname, "../database/sessions.sqlite")
-    );
+      sessionDb.prepare(`
+        DELETE FROM sessions
+        WHERE sess LIKE ?
+      `).run(`%"id":${user.id}%`);
 
-    sessionDb.prepare(`
-  DELETE FROM sessions
-  WHERE sess LIKE ?
-`).run(`%"id":${user.id}%`);
-
-    sessionDb.close();
+      sessionDb.close();
+    }
 
 
     return res.json({

@@ -130,7 +130,7 @@ const createBookSeeder = async () => {
             },
         ];
 
-        const insertStmt = db.prepare(`
+        const insertStmt = await db.prepare(`
             INSERT INTO books
             (title, author_id, genre_id, stock_quantity, cover_image)
             VALUES (?, ?, ?, ?, ?)
@@ -179,7 +179,7 @@ const createBookSeeder = async () => {
         // ================================
         // STEP 2: SYNC SQLite transaction
         // ================================
-        const insertMany = db.transaction((books) => {
+        const insertMany = await db.transaction((books) => {
             for (const book of books) {
                 insertStmt.run(
                     book.title,

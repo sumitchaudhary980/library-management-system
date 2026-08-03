@@ -6,27 +6,27 @@ const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const axios = require("axios");
 
-exports.getDashboardData = (req, res) => {
+exports.getDashboardData = async (req, res) => {
   try {
-    const totalAuthors = db
-      .prepare(`SELECT COUNT(*) AS total FROM authors`)
-      .get().total;
+    const totalAuthors = (
+      await db.prepare(`SELECT COUNT(*) AS total FROM authors`).get()
+    ).total;
 
-    const totalGenres = db
-      .prepare(`SELECT COUNT(*) AS total FROM genres`)
-      .get().total;
+    const totalGenres = (
+      await db.prepare(`SELECT COUNT(*) AS total FROM genres`).get()
+    ).total;
 
-    const totalBooks = db
-      .prepare(`SELECT COUNT(*) AS total FROM books`)
-      .get().total;
+    const totalBooks = (
+      await db.prepare(`SELECT COUNT(*) AS total FROM books`).get()
+    ).total;
 
-    const totalReaders = db
-      .prepare(`
+    const totalReaders = (
+      await db.prepare(`
         SELECT COUNT(*) AS total 
         FROM users 
         WHERE role = 'reader'
-      `)
-      .get().total;
+      `).get()
+    ).total;
 
     res.json({
       totalAuthors,
@@ -44,9 +44,9 @@ exports.getDashboardData = (req, res) => {
   }
 };
 
-exports.getAllAuthors = (req, res) => {
+exports.getAllAuthors = async (req, res) => {
   try {
-    const authors = db
+    const authors = await db
       .prepare(`
         SELECT id, name
         FROM authors
@@ -63,18 +63,20 @@ exports.getAllAuthors = (req, res) => {
   }
 };
 
-exports.getAuthors = (req, res) => {
+exports.getAuthors = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = 10;
   const search = req.query.search || "";
   const offset = (page - 1) * limit;
 
   try {
-    const total = db
-      .prepare(`SELECT COUNT(*) AS total FROM authors WHERE name LIKE ?`)
-      .get(`%${search}%`).total;
+    const total = (
+      await db
+        .prepare(`SELECT COUNT(*) AS total FROM authors WHERE name LIKE ?`)
+        .get(`%${search}%`)
+    ).total;
 
-    const authors = db
+    const authors = await db
       .prepare(`
         SELECT * FROM authors
         WHERE name LIKE ?
@@ -95,7 +97,7 @@ exports.getAuthors = (req, res) => {
   }
 };
 
-exports.createAuthor = (req, res) => {
+exports.createAuthor = async (req, res) => {
   const { name, biography } = req.body;
 
   if (!name || !name.trim()) {
@@ -103,7 +105,7 @@ exports.createAuthor = (req, res) => {
   }
 
   try {
-    const result = db
+    const result = await db
       .prepare(`INSERT INTO authors (name, biography) VALUES (?, ?)`)
       .run(name.trim(), biography?.trim() || null);
 
@@ -117,11 +119,11 @@ exports.createAuthor = (req, res) => {
   }
 };
 
-exports.getAuthor = (req, res) => {
+exports.getAuthor = async (req, res) => {
   const id = req.params.id;
 
   try {
-    const author = db.prepare(`SELECT * FROM authors WHERE id = ?`).get(id);
+    const author = await db.prepare(`SELECT * FROM authors WHERE id = ?`).get(id);
 
     if (!author) {
       return res.status(404).json({ message: "Author not found" });
@@ -134,7 +136,7 @@ exports.getAuthor = (req, res) => {
   }
 };
 
-exports.updateAuthor = (req, res) => {
+exports.updateAuthor = async (req, res) => {
   const id = req.params.id;
   let { name, biography } = req.body;
 
@@ -143,7 +145,7 @@ exports.updateAuthor = (req, res) => {
   }
 
   try {
-    const result = db
+    const result = await db
       .prepare(`UPDATE authors SET name = ?, biography = ? WHERE id = ?`)
       .run(name.trim(), biography?.trim() || null, id);
 
@@ -158,11 +160,11 @@ exports.updateAuthor = (req, res) => {
   }
 };
 
-exports.deleteAuthor = (req, res) => {
+exports.deleteAuthor = async (req, res) => {
   const id = req.params.id;
 
   try {
-    const result = db.prepare(`DELETE FROM authors WHERE id = ?`).run(id);
+    const result = await db.prepare(`DELETE FROM authors WHERE id = ?`).run(id);
 
     if (result.changes === 0) {
       return res.status(404).json({ message: "Author not found" });
@@ -177,9 +179,9 @@ exports.deleteAuthor = (req, res) => {
 
 
 // Genre
-exports.getAllGenres = (req, res) => {
+exports.getAllGenres = async (req, res) => {
   try {
-    const genres = db
+    const genres = await db
       .prepare(`
         SELECT id, name
         FROM genres
@@ -197,18 +199,20 @@ exports.getAllGenres = (req, res) => {
 };
 
 // GET GENRES 
-exports.getGenres = (req, res) => {
+exports.getGenres = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = 10;
   const search = req.query.search || "";
   const offset = (page - 1) * limit;
 
   try {
-    const total = db
-      .prepare(`SELECT COUNT(*) AS total FROM genres WHERE name LIKE ?`)
-      .get(`%${search}%`).total;
+    const total = (
+      await db
+        .prepare(`SELECT COUNT(*) AS total FROM genres WHERE name LIKE ?`)
+        .get(`%${search}%`)
+    ).total;
 
-    const genres = db
+    const genres = await db
       .prepare(`
         SELECT * FROM genres
         WHERE name LIKE ?
@@ -230,7 +234,7 @@ exports.getGenres = (req, res) => {
 };
 
 // CREATE
-exports.createGenre = (req, res) => {
+exports.createGenre = async (req, res) => {
   const { name } = req.body;
 
   if (!name || !name.trim()) {
@@ -238,7 +242,7 @@ exports.createGenre = (req, res) => {
   }
 
   try {
-    const result = db
+    const result = await db
       .prepare(`INSERT INTO genres (name) VALUES (?)`)
       .run(name.trim());
 
@@ -253,11 +257,11 @@ exports.createGenre = (req, res) => {
 };
 
 // GET ONE
-exports.getGenre = (req, res) => {
+exports.getGenre = async (req, res) => {
   const id = req.params.id;
 
   try {
-    const genre = db
+    const genre = await db
       .prepare(`SELECT * FROM genres WHERE id = ?`)
       .get(id);
 
@@ -272,7 +276,7 @@ exports.getGenre = (req, res) => {
 };
 
 // UPDATE
-exports.updateGenre = (req, res) => {
+exports.updateGenre = async (req, res) => {
   const id = req.params.id;
   const { name } = req.body;
 
@@ -281,7 +285,7 @@ exports.updateGenre = (req, res) => {
   }
 
   try {
-    const result = db
+    const result = await db
       .prepare(`UPDATE genres SET name = ? WHERE id = ?`)
       .run(name.trim(), id);
 
@@ -296,11 +300,11 @@ exports.updateGenre = (req, res) => {
 };
 
 // DELETE
-exports.deleteGenre = (req, res) => {
+exports.deleteGenre = async (req, res) => {
   const id = req.params.id;
 
   try {
-    const result = db
+    const result = await db
       .prepare(`DELETE FROM genres WHERE id = ?`)
       .run(id);
 
@@ -318,7 +322,7 @@ exports.deleteGenre = (req, res) => {
 //BOOKS
 
 //get books
-exports.getBooks = (req, res) => {
+exports.getBooks = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = 10;
 
@@ -329,7 +333,8 @@ exports.getBooks = (req, res) => {
   const offset = (page - 1) * limit;
 
   try {
-    const total = db.prepare(`
+    const total = (
+      await db.prepare(`
       SELECT COUNT(*) AS total
       FROM books
       INNER JOIN authors
@@ -341,12 +346,13 @@ exports.getBooks = (req, res) => {
         AND authors.name LIKE ?
         AND genres.name LIKE ?
     `).get(
-      `%${title}%`,
-      `%${author}%`,
-      `%${genre}%`
+        `%${title}%`,
+        `%${author}%`,
+        `%${genre}%`
+      )
     ).total;
 
-    const books = db.prepare(`
+    const books = await db.prepare(`
       SELECT
         books.id,
         books.title,
@@ -391,8 +397,6 @@ exports.getBooks = (req, res) => {
 };
 
 // create books
-
-
 exports.createBook = async (req, res) => {
   const { title, authorId, genreId, stock } = req.body;
 
@@ -428,7 +432,7 @@ exports.createBook = async (req, res) => {
 
   try {
     // Check author and get author name
-    const author = db
+    const author = await db
       .prepare(
         `
         SELECT id, name
@@ -447,7 +451,7 @@ exports.createBook = async (req, res) => {
     }
 
     // Check genre
-    const genre = db
+    const genre = await db
       .prepare(
         `
         SELECT id
@@ -466,7 +470,7 @@ exports.createBook = async (req, res) => {
     }
 
     // Check duplicate
-    const duplicate = db
+    const duplicate = await db
       .prepare(
         `
         SELECT id
@@ -525,7 +529,7 @@ exports.createBook = async (req, res) => {
     });
 
     // Insert book
-    const result = db
+    const result = await db
       .prepare(
         `
         INSERT INTO books (
@@ -563,11 +567,11 @@ exports.createBook = async (req, res) => {
 };
 
 //get book
-exports.getBook = (req, res) => {
+exports.getBook = async (req, res) => {
   const id = req.params.id;
 
   try {
-    const book = db
+    const book = await db
       .prepare(
         `
       SELECT
@@ -643,7 +647,7 @@ exports.updateBook = async (req, res) => {
 
   try {
 
-    const existingBook = db.prepare(`
+    const existingBook = await db.prepare(`
       SELECT *
       FROM books
       WHERE id = ?
@@ -655,7 +659,7 @@ exports.updateBook = async (req, res) => {
       });
     }
 
-    const author = db.prepare(`
+    const author = await db.prepare(`
       SELECT id
       FROM authors
       WHERE id = ?
@@ -669,7 +673,7 @@ exports.updateBook = async (req, res) => {
       });
     }
 
-    const genre = db.prepare(`
+    const genre = await db.prepare(`
       SELECT id
       FROM genres
       WHERE id = ?
@@ -683,7 +687,7 @@ exports.updateBook = async (req, res) => {
       });
     }
 
-    const duplicate = db.prepare(`
+    const duplicate = await db.prepare(`
       SELECT id
       FROM books
       WHERE LOWER(title)=LOWER(?)
@@ -743,7 +747,7 @@ exports.updateBook = async (req, res) => {
 
     }
 
-    db.prepare(`
+    await db.prepare(`
       UPDATE books
       SET
       title=?,
@@ -784,7 +788,7 @@ exports.deleteBook = async (req, res) => {
   const id = req.params.id;
 
   try {
-    const book = db
+    const book = await db
       .prepare(`SELECT cover_public_id FROM books WHERE id = ?`)
       .get(id);
 
@@ -798,7 +802,7 @@ exports.deleteBook = async (req, res) => {
       await cloudinary.uploader.destroy(book.cover_public_id);
     }
 
-    db.prepare(`DELETE FROM books WHERE id = ?`).run(id);
+    await db.prepare(`DELETE FROM books WHERE id = ?`).run(id);
 
     return res.json({
       message: "Book deleted successfully",
@@ -814,7 +818,7 @@ exports.deleteBook = async (req, res) => {
 
 
 // get fine users
-exports.getFineUsers = (req, res) => {
+exports.getFineUsers = async (req, res) => {
 
   const page = parseInt(req.query.page) || 1;
   const limit = 10;
@@ -892,7 +896,7 @@ exports.getFineUsers = (req, res) => {
 
 
 
-    const users = db.prepare(`
+    const users = await db.prepare(`
 
             SELECT
 
@@ -1003,117 +1007,6 @@ exports.getFineUsers = (req, res) => {
 
 };
 
-// exports.getFines = (req, res) => {
-//   const userId = req.session.user.id;
-
-//   const page = parseInt(req.query.page) || 1;
-//   const limit = 10;
-//   const offset = (page - 1) * limit;
-
-//   const title = req.query.title || "";
-//   const status = req.query.status || "";
-//   const returnedFrom = req.query.returned_from || "";
-//   const returnedTo = req.query.returned_to || "";
-//   const sort = req.query.sort || "latest";
-
-//   try {
-
-//     let where = `
-//       bb.user_id = ?
-//       AND bb.fine_amount > 0
-//     `;
-
-//     const params = [userId];
-
-//     if (title) {
-//       where += ` AND b.title LIKE ?`;
-//       params.push(`%${title}%`);
-//     }
-
-//     if (status === "paid") {
-//       where += ` AND bb.fine_paid = 1`;
-//     }
-
-//     if (status === "unpaid") {
-//       where += ` AND bb.fine_paid = 0`;
-//     }
-
-//     if (returnedFrom) {
-//       where += ` AND DATE(bb.returned_at) >= DATE(?)`;
-//       params.push(returnedFrom);
-//     }
-
-//     if (returnedTo) {
-//       where += ` AND DATE(bb.returned_at) <= DATE(?)`;
-//       params.push(returnedTo);
-//     }
-
-//     let orderBy = "bb.updated_at DESC";
-
-//     switch (sort) {
-//       case "oldest":
-//         orderBy = "bb.updated_at ASC";
-//         break;
-
-//       case "highest":
-//         orderBy = "bb.fine_amount DESC";
-//         break;
-
-//       case "lowest":
-//         orderBy = "bb.fine_amount ASC";
-//         break;
-//     }
-
-//     const total = db.prepare(`
-//       SELECT COUNT(*) AS total
-//       FROM borrowed_books bb
-//       JOIN books b ON bb.book_id = b.id
-//       WHERE ${where}
-//     `).get(...params).total;
-
-//     const fines = db.prepare(`
-//       SELECT
-//     bb.id,
-//     bb.due_date,
-//     bb.returned_at,
-//     bb.fine_amount,
-//     bb.fine_paid,
-//     bb.fine_paid_at,
-
-//     b.title,
-//     b.cover_image
-
-//       FROM borrowed_books bb
-//       JOIN books b
-//       ON bb.book_id = b.id
-
-//       WHERE ${where}
-
-//       ORDER BY ${orderBy}
-
-//       LIMIT ?
-//       OFFSET ?
-//     `).all(
-//       ...params,
-//       limit,
-//       offset
-//     );
-
-//     res.json({
-//       fines,
-//       total,
-//       totalPages: Math.ceil(total / limit)
-//     });
-
-//   } catch (err) {
-//     console.log(err);
-
-//     res.status(500).json({
-//       message: "Failed to load fines."
-//     });
-//   }
-// };
-
 //pay fines
 exports.payFine = async (req, res) => {
 
@@ -1121,7 +1014,7 @@ exports.payFine = async (req, res) => {
 
   try {
 
-    const fine = db.prepare(`
+    const fine = await db.prepare(`
       SELECT *
       FROM borrowed_books
       WHERE id = ?
@@ -1139,6 +1032,9 @@ exports.payFine = async (req, res) => {
       });
     }
 
+    // NOTE: db.transaction() is a better-sqlite3-specific synchronous API.
+    // See the flagged warning below this file — this needs verifying/rewriting
+    // for @tursodatabase/serverless before this will work in production.
     const transaction = db.transaction(() => {
 
       db.prepare(`
@@ -1170,7 +1066,8 @@ exports.payFine = async (req, res) => {
     });
 
     transaction();
-     const paymentInfo = db.prepare(`
+
+    const paymentInfo = await db.prepare(`
 SELECT
     fp.transaction_id,
     fp.payment_method,
@@ -1398,7 +1295,7 @@ text-align:center;
 margin:40px 0 20px;
 ">
 
-<a
+
 href="${process.env.APP_URL}/fines"
 style="
 display:inline-block;
@@ -1485,7 +1382,7 @@ color:#888;
 };
 
 // get readers
-exports.getReaders = (req, res) => {
+exports.getReaders = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = 10;
@@ -1547,17 +1444,19 @@ exports.getReaders = (req, res) => {
         orderBy = `ORDER BY created_at DESC`;
     }
 
-    const total = db
-      .prepare(
-        `
+    const total = (
+      await db
+        .prepare(
+          `
         SELECT COUNT(*) AS total
         FROM users
         ${where}
       `
-      )
-      .get(...params).total;
+        )
+        .get(...params)
+    ).total;
 
-    const readers = db
+    const readers = await db
       .prepare(
         `
     SELECT
@@ -1596,11 +1495,11 @@ exports.getReaders = (req, res) => {
 };
 
 //toggle reader status
-exports.toggleReaderStatus = (req, res) => {
+exports.toggleReaderStatus = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const reader = db.prepare(`
+    const reader = await db.prepare(`
       SELECT id, first_name, last_name, status
       FROM users
       WHERE id = ?
@@ -1616,7 +1515,7 @@ exports.toggleReaderStatus = (req, res) => {
     const newStatus =
       reader.status === "active" ? "inactive" : "active";
 
-    db.prepare(`
+    await db.prepare(`
       UPDATE users
       SET status = ?
       WHERE id = ?
@@ -1636,7 +1535,7 @@ exports.toggleReaderStatus = (req, res) => {
   }
 };
 //get borrow history
-exports.getBorrowHistory = (req, res) => {
+exports.getBorrowHistory = async (req, res) => {
   const userId = parseInt(req.params.userId);
 
   const page = parseInt(req.query.page) || 1;
@@ -1654,7 +1553,7 @@ exports.getBorrowHistory = (req, res) => {
 
   try {
 
-    const user = db.prepare(`
+    const user = await db.prepare(`
             SELECT
                 id,
                 first_name,
@@ -1673,11 +1572,13 @@ exports.getBorrowHistory = (req, res) => {
     }
 
     // Total books borrowed by the user (never changes with filters)
-    const totalBorrowedBooks = db.prepare(`
+    const totalBorrowedBooks = (
+      await db.prepare(`
             SELECT COUNT(*) AS total
             FROM borrowed_books
             WHERE user_id = ?
-        `).get(userId).total;
+        `).get(userId)
+    ).total;
 
     let where = `WHERE bb.user_id = ?`;
     const params = [userId];
@@ -1745,7 +1646,8 @@ exports.getBorrowHistory = (req, res) => {
     }
 
     // Total records after filters (for pagination)
-    const total = db.prepare(`
+    const total = (
+      await db.prepare(`
             SELECT COUNT(*) AS total
             FROM borrowed_books bb
             INNER JOIN books b
@@ -1753,10 +1655,11 @@ exports.getBorrowHistory = (req, res) => {
             LEFT JOIN authors a
                 ON b.author_id = a.id
             ${where}
-        `).get(...params).total;
+        `).get(...params)
+    ).total;
 
     // Fetch paginated records
-    const books = db.prepare(`
+    const books = await db.prepare(`
             SELECT
                 bb.id,
 
@@ -1812,14 +1715,14 @@ exports.getBorrowHistory = (req, res) => {
 };
 
 //return book
-exports.returnBook = (req, res) => {
+exports.returnBook = async (req, res) => {
 
   const borrowedId = parseInt(req.params.id);
 
 
   try {
 
-    const borrowed = db.prepare(`
+    const borrowed = await db.prepare(`
             SELECT *
             FROM borrowed_books
             WHERE id = ?
@@ -1851,6 +1754,8 @@ exports.returnBook = (req, res) => {
 
 
 
+    // NOTE: db.transaction() is a better-sqlite3-specific synchronous API.
+    // See the flagged warning below this file.
     const transaction = db.transaction(() => {
 
 
@@ -1899,9 +1804,9 @@ exports.returnBook = (req, res) => {
 };
 
 // profile
-exports.getProfile = (req, res) => {
+exports.getProfile = async (req, res) => {
   try {
-    const user = db.prepare(`
+    const user = await db.prepare(`
       SELECT
         id,
         first_name,
@@ -1979,7 +1884,7 @@ exports.createReader = async (req, res) => {
       return res.status(400).json({ errors });
     }
 
-    const existing = db
+    const existing = await db
       .prepare(
         `
         SELECT id
@@ -2004,7 +1909,7 @@ exports.createReader = async (req, res) => {
       10
     );
 
-    db.prepare(
+    await db.prepare(
       `
       INSERT INTO users (
         first_name,
@@ -2189,7 +2094,7 @@ exports.createReader = async (req, res) => {
                 "
               >
 
-                <a
+                
                   href="${APP_URL}/login"
                   style="
                     background:#123458;
@@ -2218,7 +2123,7 @@ exports.createReader = async (req, res) => {
               </p>
 
               <p style="word-break:break-word;">
-                <a
+                
                   href="${APP_URL}/login"
                   style="
                     color:#123458;
@@ -2303,7 +2208,7 @@ exports.getReader = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const reader = db.prepare(`
+    const reader = await db.prepare(`
       SELECT
         id,
         first_name,
@@ -2378,7 +2283,7 @@ exports.updateReader = async (req, res) => {
       return res.status(400).json({ errors });
     }
 
-    const reader = db
+    const reader = await db
       .prepare(
         `
         SELECT id
@@ -2395,7 +2300,7 @@ exports.updateReader = async (req, res) => {
       });
     }
 
-    const existing = db
+    const existing = await db
       .prepare(
         `
         SELECT id
@@ -2416,7 +2321,7 @@ exports.updateReader = async (req, res) => {
       });
     }
 
-    db.prepare(
+    await db.prepare(
       `
       UPDATE users
       SET
@@ -2479,7 +2384,7 @@ exports.updateProfile = async (req, res) => {
       });
     }
 
-    const user = db.prepare(`SELECT * FROM users WHERE id=?`).get(userId);
+    const user = await db.prepare(`SELECT * FROM users WHERE id=?`).get(userId);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -2514,7 +2419,7 @@ exports.updateProfile = async (req, res) => {
       profilePublicId = uploadResult.public_id;
     }
 
-    db.prepare(`
+    await db.prepare(`
       UPDATE users SET
         first_name=?,
         last_name=?,
@@ -2575,7 +2480,7 @@ exports.changePassword = async (req, res) => {
 
 
 
-    const user = db.prepare(`
+    const user = await db.prepare(`
       SELECT *
       FROM users
       WHERE id = ?
@@ -2627,7 +2532,7 @@ exports.changePassword = async (req, res) => {
 
 
 
-    db.prepare(`
+    await db.prepare(`
       UPDATE users
       SET
         password = ?,

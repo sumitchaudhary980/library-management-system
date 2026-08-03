@@ -11,7 +11,7 @@ const renderPending = (res, deviceId) => {
     res.status(403).send(html);
 };
 
-const deviceGate = (req, res, next) => {
+const deviceGate = async (req, res, next) => {
     let deviceId = req.cookies.device_id;
 
     if (!deviceId) {
@@ -24,19 +24,19 @@ const deviceGate = (req, res, next) => {
             maxAge: 1000 * 60 * 60 * 24 * 365
         });
 
-        db.prepare(
+        await db.prepare(
             `INSERT INTO approved_devices (device_id, approved) VALUES (?, 0)`
         ).run(deviceId);
 
         return renderPending(res, deviceId);
     }
 
-    const device = db
+    const device = await db
         .prepare(`SELECT approved FROM approved_devices WHERE device_id = ?`)
         .get(deviceId);
 
     if (!device) {
-        db.prepare(
+        await db.prepare(
             `INSERT OR IGNORE INTO approved_devices (device_id, approved) VALUES (?, 0)`
         ).run(deviceId);
         return renderPending(res, deviceId);

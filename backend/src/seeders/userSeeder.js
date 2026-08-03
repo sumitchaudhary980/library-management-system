@@ -74,7 +74,7 @@ const createUserSeeder = async () => {
 
             const hashedPassword = await bcrypt.hash(user.password, 10);
 
-            db.prepare(`
+           await db.prepare(`
                 INSERT INTO users (
                     first_name,
                     last_name,

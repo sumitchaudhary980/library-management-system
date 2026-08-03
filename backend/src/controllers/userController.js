@@ -7,11 +7,11 @@ const crypto = require("crypto");
 const axios = require("axios");
 
 //Home
-exports.getHomeData = (req, res) => {
+exports.getHomeData = async (req, res) => {
   const userId = req.session.user.id;
 
   try {
-    const user = db
+    const user = await db
       .prepare(
         `
       SELECT first_name
@@ -21,33 +21,38 @@ exports.getHomeData = (req, res) => {
       )
       .get(userId);
 
-    const borrowedBooks = db
-      .prepare(
-        `
+    const borrowedBooks = (
+      await db
+        .prepare(
+          `
       SELECT COUNT(*) AS total
       FROM borrowed_books
       WHERE
         user_id = ?
         AND returned = 0
     `,
-      )
-      .get(userId).total;
+        )
+        .get(userId)
+    ).total;
 
-    const returnedBooks = db
-      .prepare(
-        `
+    const returnedBooks = (
+      await db
+        .prepare(
+          `
       SELECT COUNT(*) AS total
       FROM borrowed_books
       WHERE
         user_id = ?
         AND returned = 1
     `,
-      )
-      .get(userId).total;
+        )
+        .get(userId)
+    ).total;
 
-    const dueBooks = db
-      .prepare(
-        `
+    const dueBooks = (
+      await db
+        .prepare(
+          `
       SELECT COUNT(*) AS total
       FROM borrowed_books
       WHERE
@@ -55,20 +60,23 @@ exports.getHomeData = (req, res) => {
         AND returned = 0
         AND DATE(due_date) <= DATE('now', '+3 day')
     `,
-      )
-      .get(userId).total;
+        )
+        .get(userId)
+    ).total;
 
-    const fineAmount = db
-      .prepare(
-        `
+    const fineAmount = (
+      await db
+        .prepare(
+          `
       SELECT COALESCE(SUM(fine_amount), 0) AS total
       FROM borrowed_books
       WHERE
         user_id = ?
         AND fine_paid = 0
     `,
-      )
-      .get(userId).total;
+        )
+        .get(userId)
+    ).total;
 
     res.json({
       firstName: user.first_name,
@@ -86,7 +94,7 @@ exports.getHomeData = (req, res) => {
   }
 };
 //Books
-exports.getBooks = (req, res) => {
+exports.getBooks = async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = 10;
 
@@ -97,9 +105,10 @@ exports.getBooks = (req, res) => {
   const offset = (page - 1) * limit;
 
   try {
-    const total = db
-      .prepare(
-        `
+    const total = (
+      await db
+        .prepare(
+          `
       SELECT COUNT(*) AS total
       FROM books
       INNER JOIN authors
@@ -111,10 +120,11 @@ exports.getBooks = (req, res) => {
         AND authors.name LIKE ?
         AND genres.name LIKE ?
     `,
-      )
-      .get(`%${title}%`, `%${author}%`, `%${genre}%`).total;
+        )
+        .get(`%${title}%`, `%${author}%`, `%${genre}%`)
+    ).total;
 
-    const books = db
+    const books = await db
       .prepare(
         `
       SELECT
@@ -155,11 +165,11 @@ exports.getBooks = (req, res) => {
   }
 };
 
-exports.getBook = (req, res) => {
+exports.getBook = async (req, res) => {
   const id = req.params.id;
 
   try {
-    const book = db
+    const book = await db
       .prepare(
         `
       SELECT
@@ -191,9 +201,9 @@ exports.getBook = (req, res) => {
     });
   }
 };
-exports.getProfile = (req, res) => {
+exports.getProfile = async (req, res) => {
   try {
-    const user = db
+    const user = await db
       .prepare(
         `
       SELECT
@@ -233,12 +243,12 @@ exports.getProfile = (req, res) => {
 };
 
 //borrow book
-exports.borrowBook = (req, res) => {
+exports.borrowBook = async (req, res) => {
   const userId = req.session.user.id;
   const bookId = parseInt(req.params.id);
 
   try {
-    const book = db
+    const book = await db
       .prepare(
         `
         SELECT id, stock_quantity
@@ -260,7 +270,7 @@ exports.borrowBook = (req, res) => {
       });
     }
 
-    const borrowed = db
+    const borrowed = await db
       .prepare(
         `
         SELECT id
@@ -282,6 +292,7 @@ exports.borrowBook = (req, res) => {
     const dueDate = new Date();
     dueDate.setDate(dueDate.getDate() + 7);
 
+    // NOTE: db.transaction() — see flagged issue at the end of this file.
     const transaction = db.transaction(() => {
       db.prepare(
         `
@@ -321,7 +332,7 @@ VALUES (?, ?, ?, 0, 0, 0)
 };
 
 //get borrowed books
-exports.getBorrowedBooks = (req, res) => {
+exports.getBorrowedBooks = async (req, res) => {
   const userId = req.session.user.id;
 
   const page = parseInt(req.query.page) || 1;
@@ -414,7 +425,7 @@ exports.getBorrowedBooks = (req, res) => {
       totalParams.push(borrowedTo);
     }
 
-    const total = db.prepare(totalQuery).get(...totalParams).total;
+    const total = (await db.prepare(totalQuery).get(...totalParams)).total;
 
     // FETCH BOOKS
 
@@ -470,7 +481,7 @@ exports.getBorrowedBooks = (req, res) => {
     booksParams.push(limit);
     booksParams.push(offset);
 
-    const books = db.prepare(booksQuery).all(...booksParams);
+    const books = await db.prepare(booksQuery).all(...booksParams);
 
     const today = new Date();
 
@@ -503,12 +514,12 @@ exports.getBorrowedBooks = (req, res) => {
 };
 
 //renew borrowed book
-exports.renewBook = (req, res) => {
+exports.renewBook = async (req, res) => {
   const userId = req.session.user.id;
   const borrowedId = parseInt(req.params.id);
 
   try {
-    const borrowed = db
+    const borrowed = await db
       .prepare(
         `
       SELECT *
@@ -542,7 +553,7 @@ exports.renewBook = (req, res) => {
     const dueDate = new Date(borrowed.due_date);
     dueDate.setDate(dueDate.getDate() + 7);
 
-    db.prepare(
+    await db.prepare(
       `
       UPDATE borrowed_books
       SET
@@ -567,7 +578,7 @@ exports.renewBook = (req, res) => {
 //return borrowed book
 
 // get borrow history
-exports.getBorrowHistory = (req, res) => {
+exports.getBorrowHistory = async (req, res) => {
   const userId = req.session.user.id;
 
   const page = parseInt(req.query.page) || 1;
@@ -629,9 +640,10 @@ exports.getBorrowHistory = (req, res) => {
   }
 
   try {
-    const total = db
-      .prepare(
-        `
+    const total = (
+      await db
+        .prepare(
+          `
       SELECT COUNT(*) AS total
       FROM borrowed_books
 
@@ -646,10 +658,11 @@ exports.getBorrowHistory = (req, res) => {
 
       WHERE ${whereClause}
     `,
-      )
-      .get(...params).total;
+        )
+        .get(...params)
+    ).total;
 
-    const books = db
+    const books = await db
       .prepare(
         `
       SELECT
@@ -703,7 +716,7 @@ exports.getBorrowHistory = (req, res) => {
 };
 
 //get fines
-exports.getFines = (req, res) => {
+exports.getFines = async (req, res) => {
   const userId = req.session.user.id;
 
   const page = parseInt(req.query.page) || 1;
@@ -763,18 +776,20 @@ exports.getFines = (req, res) => {
         break;
     }
 
-    const total = db
-      .prepare(
-        `
+    const total = (
+      await db
+        .prepare(
+          `
       SELECT COUNT(*) AS total
       FROM borrowed_books bb
       JOIN books b ON bb.book_id = b.id
       WHERE ${where}
     `,
-      )
-      .get(...params).total;
+        )
+        .get(...params)
+    ).total;
 
-    const fines = db
+    const fines = await db
       .prepare(
         `
       SELECT
@@ -816,7 +831,7 @@ exports.getFines = (req, res) => {
   }
 };
 
-exports.payFine = (req, res) => {
+exports.payFine = async (req, res) => {
   try {
     const borrowedId = parseInt(req.params.id);
     const userId = req.session.user.id;
@@ -824,7 +839,7 @@ exports.payFine = (req, res) => {
     const appUrl = process.env.APP_URL;
     const productCode = process.env.ESEWA_PRODUCT_CODE;
 
-    const fine = db
+    const fine = await db
       .prepare(
         `
 SELECT
@@ -870,6 +885,7 @@ WHERE
     const transactionId = crypto.randomUUID();
     const amount = Number(fine.fine_amount).toFixed(2);
 
+    // NOTE: db.transaction() — see flagged issue at the end of this file.
     const createPayment = db.transaction(() => {
       db.prepare(
         `
@@ -955,7 +971,7 @@ exports.esewaSuccess = async (req, res) => {
     }
 
     // Look up the pending payment tied to this transaction
-    const payment = db
+    const payment = await db
       .prepare(
         `
             SELECT *
@@ -984,7 +1000,7 @@ exports.esewaSuccess = async (req, res) => {
     const verifiedStatus = statusRes.data.status;
 
     if (verifiedStatus !== "COMPLETE") {
-      db.prepare(
+      await db.prepare(
         `
                 UPDATE fine_payments
                 SET payment_status = 'failed'
@@ -1000,7 +1016,7 @@ exports.esewaSuccess = async (req, res) => {
     if (Number(statusRes.data.total_amount) !== Number(payment.amount)) {
       console.log("Amount mismatch on transaction:", transaction_uuid);
 
-      db.prepare(
+      await db.prepare(
         `
                 UPDATE fine_payments
                 SET payment_status = 'failed'
@@ -1012,6 +1028,7 @@ exports.esewaSuccess = async (req, res) => {
     }
 
     // Everything checks out — mark as paid, atomically
+    // NOTE: db.transaction() — see flagged issue at the end of this file.
     const completePayment = db.transaction(() => {
       const currentPayment = db
         .prepare(
@@ -1058,7 +1075,7 @@ exports.esewaSuccess = async (req, res) => {
     });
 
     completePayment();
-    const paymentInfo = db
+    const paymentInfo = await db
       .prepare(
         `
 SELECT
@@ -1285,7 +1302,7 @@ text-align:center;
 margin:40px 0 20px;
 ">
 
-<a
+
 href="${process.env.APP_URL}/fines"
 style="
 display:inline-block;
@@ -1362,11 +1379,12 @@ color:#888;
 };
 
 // ESEWA FAILURE CALLBACK
-exports.esewaFailure = (req, res) => {
+exports.esewaFailure = async (req, res) => {
   try {
     const transactionId = req.query.transaction_uuid;
 
     if (transactionId) {
+      // NOTE: db.transaction() — see flagged issue at the end of this file.
       const failPayment = db.transaction(() => {
         const payment = db
           .prepare(
@@ -1433,7 +1451,7 @@ exports.updateProfile = async (req, res) => {
       });
     }
 
-    const user = db.prepare(`SELECT * FROM users WHERE id=?`).get(userId);
+    const user = await db.prepare(`SELECT * FROM users WHERE id=?`).get(userId);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -1468,7 +1486,7 @@ exports.updateProfile = async (req, res) => {
       profilePublicId = uploadResult.public_id;
     }
 
-    db.prepare(
+    await db.prepare(
       `
       UPDATE users SET
         first_name=?,
@@ -1520,7 +1538,7 @@ exports.changePassword = async (req, res) => {
       });
     }
 
-    const user = db
+    const user = await db
       .prepare(
         `
       SELECT *
@@ -1557,7 +1575,7 @@ exports.changePassword = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    db.prepare(
+    await db.prepare(
       `
       UPDATE users
       SET

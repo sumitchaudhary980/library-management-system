@@ -54,7 +54,7 @@ const createAdminSeeder = async () => {
             console.log("Admin profile image not found.");
         }
 
-        db.prepare(`
+        await db.prepare(`
             INSERT INTO users
             (
                 first_name,

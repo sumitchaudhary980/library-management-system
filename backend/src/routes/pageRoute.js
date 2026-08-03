@@ -220,7 +220,7 @@ router.get("/forgot-password", (req, res) => {
 });
 
 
-router.get("/reset-password", (req, res) => {
+router.get("/reset-password", async (req, res) => {
 
   const { token } = req.query;
 
@@ -236,7 +236,7 @@ router.get("/reset-password", (req, res) => {
     .digest("hex");
 
 
-  const user = db.prepare(`
+  const user = await db.prepare(`
     SELECT id, reset_token_expires
     FROM users
     WHERE reset_token = ?
@@ -259,7 +259,7 @@ router.get("/reset-password", (req, res) => {
   if (expired) {
 
 
-    db.prepare(`
+    await db.prepare(`
       UPDATE users
       SET
         reset_token = NULL,
@@ -284,7 +284,6 @@ router.get("/reset-password", (req, res) => {
 
 
 });
-
 router.get("/profile/change-password", (req, res) => {
   if (!req.session.user) {
     return res.redirect("/");

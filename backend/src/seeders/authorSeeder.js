@@ -1,6 +1,6 @@
 const db = require("../config/db");
 
-const createAuthorSeeder = () => {
+const createAuthorSeeder = async() => {
   const authors = [
     {
       name: "J.K. Rowling",
@@ -78,7 +78,7 @@ const createAuthorSeeder = () => {
     },
   ];
 
-  const stmt = db.prepare(`
+  const stmt = await db.prepare(`
 
     INSERT INTO authors (name, biography)
 

@@ -2,15 +2,15 @@ const cron = require("node-cron");
 const db = require("../config/db");
 
 const startFineCron = () => {
- console.log("Fine cron initialized");
-  // Runs every hour
-  cron.schedule("0 * * * *", () => {
-    console.log("Running daily fine update:", new Date());
+  console.log("Fine cron initialized");
 
+  // Runs every hour
+  cron.schedule("0 * * * *", async () => {
+    console.log("Running daily fine update:", new Date());
 
     try {
 
-      db.prepare(`
+      await db.prepare(`
         UPDATE borrowed_books
         SET fine_amount =
           CAST(

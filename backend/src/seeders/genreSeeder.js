@@ -1,6 +1,6 @@
 const db = require("../config/db");
 
-const createGenreSeeder = () => {
+const createGenreSeeder = async () => {
   const genres = [
     "Fantasy",
     "Science Fiction",
@@ -16,12 +16,12 @@ const createGenreSeeder = () => {
     "Poetry"
   ];
 
-  const stmt = db.prepare(`
+  const stmt = await db.prepare(`
     INSERT INTO genres (name)
     VALUES (?)
   `);
 
-  const insertMany = db.transaction((genres) => {
+  const insertMany = await db.transaction((genres) => {
     for (const genre of genres) {
       stmt.run(genre);
     }
