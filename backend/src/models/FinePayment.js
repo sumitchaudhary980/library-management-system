@@ -39,21 +39,21 @@ const createFinePaymentTable = () => {
   try {
     db.exec(`
       ALTER TABLE fine_payments
-      ADD COLUMN IF NOT EXISTS  product_code TEXT;
+      ADD COLUMN product_code TEXT;
     `);
   } catch (_) {}
 
   try {
     db.exec(`
       ALTER TABLE fine_payments
-      ADD COLUMN IF NOT EXISTS  signature TEXT;
+      ADD COLUMN signature TEXT;
     `);
   } catch (_) {}
 
   try {
     db.exec(`
       ALTER TABLE fine_payments
-      ADD COLUMN IF NOT EXISTS received_by INTEGER
+      ADD COLUMN received_by INTEGER
       REFERENCES users(id)
       ON DELETE SET NULL;
     `);

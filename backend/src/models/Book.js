@@ -27,7 +27,7 @@ const createBookTable = async () => {
   if (!hasDescription) {
     await db.exec(`
       ALTER TABLE books
-      ADD COLUMN IF NOT EXISTS description TEXT;
+      ADD COLUMN description TEXT;
     `);
 
     console.log("Added 'description' column to books table.");

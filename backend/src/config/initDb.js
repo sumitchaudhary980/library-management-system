@@ -15,17 +15,17 @@ const { createUserSeeder } = require("../seeders/userSeeder");
 
 
 
-createUserTable();
-createAuthorTable();
-createGenreTable();
-createBookTable();
-createBorrowedBookTable();
-createFinePaymentTable();
+// createUserTable();
+// createAuthorTable();
+// createGenreTable();
+// createBookTable();
+// createBorrowedBookTable();
+// createFinePaymentTable();
 
-createAdminSeeder();
-createUserSeeder();
-createAuthorSeeder();
-createGenreSeeder();
-createBookSeeder();
+// createAdminSeeder();
+// createUserSeeder();
+// createAuthorSeeder();
+// createGenreSeeder();
+// createBookSeeder();
 
 console.log("Database initialized");

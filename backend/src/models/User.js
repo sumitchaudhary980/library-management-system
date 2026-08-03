@@ -30,7 +30,7 @@ const createUserTable = async () => {
   if (!columns.some((column) => column.name === "status")) {
     await db.exec(`
       ALTER TABLE users
-      ADD COLUMN IF NOT EXISTS  status TEXT NOT NULL DEFAULT 'active';
+      ADD COLUMN status TEXT NOT NULL DEFAULT 'active';
     `);
   }
 
@@ -46,7 +46,7 @@ const createUserTable = async () => {
   if (!columns.some((column) => column.name === "reset_token")) {
     await db.exec(`
       ALTER TABLE users
-      ADD COLUMN IF NOT EXISTS  reset_token TEXT;
+      ADD COLUMN reset_token TEXT;
     `);
   }
 
@@ -54,7 +54,7 @@ const createUserTable = async () => {
   if (!columns.some((column) => column.name === "reset_token_expires")) {
     await db.exec(`
       ALTER TABLE users
-      ADD COLUMN IF NOT EXISTS reset_token_expires DATETIME;
+      ADD COLUMN reset_token_expires DATETIME;
     `);
   }
 
