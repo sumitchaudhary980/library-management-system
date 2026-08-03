@@ -180,14 +180,7 @@ ${fine.fine_amount > 0
 </td>
 
 
-                <td class="py-3 px-4 text-nowrap">
-
-                   ${fine.remaining_fine <= 0
-                    ? `<span class="badge bg-success">Paid</span>`
-                    : `<span class="badge bg-danger">Unpaid</span>`
-                }
-
-                </td>
+               
 
 
                 <td class="py-3 px-4 text-center text-nowrap">

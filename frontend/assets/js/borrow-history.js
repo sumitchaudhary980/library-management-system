@@ -168,23 +168,7 @@ No Fine
 
 </td>
 
-             <td class="py-3 px-4 text-center text-nowrap">
-
-    ${
-        fineAmount > 0 && remainingFine === 0
-        ? `<span class="badge bg-success">
-            Fine Paid
-          </span>`
-        : fineAmount > 0 && remainingFine > 0
-        ? `<span class="badge bg-danger">
-            Fine Not Paid
-          </span>`
-        : `<span class="text-muted">
-            No Fine
-          </span>`
-    }
-
-</td>
+            
 <td class="py-3 px-4 text-center text-nowrap">
 
     ${
