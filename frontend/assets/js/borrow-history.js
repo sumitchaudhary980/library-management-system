@@ -206,47 +206,35 @@ ${remainingFine > 0
 </td>
 <td class="py-3 px-4 text-center text-nowrap">
 
-    ${remainingFine > 0
-                    ? `
-        <button
-            class="btn btn-sm text-white"
-            style="background:#002147;border-radius:8px;"
-            onclick="collectCash(${book.id})">
+    ${
+        returned
+        ? `<span class="badge bg-success">Returned</span>`
+        : remainingFine > 0
+        ? `
+            <button
+                class="btn btn-sm text-white"
+                style="background:#002147;border-radius:8px;"
+                onclick="collectCash(${book.id})">
 
-            <i class="fas fa-money-bill-wave me-1"></i>
-            Collect Cash
+                <i class="fas fa-money-bill-wave me-1"></i>
+                Collect Cash
 
-        </button>
+            </button>
         `
-                    : !returned
-                        ? `
-        <button
-            class="btn btn-sm text-white"
-            style="background:#002147;border-radius:8px;"
-            onclick="returnBook(${book.id})">
+        : `
+            <button
+                class="btn btn-sm text-white"
+                style="background:#002147;border-radius:8px;"
+                onclick="returnBook(${book.id})">
 
-            <i class="fas fa-rotate-left me-1"></i>
-            Return
+                <i class="fas fa-rotate-left me-1"></i>
+                Return
 
-        </button>
+            </button>
         `
-                        : `
-        `
-                }
+    }
 
 </td>
-
-<td class="py-3 px-4 text-center text-nowrap">
-
-    ${returned
-                    ? `<span class="badge bg-success">Returned</span>`
-                    : `<span class="badge bg-warning text-dark">Borrowed</span>`
-                }
-
-</td>
-
-
-
             </tr>
             `;
         });
