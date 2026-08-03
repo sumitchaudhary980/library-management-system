@@ -921,26 +921,24 @@ exports.getFineUsers = async (req, res) => {
 ) AS fined_books,
 
 
-                COUNT(
-                    CASE
-                    WHEN bb.fine_paid = 0
-                    AND bb.fine_amount > 0
-                    THEN bb.id
-                    END
-                ) AS unpaid_books,
+              COUNT(
+    CASE
+    WHEN (bb.fine_amount - bb.fine_paid_amount) > 0
+    THEN bb.id
+    END
+) AS unpaid_books,
 
 
                 COALESCE(
-                    SUM(
-                        CASE
-                        WHEN bb.fine_paid = 0
-                        AND bb.fine_amount > 0
-                        THEN bb.fine_amount
-                        ELSE 0
-                        END
-                    ),
-                    0
-                ) AS outstanding_fine
+    SUM(
+        CASE
+        WHEN (bb.fine_amount - bb.fine_paid_amount) > 0
+        THEN (bb.fine_amount - bb.fine_paid_amount)
+        ELSE 0
+        END
+    ),
+    0
+) AS outstanding_fine
 
 
 
@@ -1026,9 +1024,11 @@ exports.payFine = async (req, res) => {
       });
     }
 
-    if (fine.fine_paid) {
+    const remainingFine = fine.fine_amount - fine.fine_paid_amount;
+
+    if (remainingFine <= 0) {
       return res.status(400).json({
-        message: "Fine already paid."
+        message: "Fine already fully paid."
       });
     }
 
@@ -1039,11 +1039,19 @@ exports.payFine = async (req, res) => {
 
       db.prepare(`
         UPDATE borrowed_books
-        SET
-          fine_paid = 1,
-          fine_paid_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-      `).run(borrowedId);
+SET
+  fine_paid_amount = fine_paid_amount + ?,
+  fine_paid = CASE
+    WHEN fine_paid_amount + ? >= fine_amount THEN 1
+    ELSE 0
+  END,
+  fine_paid_at = CURRENT_TIMESTAMP
+WHERE id = ?
+      `).run(
+        remainingFine,
+        remainingFine,
+        borrowedId
+      );
 
       db.prepare(`
         INSERT INTO fine_payments (
@@ -1057,10 +1065,10 @@ exports.payFine = async (req, res) => {
         VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
       `).run(
         borrowedId,
-        fine.fine_amount,
+        remainingFine,
         "cash",
         "paid",
-        req.session.user.id // admin id
+        req.session.user.id //admin user id
       );
 
     });
@@ -1100,15 +1108,15 @@ ORDER BY fp.id DESC
 LIMIT 1
 `).get(borrowedId);
 
-const borrowedOn = paymentInfo.borrowed_at;
-const dueOn = paymentInfo.due_date;
-const collectedOn = paymentInfo.fine_paid_at;
+    const borrowedOn = paymentInfo.borrowed_at;
+    const dueOn = paymentInfo.due_date;
+    const collectedOn = paymentInfo.fine_paid_at;
 
- const paidOn = paymentInfo.fine_paid_at
-  ? paymentInfo.fine_paid_at.replace("T", " ")
-  : "-";
+    const paidOn = paymentInfo.fine_paid_at
+      ? paymentInfo.fine_paid_at.replace("T", " ")
+      : "-";
 
- await transporter.sendMail({
+    await transporter.sendMail({
       to: paymentInfo.email,
       cc: process.env.ADMIN_EMAIL || undefined,
       subject: "Fine Payment Receipt - Kaiser Library",
@@ -1363,7 +1371,7 @@ color:#888;
 </html>
 `,
     });
-    
+
 
     res.json({
       message: "Fine collected successfully."
@@ -1672,8 +1680,9 @@ exports.getBorrowHistory = async (req, res) => {
                 bb.due_date,
 
                 COALESCE(bb.fine_amount,0) AS fine_amount,
-                COALESCE(bb.fine_paid,0) AS fine_paid,
-                bb.fine_paid_at,
+COALESCE(bb.fine_paid_amount,0) AS fine_paid_amount,
+COALESCE(bb.fine_paid,0) AS fine_paid,
+bb.fine_paid_at,
 
                 COALESCE(bb.returned,0) AS returned,
                 bb.returned_at
@@ -1781,7 +1790,7 @@ exports.returnBook = async (req, res) => {
 
 
     transaction();
-   
+
     res.json({
       message: "Book returned successfully."
     });

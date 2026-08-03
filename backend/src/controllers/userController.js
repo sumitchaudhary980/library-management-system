@@ -430,13 +430,18 @@ exports.getBorrowedBooks = async (req, res) => {
     // FETCH BOOKS
 
     const booksQuery = `
-  SELECT
+ SELECT
     borrowed_books.id AS borrowed_id,
     borrowed_books.borrowed_at,
     borrowed_books.due_date,
     borrowed_books.renewed,
     borrowed_books.fine_amount,
     borrowed_books.fine_paid,
+
+    CASE
+        WHEN DATE(borrowed_books.due_date) < DATE('now') THEN 1
+        ELSE 0
+    END AS is_overdue,
 
     books.id,
     books.title,
@@ -731,9 +736,9 @@ exports.getFines = async (req, res) => {
 
   try {
     let where = `
-      bb.user_id = ?
-      AND bb.fine_amount > 0
-    `;
+  bb.user_id = ?
+  AND bb.fine_amount > 0
+`;
 
     const params = [userId];
 
@@ -743,13 +748,16 @@ exports.getFines = async (req, res) => {
     }
 
     if (status === "paid") {
-      where += ` AND bb.fine_paid = 1`;
+      where += `
+    AND bb.fine_amount <= bb.fine_paid_amount
+  `;
     }
 
     if (status === "unpaid") {
-      where += ` AND bb.fine_paid = 0`;
+      where += `
+    AND bb.fine_amount > bb.fine_paid_amount
+  `;
     }
-
     if (returnedFrom) {
       where += ` AND DATE(bb.returned_at) >= DATE(?)`;
       params.push(returnedFrom);
@@ -796,9 +804,12 @@ exports.getFines = async (req, res) => {
     bb.id,
     bb.due_date,
     bb.returned_at,
-    bb.fine_amount,
-    bb.fine_paid,
-    bb.fine_paid_at,
+  bb.fine_amount,
+bb.fine_paid_amount,
+bb.fine_paid,
+bb.fine_paid_at,
+
+(bb.fine_amount - bb.fine_paid_amount) AS remaining_fine,
 
     b.title,
     b.cover_image
@@ -870,9 +881,12 @@ WHERE
       });
     }
 
-    if (fine.fine_paid) {
+    const remainingFine =
+      Number(fine.fine_amount) - Number(fine.fine_paid_amount || 0);
+
+    if (remainingFine <= 0) {
       return res.status(400).json({
-        message: "Fine already paid.",
+        message: "No fine to pay.",
       });
     }
 
@@ -883,11 +897,10 @@ WHERE
     }
 
     const transactionId = crypto.randomUUID();
-    const amount = Number(fine.fine_amount).toFixed(2);
-
+    const amount = remainingFine.toFixed(2);
     // NOTE: db.transaction() — see flagged issue at the end of this file.
     await db.prepare(
-  `
+      `
   INSERT INTO fine_payments(
       borrowed_book_id,
       amount,
@@ -897,27 +910,27 @@ WHERE
   )
   VALUES(?,?,?,?,?)
   `
-).run(
-  borrowedId,
-  amount,
-  "esewa",
-  "pending",
-  transactionId
-);
+    ).run(
+      borrowedId,
+      amount,
+      "esewa",
+      "pending",
+      transactionId
+    );
 
 
-await db.prepare(
-  `
+    await db.prepare(
+      `
   UPDATE fine_payments
   SET payment_status = 'failed'
   WHERE borrowed_book_id = ?
     AND transaction_id != ?
     AND payment_status = 'pending'
   `
-).run(
-  borrowedId,
-  transactionId
-);
+    ).run(
+      borrowedId,
+      transactionId
+    );
     const message = `total_amount=${amount},transaction_uuid=${transactionId},product_code=${productCode}`;
 
     const signature = crypto
@@ -1035,52 +1048,59 @@ exports.esewaSuccess = async (req, res) => {
 
     // Everything checks out — mark as paid, atomically
     // NOTE: db.transaction() — see flagged issue at the end of this file.
-     const currentPayment = await db
-  .prepare(
-    `
+    const currentPayment = await db
+      .prepare(
+        `
     SELECT *
     FROM fine_payments
     WHERE transaction_id = ?
     `
-  )
-  .get(transaction_uuid);
+      )
+      .get(transaction_uuid);
 
 
-if (!currentPayment) {
-  throw new Error("Payment not found.");
-}
+    if (!currentPayment) {
+      throw new Error("Payment not found.");
+    }
 
 
-if (currentPayment.payment_status === "paid") {
-  return res.redirect(`${process.env.APP_URL}/fines?payment=success`);
-}
+    if (currentPayment.payment_status === "paid") {
+      return res.redirect(`${process.env.APP_URL}/fines?payment=success`);
+    }
 
 
-if (currentPayment.payment_status !== "pending") {
-  throw new Error("Invalid payment state.");
-}
+    if (currentPayment.payment_status !== "pending") {
+      throw new Error("Invalid payment state.");
+    }
 
 
-await db.prepare(
-  `
+    await db.prepare(
+      `
   UPDATE fine_payments
   SET payment_status = 'paid'
   WHERE transaction_id = ?
   `
-).run(transaction_uuid);
+    ).run(transaction_uuid);
 
 
 
-await db.prepare(
-  `
+    await db.prepare(
+      `
   UPDATE borrowed_books
-  SET
-      fine_paid = 1,
-      fine_paid_at = CURRENT_TIMESTAMP,
-  WHERE id = ?
-    AND fine_paid = 0
+SET
+    fine_paid_amount = fine_paid_amount + ?,
+    fine_paid = CASE
+        WHEN fine_paid_amount + ? >= fine_amount THEN 1
+        ELSE 0
+    END,
+    fine_paid_at = CURRENT_TIMESTAMP
+WHERE id = ?
   `
-).run(currentPayment.borrowed_book_id);
+    ).run(
+      payment.amount,
+      payment.amount,
+      currentPayment.borrowed_book_id
+    );
     const paymentInfo = await db
       .prepare(
         `
@@ -1116,9 +1136,9 @@ WHERE fp.transaction_id = ?
       )
       .get(transaction_uuid);
 
-      const paidOn = paymentInfo.fine_paid_at
-  ? paymentInfo.fine_paid_at.replace("T", " ")
-  : "-";
+    const paidOn = paymentInfo.fine_paid_at
+      ? paymentInfo.fine_paid_at.replace("T", " ")
+      : "-";
     await transporter.sendMail({
       to: paymentInfo.email,
       cc: process.env.ADMIN_EMAIL || undefined,

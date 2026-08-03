@@ -52,7 +52,7 @@ async function loadBorrowedBooks(page = 1) {
                 </tr>
             `;
         }
-console.log(data.books);
+        console.log(data.books);
         data.books.forEach((book) => {
             const today = new Date();
             const dueDate = new Date(book.due_date);
@@ -101,20 +101,28 @@ console.log(data.books);
                     <td class="py-3 px-4 text-center text-nowrap">
                        ${book.renewed
                     ? `
-            <button class="btn btn-secondary btn-sm px-3" disabled
+        <button class="btn btn-secondary btn-sm px-3" disabled
+                style="border-radius:10px; min-width:110px;">
+            Renewed
+        </button>
+    `
+                    : book.is_overdue
+                        ? `
+            <button class="btn btn-dark btn-sm px-3" disabled
+                    title="Overdue books cannot be renewed."
                     style="border-radius:10px; min-width:110px;">
-                Renewed
+                <i class="fas fa-clock me-2"></i>Overdue
             </button>
         `
-                    : (book.fine_amount > 0 && book.fine_paid === 0)
-                        ? `
+                        : (book.fine_amount > 0 && book.fine_paid === 0)
+                            ? `
                 <button class="btn btn-danger btn-sm px-3" disabled
                         title="Please clear your fine before renewing this book."
                         style="border-radius:10px; min-width:110px;">
                     <i class="fas fa-ban me-2"></i>Fine Due
                 </button>
             `
-                        : `
+                            : `
                 <button class="btn btn-sm px-3 text-white"
                         onclick="renewBook(${book.borrowed_id})"
                         style="background:#c5a059; border-radius:10px; min-width:110px;">

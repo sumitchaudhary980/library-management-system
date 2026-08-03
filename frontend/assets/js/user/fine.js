@@ -134,23 +134,57 @@ async function loadFines(page = 1) {
                 </td>
 
 
-               <td class="py-3 px-4 fw-bold text-center text-nowrap">
-    ${Number(fine.fine_amount) > 0
-                    ? `<span class="${fine.fine_paid ? "text-success" : "text-danger"}">
-                    Rs. ${Number(fine.fine_amount).toLocaleString()}
-               </span>`
-                    : `<span class="text-muted">No Fine</span>`
-                }
+            <td class="py-3 px-4 fw-bold text-center text-nowrap">
+
+${fine.fine_amount > 0
+?
+`
+<div>
+
+    <span class="badge bg-danger mb-1">
+        Fine: Rs. ${Number(fine.fine_amount).toLocaleString()}
+    </span>
+
+    <br>
+
+    <span class="badge bg-success mb-1">
+        Paid: Rs. ${Number(fine.fine_paid_amount || 0).toLocaleString()}
+    </span>
+
+    ${
+        (fine.fine_amount - fine.fine_paid_amount) > 0
+        ?
+        `
+        <br>
+        <span class="badge bg-warning text-dark">
+            Due: Rs. ${Number(
+                fine.fine_amount - fine.fine_paid_amount
+            ).toLocaleString()}
+        </span>
+        `
+        :
+        ""
+    }
+
+</div>
+`
+:
+`
+<span class="text-muted">
+    No Fine
+</span>
+`
+
+}
+
 </td>
 
 
                 <td class="py-3 px-4 text-nowrap">
 
-                    ${fine.fine_paid
-                    ?
-                    `<span class="badge bg-success">Paid</span>`
-                    :
-                    `<span class="badge bg-danger">Unpaid</span>`
+                   ${fine.remaining_fine <= 0
+                    ? `<span class="badge bg-success">Paid</span>`
+                    : `<span class="badge bg-danger">Unpaid</span>`
                 }
 
                 </td>
@@ -158,25 +192,25 @@ async function loadFines(page = 1) {
 
                 <td class="py-3 px-4 text-center text-nowrap">
 
-                    ${fine.fine_paid
+                    ${fine.remaining_fine <= 0
 
                     ?
 
                     `<button class="btn btn-secondary btn-sm px-3" disabled>
-                            Paid
-                        </button>`
+    Paid
+</button>`
 
                     :
 
                     `<button 
-                            class="btn btn-sm text-white px-3 pay-fine-btn"
-                            data-id="${fine.id}"
-                            style="background:#002147;border-radius:10px;">
-                            
-                            <i class="fas fa-credit-card me-2"></i>
-                            Pay
+    class="btn btn-sm text-white px-3 pay-fine-btn"
+    data-id="${fine.id}"
+    style="background:#002147;border-radius:10px;">
+    
+    <i class="fas fa-credit-card me-2"></i>
+    Pay
 
-                        </button>`
+</button>`
 
                 }
 

@@ -5,18 +5,17 @@ const updateFines = async () => {
   console.log("Running fine update:", new Date());
 
   try {
-    await db.run(`
-      UPDATE borrowed_books
-      SET fine_amount =
-        CAST(
-          julianday(DATE('now')) - julianday(DATE(due_date))
-          AS INTEGER
-        ) * 10
-      WHERE
-        returned = 0
-        AND fine_paid = 0
-        AND DATE(due_date) < DATE('now');
-    `);
+    await db.exec(`
+  UPDATE borrowed_books
+  SET fine_amount =
+    CAST(
+      julianday(DATE('now')) - julianday(DATE(due_date))
+      AS INTEGER
+    ) * 10
+  WHERE
+    returned = 0
+    AND DATE(due_date) < DATE('now');
+`);
 
     console.log("Fine calculation completed.");
 
@@ -30,7 +29,7 @@ const updateFines = async () => {
 const startFineCron = () => {
   console.log("Fine cron initialized");
 
-  cron.schedule("0 * * * *", async () => {
+  cron.schedule("0 * * * * ", async () => {
     await updateFines();
   });
 };

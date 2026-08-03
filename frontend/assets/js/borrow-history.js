@@ -88,6 +88,8 @@ async function loadFineDetails(page = 1) {
             const returned = Number(book.returned) === 1;
             const finePaid = Number(book.fine_paid) === 1;
             const fineAmount = Number(book.fine_amount || 0);
+            const paidAmount = Number(book.fine_paid_amount || 0);
+            const remainingFine = fineAmount - paidAmount;
 
             table.innerHTML += `
             <tr>
@@ -122,27 +124,48 @@ async function loadFineDetails(page = 1) {
 
                 </td>
 
-                <td class="py-3 px-4 fw-bold text-center text-nowrap">
+               <td class="py-3 px-4 fw-bold text-center text-nowrap">
 
-                    ${fineAmount > 0
-                    ? `<span class="${finePaid ? "text-success" : "text-danger"}">
-                                    Rs. ${fineAmount.toLocaleString()}
-                               </span>`
-                    : `<span class="text-muted">No Fine</span>`
-                }
+${fineAmount > 0
+?
+`
+<div>
 
-                </td>
+    <span class="badge bg-danger mb-1">
+        Fine: Rs. ${fineAmount.toLocaleString()}
+    </span>
 
-                <td class="py-3 px-4 text-center text-nowrap">
+    <br>
 
-                    ${fineAmount > 0 && !finePaid
-                    ? `<span class="badge bg-danger">Unpaid Fine</span>`
-                    : fineAmount > 0 && finePaid
-                        ? `<span class="badge bg-success">Fine Paid</span>`
-                        : `<span class="badge bg-secondary">No Fine</span>`
-                }
+    <span class="badge bg-success mb-1">
+        Paid: Rs. ${paidAmount.toLocaleString()}
+    </span>
 
-                </td>
+    ${
+        remainingFine > 0
+        ?
+        `
+        <br>
+        <span class="badge bg-warning text-dark">
+            Due: Rs. ${remainingFine.toLocaleString()}
+        </span>
+        `
+        :
+        ""
+    }
+
+</div>
+`
+:
+`
+<span class="text-muted">
+No Fine
+</span>
+`
+
+}
+
+</td>
 
                 <td class="py-3 px-4 text-center text-nowrap">
 
@@ -154,13 +177,13 @@ async function loadFineDetails(page = 1) {
                                 Returned
                             </button>
                             `
-                    : fineAmount > 0 && !finePaid
+                    : remainingFine > 0
 ? `
 <button
     class="btn btn-sm text-white"
     style="background:#002147;border-radius:8px;"
     onclick="collectCash(${book.id})">
-
+    
     <i class="fas fa-money-bill-wave me-1"></i>
     Collect Cash
 

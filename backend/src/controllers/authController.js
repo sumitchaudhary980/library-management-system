@@ -525,7 +525,7 @@ exports.forgotPassword = async (req, res) => {
                 "
               >
 
-                
+                <a
                   href="${resetLink}"
                   style="
                     background:#123458;
@@ -601,7 +601,7 @@ exports.forgotPassword = async (req, res) => {
 
               <p style="word-break:break-word;">
 
-                
+                <a
                   href="${resetLink}"
                   style="
                     color:#123458;
