@@ -170,38 +170,19 @@ No Fine
 
              <td class="py-3 px-4 text-center text-nowrap">
 
-${remainingFine > 0
-                    ? `
-        <button
-            class="btn btn-sm text-white"
-            style="background:#002147;border-radius:8px;"
-            onclick="collectCash(${book.id})">
-
-            <i class="fas fa-money-bill-wave me-1"></i>
-            Collect Cash
-
-        </button>
-        `
-                    : returned
-                        ? `
-            <button
-                class="btn btn-secondary btn-sm"
-                disabled>
-                Returned
-            </button>
-            `
-                        : `
-            <button
-                class="btn btn-sm text-white"
-                style="background:#002147;border-radius:8px;"
-                onclick="returnBook(${book.id})">
-
-                <i class="fas fa-rotate-left me-1"></i>
-                Return
-
-            </button>
-            `
-                }
+    ${
+        fineAmount > 0 && remainingFine === 0
+        ? `<span class="badge bg-success">
+            Fine Paid
+          </span>`
+        : fineAmount > 0 && remainingFine > 0
+        ? `<span class="badge bg-danger">
+            Fine Not Paid
+          </span>`
+        : `<span class="text-muted">
+            No Fine
+          </span>`
+    }
 
 </td>
 <td class="py-3 px-4 text-center text-nowrap">
