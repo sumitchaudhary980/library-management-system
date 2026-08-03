@@ -9,10 +9,13 @@ if (process.env.NODE_ENV === "production") {
   });
 
   const db = {
+    // better-sqlite3 compatible exec()
     async exec(sql) {
       return await turso.execute(sql);
     },
 
+
+    // better-sqlite3 compatible prepare()
     prepare(sql) {
       return {
         async get(...params) {
@@ -24,6 +27,7 @@ if (process.env.NODE_ENV === "production") {
           return result.rows[0] || undefined;
         },
 
+
         async all(...params) {
           const result = await turso.execute({
             sql,
@@ -32,6 +36,7 @@ if (process.env.NODE_ENV === "production") {
 
           return result.rows;
         },
+
 
         async run(...params) {
           const result = await turso.execute({
@@ -46,28 +51,67 @@ if (process.env.NODE_ENV === "production") {
         },
       };
     },
+
+
+    // better-sqlite3 compatible transaction()
+    transaction(callback) {
+      return async (...args) => {
+
+        await turso.execute("BEGIN");
+
+        try {
+
+          const result = await callback(...args);
+
+          await turso.execute("COMMIT");
+
+          return result;
+
+        } catch (error) {
+
+          await turso.execute("ROLLBACK");
+
+          throw error;
+
+        }
+      };
+    },
   };
+
 
   console.log("Connected to Turso");
 
   module.exports = db;
 
+
 } else {
+
   const Database = require("better-sqlite3");
   const path = require("path");
   const fs = require("fs");
 
+
   const dbDir = path.join(__dirname, "..", "database");
 
+
   if (!fs.existsSync(dbDir)) {
-    fs.mkdirSync(dbDir, { recursive: true });
+    fs.mkdirSync(dbDir, {
+      recursive: true,
+    });
   }
 
-  const dbPath = path.join(dbDir, "kaiserlibrary.sqlite");
+
+  const dbPath = path.join(
+    dbDir,
+    "kaiserlibrary.sqlite"
+  );
+
 
   const db = new Database(dbPath);
 
+
   console.log("Connected to SQLite:", dbPath);
+
 
   module.exports = db;
 }
