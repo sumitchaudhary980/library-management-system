@@ -159,8 +159,10 @@ app.use(
 
         scriptSrc: [
           "'self'",
+          "'unsafe-inline'",
           "https://cdn.jsdelivr.net",
-          "https://cdnjs.cloudflare.com"
+          "https://cdnjs.cloudflare.com",
+          "https://va.vercel-scripts.com"
         ],
 
         styleSrc: [
@@ -192,7 +194,8 @@ app.use(
           "'self'",
           "https://cdn.jsdelivr.net",
           "https://fonts.gstatic.com",
-          "https://cdnjs.cloudflare.com"
+          "https://cdnjs.cloudflare.com",
+          "https://va.vercel-scripts.com"
         ],
 
         formAction: [
