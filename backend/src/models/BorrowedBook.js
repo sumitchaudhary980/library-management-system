@@ -29,6 +29,22 @@ const createBorrowedBookTable = () => {
       FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE
     );
   `);
+  const columns = db.prepare("PRAGMA table_info(borrowed_books)").all();
+
+  if (!columns.some(column => column.name === "fine_paid_amount")) {
+    db.exec(`
+    ALTER TABLE borrowed_books
+    ADD COLUMN fine_paid_amount REAL NOT NULL DEFAULT 0;
+  `);
+  }
+
+  // Fine paid amount column
+  if (!columns.some((column) => column.name === "fine_paid_amount")) {
+    db.exec(`
+    ALTER TABLE borrowed_books
+    ADD COLUMN fine_paid_amount REAL NOT NULL DEFAULT 0;
+  `);
+  }
 
   db.exec(`
     CREATE TRIGGER IF NOT EXISTS update_borrowed_books_updated_at

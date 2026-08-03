@@ -1,7 +1,7 @@
 const db = require("../config/db");
 
-const createBookTable = async () => {
-  await db.exec(`
+const createBookTable = () => {
+  db.exec(`
     CREATE TABLE IF NOT EXISTS books (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       title TEXT NOT NULL,
@@ -19,13 +19,13 @@ const createBookTable = async () => {
   `);
 
   // Add description column if it doesn't exist
-  const columns = await db.prepare(`PRAGMA table_info(books)`).all();
+  const columns = db.prepare(`PRAGMA table_info(books)`).all();
   const hasDescription = columns.some(
     (column) => column.name === "description"
   );
 
   if (!hasDescription) {
-    await db.exec(`
+    db.exec(`
       ALTER TABLE books
       ADD COLUMN description TEXT;
     `);
@@ -33,7 +33,7 @@ const createBookTable = async () => {
     console.log("Added 'description' column to books table.");
   }
 
-  await db.exec(`
+  db.exec(`
     CREATE TRIGGER IF NOT EXISTS update_books_updated_at
     AFTER UPDATE ON books
     FOR EACH ROW

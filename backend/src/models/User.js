@@ -1,7 +1,7 @@
 const db = require("../config/db");
 
-const createUserTable = async () => {
-  await db.exec(`
+const createUserTable = () => {
+  db.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       first_name TEXT NOT NULL,
@@ -24,11 +24,9 @@ const createUserTable = async () => {
     )
   `);
 
-  const result = await db.execute("PRAGMA table_info(users)");
-  const columns = result.rows;
-  // Status column
+  const columns = db.prepare("PRAGMA table_info(users)").all();  // Status column
   if (!columns.some((column) => column.name === "status")) {
-    await db.exec(`
+    db.exec(`
       ALTER TABLE users
       ADD COLUMN status TEXT NOT NULL DEFAULT 'active';
     `);
@@ -36,7 +34,7 @@ const createUserTable = async () => {
 
   // Must change password column
   if (!columns.some((column) => column.name === "must_change_password")) {
-    await db.exec(`
+    db.exec(`
       ALTER TABLE users
       ADD COLUMN must_change_password INTEGER NOT NULL DEFAULT 1;
     `);
@@ -44,7 +42,7 @@ const createUserTable = async () => {
 
   // Reset token column
   if (!columns.some((column) => column.name === "reset_token")) {
-    await db.exec(`
+    db.exec(`
       ALTER TABLE users
       ADD COLUMN reset_token TEXT;
     `);
@@ -52,13 +50,13 @@ const createUserTable = async () => {
 
   // Reset token expiry column
   if (!columns.some((column) => column.name === "reset_token_expires")) {
-    await db.exec(`
+    db.exec(`
       ALTER TABLE users
       ADD COLUMN reset_token_expires DATETIME;
     `);
   }
 
-  await db.exec(`
+   db.exec(`
     CREATE TRIGGER IF NOT EXISTS update_users_updated_at
     AFTER UPDATE ON users
     FOR EACH ROW
