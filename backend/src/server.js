@@ -322,6 +322,11 @@ app.use((err, req, res, next) => {
 
   console.error(err);
 
+  // Prevent "Cannot set headers after they are sent"
+  if (res.headersSent) {
+    return next(err);
+  }
+
 
   const status = err.status || 500;
 
@@ -340,7 +345,7 @@ app.use((err, req, res, next) => {
   }
 
 
-  res.status(status).sendFile(
+  return res.status(status).sendFile(
     path.join(frontendPath, "errors", "500.html")
   );
 
