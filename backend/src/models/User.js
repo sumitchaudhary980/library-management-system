@@ -24,8 +24,8 @@ const createUserTable = async () => {
     )
   `);
 
-  const columns = await db.prepare(`PRAGMA table_info(users)`).all();
-
+  const result = await db.execute("PRAGMA table_info(users)");
+  const columns = result.rows;
   // Status column
   if (!columns.some((column) => column.name === "status")) {
     await db.exec(`
@@ -52,13 +52,13 @@ const createUserTable = async () => {
 
   // Reset token expiry column
   if (!columns.some((column) => column.name === "reset_token_expires")) {
-   await  db.exec(`
+    await db.exec(`
       ALTER TABLE users
       ADD COLUMN reset_token_expires DATETIME;
     `);
   }
 
- await db.exec(`
+  await db.exec(`
     CREATE TRIGGER IF NOT EXISTS update_users_updated_at
     AFTER UPDATE ON users
     FOR EACH ROW
