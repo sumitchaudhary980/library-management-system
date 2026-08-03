@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const { requireAdmin } = require("../middleware/authMiddleware");
-const runFineCron = require("../jobs/fineCron");
+const runFineCron = require("./jobs/fineCron");
 
 router.get("/run-fines", requireAdmin, async (req, res) => {
   try {
