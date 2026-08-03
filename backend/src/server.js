@@ -219,7 +219,6 @@ app.use(cookieParser());
 // API limiter
 
 app.use("/api", rateLimiter);
-app.use("/api/cron", cronRoute);
 // SESSION
 
 app.use(
@@ -284,6 +283,7 @@ app.use(
 
 
 // ROUTES
+app.use("/api/cron", cronRoute);
 
 app.use("/", pageRoute);
 
