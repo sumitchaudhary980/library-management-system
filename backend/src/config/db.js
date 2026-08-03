@@ -9,6 +9,15 @@ if (process.env.NODE_ENV === "production") {
   });
 
   const db = {
+    // Replacement for better-sqlite3 db.exec()
+    async exec(sql) {
+      return await turso.execute({
+        sql,
+        args: [],
+      });
+    },
+
+    // Replacement for better-sqlite3 db.prepare()
     prepare(sql) {
       return {
         async get(...params) {
@@ -17,7 +26,7 @@ if (process.env.NODE_ENV === "production") {
             args: params,
           });
 
-          return result.rows[0];
+          return result.rows[0] || undefined;
         },
 
         async all(...params) {
@@ -30,10 +39,15 @@ if (process.env.NODE_ENV === "production") {
         },
 
         async run(...params) {
-          return await turso.execute({
+          const result = await turso.execute({
             sql,
             args: params,
           });
+
+          return {
+            changes: result.rowsAffected,
+            lastInsertRowid: result.lastInsertRowid,
+          };
         },
       };
     },
