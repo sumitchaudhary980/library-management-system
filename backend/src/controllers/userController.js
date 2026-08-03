@@ -1077,8 +1077,6 @@ await db.prepare(
   SET
       fine_paid = 1,
       fine_paid_at = CURRENT_TIMESTAMP,
-      returned = 1,
-      returned_at = CURRENT_TIMESTAMP
   WHERE id = ?
     AND fine_paid = 0
   `
