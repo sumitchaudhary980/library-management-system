@@ -8,7 +8,7 @@ const uploadToCloudinary = (filePath) => {
     return new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
             {
-                folder: "kaiser-library/users",
+                folder: "heritage-library/users",
                 resource_type: "image",
             },
             (error, result) => {

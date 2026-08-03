@@ -418,7 +418,7 @@ exports.forgotPassword = async (req, res) => {
 
 
       subject:
-        "Reset Your Kaiser Library Password",
+        "Reset Your Heritage Library Password",
 
 
       html: `
@@ -459,7 +459,7 @@ exports.forgotPassword = async (req, res) => {
             >
 
               <h1 style="margin:0;font-size:30px;">
-                📚 Kaiser Library
+                📚 Heritage Library
               </h1>
 
               <p style="margin-top:12px;font-size:16px;">
@@ -495,7 +495,7 @@ exports.forgotPassword = async (req, res) => {
               >
 
                 We received a request to reset the password for your
-                <strong>Kaiser Library</strong> account.
+                <strong>Heritage Library</strong> account.
 
               </p>
 
@@ -641,7 +641,7 @@ exports.forgotPassword = async (req, res) => {
 
                 Regards,<br>
 
-                <strong>Kaiser Library Team</strong>
+                <strong>Heritage Library Team</strong>
 
               </p>
 
@@ -668,7 +668,7 @@ exports.forgotPassword = async (req, res) => {
               "
             >
 
-              © ${new Date().getFullYear()} Kaiser Library. All Rights Reserved.
+              © ${new Date().getFullYear()} Heritage Library. All Rights Reserved.
 
             </td>
 

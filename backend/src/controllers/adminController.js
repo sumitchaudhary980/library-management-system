@@ -516,7 +516,7 @@ exports.createBook = async (req, res) => {
     const uploadResult = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
-          folder: "kaiser-library/books",
+          folder: "heritage-library/books",
           resource_type: "image",
         },
         (error, result) => {
@@ -719,7 +719,7 @@ exports.updateBook = async (req, res) => {
           const uploadStream =
             cloudinary.uploader.upload_stream(
               {
-                folder: "kaiser-library/books",
+                folder: "heritage-library/books",
               },
               (err, result) => {
 
@@ -1119,7 +1119,7 @@ LIMIT 1
     await transporter.sendMail({
       to: paymentInfo.email,
       cc: process.env.ADMIN_EMAIL || undefined,
-      subject: "Fine Payment Receipt - Kaiser Library",
+      subject: "Fine Payment Receipt - Heritage Library",
       html: `
 <!DOCTYPE html>
 <html lang="en">
@@ -1152,7 +1152,7 @@ color:#fff;
 ">
 
 <h1 style="margin:0;font-size:30px;">
-📚 Kaiser Library
+📚 Heritage Library
 </h1>
 
 <p style="margin-top:12px;font-size:17px;">
@@ -1291,7 +1291,7 @@ Your payment has been verified successfully.
 
 The librarian can now process the return of your book.
 
-Thank you for using Kaiser Library.
+Thank you for using Heritage Library.
 </p>
 
 </div>
@@ -1341,7 +1341,7 @@ margin-top:30px;
 color:#555;
 ">
 Regards,<br>
-<strong>Kaiser Library Team</strong>
+<strong>Heritage Library Team</strong>
 </p>
 
 </td>
@@ -1357,7 +1357,7 @@ padding:18px;
 font-size:13px;
 color:#888;
 ">
-© ${new Date().getFullYear()} Kaiser Library. All Rights Reserved.
+© ${new Date().getFullYear()} Heritage Library. All Rights Reserved.
 </td>
 </tr>
 
@@ -1953,7 +1953,7 @@ exports.createReader = async (req, res) => {
 
     await transporter.sendMail({
       to: email.trim(),
-      subject: "Welcome to Kaiser Library - Your Reader Account",
+      subject: "Welcome to Heritage Library - Your Reader Account",
       html: `
 <!DOCTYPE html>
 <html lang="en">
@@ -1991,7 +1991,7 @@ exports.createReader = async (req, res) => {
               "
             >
               <h1 style="margin:0;font-size:30px;">
-                📚 Kaiser Library
+                📚 Heritage Library
               </h1>
 
               <p style="margin-top:12px;font-size:16px;">
@@ -2021,7 +2021,7 @@ exports.createReader = async (req, res) => {
                 "
               >
                 Your reader account has been successfully created by the
-                <strong>Kaiser Library Administrator</strong>.
+                <strong>Heritage Library Administrator</strong>.
               </p>
 
               <table
@@ -2116,7 +2116,7 @@ exports.createReader = async (req, res) => {
                     display:inline-block;
                   "
                 >
-                  Login to Kaiser Library
+                  Login to Heritage Library
                 </a>
 
               </div>
@@ -2170,7 +2170,7 @@ exports.createReader = async (req, res) => {
                 "
               >
                 Regards,<br>
-                <strong>Kaiser Library Team</strong>
+                <strong>Heritage Library Team</strong>
               </p>
 
             </td>
@@ -2187,7 +2187,7 @@ exports.createReader = async (req, res) => {
                 font-size:13px;
               "
             >
-              © ${new Date().getFullYear()} Kaiser Library. All Rights Reserved.
+              © ${new Date().getFullYear()} Heritage Library. All Rights Reserved.
             </td>
           </tr>
 
@@ -2407,7 +2407,7 @@ exports.updateProfile = async (req, res) => {
       const uploadResult = await new Promise((resolve, reject) => {
         const uploadStream = cloudinary.uploader.upload_stream(
           {
-            folder: "kaiser-library/profile",
+            folder: "heritage-library/profile",
             resource_type: "image"
           },
           (err, result) => {
@@ -2569,7 +2569,7 @@ exports.changePassword = async (req, res) => {
       to: user.email,
 
       subject:
-        "Your Kaiser Library Password Has Been Changed",
+        "Your Heritage Library Password Has Been Changed",
 
       html:`
 
@@ -2612,7 +2612,7 @@ padding:40px;
 ">
 
 <h1 style="margin:0;">
-📚 Kaiser Library
+📚 Heritage Library
 </h1>
 
 <p style="margin-top:12px;">
@@ -2643,7 +2643,7 @@ color:#555;
 line-height:1.8;
 ">
 
-Your Kaiser Library account password was successfully changed.
+Your Heritage Library account password was successfully changed.
 
 </p>
 
@@ -2753,7 +2753,7 @@ color:#555;
 line-height:1.7;
 ">
 
-If you did not make this change, please contact the Kaiser Library administrator immediately to secure your account.
+If you did not make this change, please contact the Heritage Library administrator immediately to secure your account.
 
 </p>
 
@@ -2776,7 +2776,7 @@ border-top:1px solid #eeeeee;
 Regards,<br>
 
 <strong>
-Kaiser Library Team
+Heritage Library Team
 </strong>
 
 </p>
@@ -2799,7 +2799,7 @@ padding:18px;
 color:#888;
 ">
 
-© ${new Date().getFullYear()} Kaiser Library. All Rights Reserved.
+© ${new Date().getFullYear()} Heritage Library. All Rights Reserved.
 
 </td>
 

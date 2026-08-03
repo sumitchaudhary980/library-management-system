@@ -191,7 +191,7 @@ MAIL_PORT=587
 MAIL_SECURE=false
 MAIL_USER=your_email@gmail.com
 MAIL_PASS=your_app_password
-MAIL_FROM="Kaiser Library <your_email@gmail.com>"
+MAIL_FROM="Heritage Library <your_email@gmail.com>"
 
 # Upstash Rate Limiter
 UPSTASH_REDIS_REST_URL=your_upstash_url
