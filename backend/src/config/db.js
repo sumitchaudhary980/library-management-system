@@ -8,75 +8,71 @@ if (process.env.NODE_ENV === "production") {
     authToken: process.env.TURSO_AUTH_TOKEN,
   });
 
-  const db = {
-    // better-sqlite3 compatible exec()
-    async exec(sql) {
-      return await turso.execute(sql);
-    },
+const db = {
+
+  async execute(sql, args = []) {
+    return await turso.execute({
+      sql,
+      args,
+    });
+  },
 
 
-    // better-sqlite3 compatible prepare()
-    prepare(sql) {
-      return {
-        async get(...params) {
-          const result = await turso.execute({
-            sql,
-            args: params,
-          });
-
-          return result.rows[0] || undefined;
-        },
+  async exec(sql) {
+    return await turso.execute(sql);
+  },
 
 
-        async all(...params) {
-          const result = await turso.execute({
-            sql,
-            args: params,
-          });
+  prepare(sql) {
+    return {
+      async get(...params) {
+        const result = await turso.execute({
+          sql,
+          args: params,
+        });
 
-          return result.rows;
-        },
+        return result.rows[0] || undefined;
+      },
+
+      async all(...params) {
+        const result = await turso.execute({
+          sql,
+          args: params,
+        });
+
+        return result.rows;
+      },
+
+      async run(...params) {
+        const result = await turso.execute({
+          sql,
+          args: params,
+        });
+
+        return {
+          changes: result.rowsAffected,
+          lastInsertRowid: result.lastInsertRowid,
+        };
+      },
+    };
+  },
 
 
-        async run(...params) {
-          const result = await turso.execute({
-            sql,
-            args: params,
-          });
+  transaction(callback) {
+    return async (...args) => {
+      await turso.execute("BEGIN");
 
-          return {
-            changes: result.rowsAffected,
-            lastInsertRowid: result.lastInsertRowid,
-          };
-        },
-      };
-    },
-
-
-    // better-sqlite3 compatible transaction()
-    transaction(callback) {
-      return async (...args) => {
-
-        await turso.execute("BEGIN");
-
-        try {
-
-          const result = await callback(...args);
-
-          await turso.execute("COMMIT");
-
-          return result;
-
-        } catch (error) {
-
-          await turso.execute("ROLLBACK");
-
-          throw error;
-
-        }
-      };
-    },
-  };
+      try {
+        const result = await callback(...args);
+        await turso.execute("COMMIT");
+        return result;
+      } catch (error) {
+        await turso.execute("ROLLBACK");
+        throw error;
+      }
+    };
+  },
+};
 
 
   console.log("Connected to Turso");
