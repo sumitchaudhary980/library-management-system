@@ -96,7 +96,7 @@ app.use(cookieParser());
 
 
 // Apply rate limiter only to API routes
-app.use("/api", rateLimiter);
+// app.use("/api", rateLimiter);
 
 
 app.use(
