@@ -2103,7 +2103,7 @@ exports.createReader = async (req, res) => {
                 "
               >
 
-                
+                <a
                   href="${APP_URL}/login"
                   style="
                     background:#123458;
@@ -2132,7 +2132,7 @@ exports.createReader = async (req, res) => {
               </p>
 
               <p style="word-break:break-word;">
-                
+                <a
                   href="${APP_URL}/login"
                   style="
                     color:#123458;
