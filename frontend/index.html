@@ -1,9 +1,61 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-NP">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Heritage Library | Digital Portal</title>
+    <title>Heritage Digital Library Nepal | Library Management System</title>
+    <meta
+      name="description"
+      content="Heritage Digital Library is a library management system for online library access and book management in Nepal, developed by Sumit Kumar Chaudhary."
+    />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="author" content="Sumit Kumar Chaudhary" />
+    <meta name="application-name" content="Heritage Digital Library" />
+    <meta name="geo.region" content="NP-P3" />
+    <meta name="geo.placename" content="Kathmandu, Nepal" />
+    <link rel="canonical" href="__SITE_URL__/" />
+    <link rel="icon" type="image/x-icon" href="/assets/favicon/favicon.ico" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/assets/favicon/favicon-32x32.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/assets/favicon/favicon-16x16.png"
+    />
+    <meta property="og:title" content="Heritage Digital Library Nepal" />
+    <meta
+      property="og:description"
+      content="A fast, accessible Library Management System and Digital Library portal for Nepal, created by Sumit Kumar Chaudhary."
+    />
+    <meta
+      property="og:image"
+      content="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=1200"
+    />
+    <meta property="og:url" content="__SITE_URL__/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Heritage Digital Library" />
+    <meta property="og:locale" content="en_NP" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Heritage Digital Library Nepal" />
+    <meta
+      name="twitter:description"
+      content="Library Management System Nepal and Digital Library portal developed by Sumit Kumar Chaudhary."
+    />
+    <meta
+      name="twitter:image"
+      content="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=1200"
+    />
+    <link
+      rel="preload"
+      as="image"
+      href="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=1000"
+      fetchpriority="high"
+    />
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -19,9 +71,83 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
     />
     <link rel="stylesheet" href="/assets/style.css" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "__SITE_URL__/#organization",
+            "name": "Heritage Digital Library",
+            "url": "__SITE_URL__/",
+            "logo": "__SITE_URL__/assets/favicon/favicon-32x32.png",
+            "areaServed": {
+              "@type": "Country",
+              "name": "Nepal"
+            },
+            "founder": {
+              "@id": "__SITE_URL__/#sumit-kumar-chaudhary"
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "__SITE_URL__/#website",
+            "name": "Heritage Digital Library",
+            "url": "__SITE_URL__/",
+            "inLanguage": "en-NP",
+            "publisher": {
+              "@id": "__SITE_URL__/#organization"
+            },
+            "creator": {
+              "@id": "__SITE_URL__/#sumit-kumar-chaudhary"
+            }
+          },
+          {
+            "@type": "SoftwareApplication",
+            "@id": "__SITE_URL__/#software",
+            "name": "Heritage Digital Library",
+            "applicationCategory": "Library Management System",
+            "operatingSystem": "Web",
+            "url": "__SITE_URL__/",
+            "description": "Heritage Digital Library is a web-based Library Management System for digital library and book management workflows in Nepal.",
+            "creator": {
+              "@id": "__SITE_URL__/#sumit-kumar-chaudhary"
+            },
+            "areaServed": {
+              "@type": "City",
+              "name": "Kathmandu"
+            }
+          },
+          {
+            "@type": "Person",
+            "@id": "__SITE_URL__/#sumit-kumar-chaudhary",
+            "name": "Sumit Kumar Chaudhary",
+            "alternateName": [
+              "Sumit Chaudhary",
+              "SumitKumarChaudhary",
+              "sumitchaudhary"
+            ],
+            "jobTitle": "Full-Stack Web Developer",
+            "url": "__SITE_URL__/"
+          },
+          {
+            "@type": "BreadcrumbList",
+            "@id": "__SITE_URL__/#breadcrumb",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "__SITE_URL__/"
+              }
+            ]
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
-    <nav class="navbar fixed-top bg-white shadow-sm">
+    <nav class="navbar fixed-top bg-white shadow-sm" aria-label="Primary navigation">
       <div class="container py-2">
         <a class="navbar-brand font-serif fw-bold" href="/">
           <i class="fas fa-book-open brand-icon me-2"></i>
@@ -61,8 +187,12 @@
               <div class="hero-image-wrapper">
                 <img
                   src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=1000"
-                  alt="Heritage Library Bookshelf"
+                  alt="Bookshelves representing Heritage Digital Library Nepal"
                   class="hero-image img-fluid"
+                  width="1000"
+                  height="667"
+                  decoding="async"
+                  fetchpriority="high"
                 />
               </div>
             </div>
@@ -178,16 +308,17 @@
                   href="mailto:contact@heritagelibrary.com"
                   class="social-icon"
                   title="Email Us"
+                  aria-label="Email Heritage Digital Library"
                 >
                   <i class="far fa-envelope"></i>
                 </a>
-                <a href="#" class="social-icon" title="Instagram">
+                <a href="#" class="social-icon" title="Instagram" aria-label="Instagram">
                   <i class="fab fa-instagram"></i>
                 </a>
-                <a href="#" class="social-icon" title="LinkedIn">
+                <a href="#" class="social-icon" title="LinkedIn" aria-label="LinkedIn">
                   <i class="fab fa-linkedin-in"></i>
                 </a>
-                <a href="#" class="social-icon" title="X (Twitter)">
+                <a href="#" class="social-icon" title="X (Twitter)" aria-label="X Twitter">
                   <i class="fab fa-x-twitter"></i>
                 </a>
               </div>
@@ -206,6 +337,9 @@
       </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      defer
+    ></script>
   </body>
 </html>

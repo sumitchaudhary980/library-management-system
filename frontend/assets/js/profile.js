@@ -53,7 +53,9 @@ async function loadProfile() {
         <img
           src="${user.profile_image}"
           class="profile-avatar"
-          alt="Profile Image"
+          alt="${user.first_name} ${user.last_name} profile image"
+          loading="lazy"
+          decoding="async"
         >
       `;
     }

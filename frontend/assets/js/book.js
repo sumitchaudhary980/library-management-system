@@ -45,6 +45,9 @@ async function loadBooks(page = 1) {
       <td class="py-3 px-4">
         <img
           src="${book.cover_image}"
+          alt="${book.title} book cover"
+          loading="lazy"
+          decoding="async"
           style="width:60px;height:80px;object-fit:cover;border-radius:8px;"
         >
       </td>

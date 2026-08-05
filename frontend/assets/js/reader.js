@@ -83,6 +83,9 @@ async function loadReaders(page = 1) {
           ? `
       <img
         src="${reader.profile_image}"
+        alt="${reader.first_name} ${reader.last_name} profile image"
+        loading="lazy"
+        decoding="async"
         style="width:55px;height:55px;border-radius:50%;object-fit:cover;"
       >
     `

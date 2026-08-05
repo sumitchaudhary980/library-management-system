@@ -124,6 +124,9 @@ async function loadUsers(page = 1) {
                     ? `
       <img
         src="${user.profile_image}"
+        alt="${user.first_name} ${user.last_name} profile image"
+        loading="lazy"
+        decoding="async"
         class="rounded-circle me-3"
         style="
           width:52px;

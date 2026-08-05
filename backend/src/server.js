@@ -36,6 +36,30 @@ app.set("trust proxy", 1);
 const PORT = process.env.PORT || 3000;
 
 const frontendPath = path.join(__dirname, "../../frontend");
+const DEFAULT_APP_URL = "http://localhost:3000";
+
+const getBaseUrl = (req) => {
+  const configuredUrl = process.env.APP_URL || DEFAULT_APP_URL;
+
+  if (configuredUrl && !configuredUrl.includes("localhost")) {
+    return configuredUrl.replace(/\/$/, "");
+  }
+
+  return `${req.protocol}://${req.get("host")}`;
+};
+
+const noindexPrivateSurfaces = (req, res, next) => {
+  const publicPaths = new Set(["/", "/robots.txt", "/sitemap.xml", "/favicon.ico"]);
+  const isStaticAsset =
+    req.path.startsWith("/assets/") ||
+    req.path.startsWith("/errors/error.css");
+
+  if (!publicPaths.has(req.path) && !isStaticAsset) {
+    res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
+  }
+
+  next();
+};
 
 
 // ---------------- SESSION STORE ----------------
@@ -148,6 +172,9 @@ if (process.env.NODE_ENV === "production") {
 }
 
 
+app.use(noindexPrivateSurfaces);
+
+
 // ---------------- SECURITY ----------------
 
 
@@ -159,6 +186,7 @@ app.use(
 
         scriptSrc: [
           "'self'",
+          "'unsafe-inline'",
           "https://cdn.jsdelivr.net",
           "https://cdnjs.cloudflare.com"
         ],
@@ -257,13 +285,68 @@ app.use(
 
 // STATIC FILES
 
+app.get("/favicon.ico", (req, res) => {
+  res.setHeader("Cache-Control", "public, max-age=2592000");
+  res.sendFile(path.join(frontendPath, "assets", "favicon", "favicon.ico"));
+});
+
+app.get("/robots.txt", (req, res) => {
+  const baseUrl = getBaseUrl(req);
+
+  res.type("text/plain");
+  res.setHeader("Cache-Control", "public, max-age=3600");
+  res.send([
+    "User-agent: *",
+    "Allow: /$",
+    "Allow: /assets/",
+    "Disallow: /admin",
+    "Disallow: /dashboard",
+    "Disallow: /login",
+    "Disallow: /register",
+    "Disallow: /api",
+    "Disallow: /home",
+    "Disallow: /books",
+    "Disallow: /authors",
+    "Disallow: /genres",
+    "Disallow: /readers",
+    "Disallow: /fines",
+    "Disallow: /profile",
+    "Disallow: /borrowed-books",
+    "Disallow: /borrow-history",
+    "Disallow: /forgot-password",
+    "Disallow: /reset-password",
+    "Disallow: /change-password",
+    `Sitemap: ${baseUrl}/sitemap.xml`,
+    "",
+  ].join("\n"));
+});
+
+app.get("/sitemap.xml", (req, res) => {
+  const baseUrl = getBaseUrl(req);
+
+  res.type("application/xml");
+  res.setHeader("Cache-Control", "public, max-age=3600");
+  res.send(`<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>${baseUrl}/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>
+`);
+});
+
 app.use(
   "/assets",
   express.static(
     path.join(frontendPath, "assets"),
     {
       etag: true,
-      maxAge: "1d",
+      maxAge: "7d",
+      setHeaders: (res) => {
+        res.setHeader("Cache-Control", "public, max-age=604800");
+      },
     }
   )
 );
