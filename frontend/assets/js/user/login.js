@@ -9,6 +9,16 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     return;
   }
 
+  // Add loading state
+  const loginButton = document.querySelector('#loginForm button[type="submit"]');
+  const originalButtonText = loginButton.innerHTML;
+
+  loginButton.disabled = true;
+  loginButton.innerHTML = `
+    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+    Authenticating...
+  `;
+
   try {
     const res = await fetch("/api/auth/login", {
       method: "POST",
@@ -42,10 +52,20 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
         window.location.href = data.redirect;
       }, 1000);
     } else {
+      // Restore button if login fails
+      loginButton.disabled = false;
+      loginButton.innerHTML = originalButtonText;
+
       showToast(data.message || "Invalid credentials.", "error");
     }
   } catch (err) {
     console.error("Login error:", err);
+
+    // Restore button if request fails
+    loginButton.disabled = false;
+    loginButton.innerHTML = originalButtonText;
+
     showToast("Something went wrong. Try again.", "error");
   }
 });
+
