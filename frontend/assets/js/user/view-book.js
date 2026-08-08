@@ -1,6 +1,47 @@
 const id = window.location.pathname.split("/").pop();
 
+function setBookDetailsLoading(loading) {
+    const coverImage = document.getElementById("coverImage");
+    const placeholders = [
+        ["bookTitle", "Loading book title", "65%"],
+        ["bookAuthor", "Loading author", "55%"],
+        ["bookStock", "Loading stock", "45%"],
+        ["bookDescription", "Loading description", "100%"],
+    ];
+
+    placeholders.forEach(([id, text, width]) => {
+        const el = document.getElementById(id);
+
+        if (loading) {
+            el.textContent = text;
+            el.classList.add("loading-placeholder");
+            el.style.width = width;
+        } else {
+            el.classList.remove("loading-placeholder");
+            el.style.width = "";
+            if (el.textContent === text) el.textContent = "";
+        }
+    });
+
+    if (loading) {
+        document.getElementById("bookGenreBadge").textContent = "Loading";
+        document.getElementById("bookStockBadge").innerHTML =
+            `<span class="badge px-3 py-2 loading-placeholder" style="border-radius:30px;">Loading</span>`;
+    }
+
+    document.getElementById("bookGenreBadge").classList.toggle("loading-placeholder", loading);
+    if (!loading && document.getElementById("bookGenreBadge").textContent === "Loading") {
+        document.getElementById("bookGenreBadge").textContent = "";
+    }
+    if (!loading && document.getElementById("bookStockBadge").textContent.trim() === "Loading") {
+        document.getElementById("bookStockBadge").innerHTML = "";
+    }
+    coverImage.classList.toggle("image-loading", loading);
+}
+
 async function loadBook() {
+    setBookDetailsLoading(true);
+
     try {
         const response = await fetch(`/api/user/books/${id}`, {
             credentials: "include",
@@ -74,11 +115,19 @@ async function loadBook() {
                 <i class="fas fa-ban me-2"></i>
                 Unavailable
             `;
+        } else {
+            borrowButton.disabled = false;
+            borrowButton.innerHTML = `
+                <i class="fas fa-book-reader me-2"></i>
+                Borrow Book
+            `;
         }
 
     } catch (err) {
         console.log(err);
         showToast("Failed to load book");
+    } finally {
+        setBookDetailsLoading(false);
     }
 }
 
@@ -87,6 +136,10 @@ async function borrowBook() {
         document.getElementById("borrowBookButton");
 
     borrowButton.disabled = true;
+    borrowButton.innerHTML = `
+        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        Borrow Book
+    `;
 
     try {
         const response = await fetch(`/api/user/books/${id}/borrow`, {
@@ -107,12 +160,20 @@ async function borrowBook() {
             showToast(data.message || "Unable to borrow book");
 
             borrowButton.disabled = false;
+            borrowButton.innerHTML = `
+                <i class="fas fa-book-reader me-2"></i>
+                Borrow Book
+            `;
         }
     } catch (err) {
         console.log(err);
         showToast("Something went wrong");
 
         borrowButton.disabled = false;
+        borrowButton.innerHTML = `
+            <i class="fas fa-book-reader me-2"></i>
+            Borrow Book
+        `;
     }
 }
 

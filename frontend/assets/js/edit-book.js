@@ -39,6 +39,33 @@ const bookId = window.location.pathname.split("/").pop();
 let authors = [];
 let genres = [];
 let currentCover = "";
+const originalPlaceholders = {
+  title: title.placeholder,
+  authorSearch: authorSearch.placeholder,
+  genreSearch: genreSearch.placeholder,
+  stock: stock.placeholder,
+};
+
+function setInitialDataLoading(loading) {
+  [title, authorSearch, genreSearch, stock, cover, submitBtn].forEach((el) => {
+    el.disabled = loading;
+  });
+
+  if (loading) {
+    title.placeholder = "Loading book title...";
+    authorSearch.placeholder = "Loading author...";
+    genreSearch.placeholder = "Loading genre...";
+    stock.placeholder = "Loading stock...";
+    coverPreview.classList.add("image-loading");
+    return;
+  }
+
+  title.placeholder = originalPlaceholders.title;
+  authorSearch.placeholder = originalPlaceholders.authorSearch;
+  genreSearch.placeholder = originalPlaceholders.genreSearch;
+  stock.placeholder = originalPlaceholders.stock;
+  coverPreview.classList.remove("image-loading");
+}
 
 async function loadLookupData() {
   const [authorRes, genreRes] = await Promise.all([
@@ -336,6 +363,11 @@ bookForm.addEventListener("submit", async (e) => {
 });
 
 (async () => {
-  await loadLookupData();
-  await loadBook();
+  setInitialDataLoading(true);
+  try {
+    await loadLookupData();
+    await loadBook();
+  } finally {
+    setInitialDataLoading(false);
+  }
 })();

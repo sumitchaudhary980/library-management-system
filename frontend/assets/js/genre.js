@@ -1,8 +1,22 @@
 let currentSearch = "";
 let searchTimer;
 
+function showGenreTableLoading() {
+  document.getElementById("genreTable").innerHTML = `
+    <tr class="loading-row">
+      <td colspan="2" class="text-center py-4 text-muted">
+        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        Loading genres...
+      </td>
+    </tr>
+  `;
+  document.getElementById("entryText").innerHTML = "";
+  document.getElementById("pagination").innerHTML = "";
+}
+
 async function loadGenres(page = 1, search = currentSearch) {
   currentSearch = search;
+  showGenreTableLoading();
 
   const response = await fetch(`/api/admin/genres?page=${page}&search=${search}`);
   const data = await response.json();
@@ -40,7 +54,7 @@ async function loadGenres(page = 1, search = currentSearch) {
               <i class="fas fa-pen"></i>
             </a>
 
-            <button onclick="deleteGenre(${genre.id})" class="action-btn delete-btn" title="Delete">
+            <button onclick="deleteGenre(${genre.id}, this)" class="action-btn delete-btn" title="Delete">
               <i class="fas fa-trash"></i>
             </button>
           </div>
@@ -79,7 +93,7 @@ async function loadGenres(page = 1, search = currentSearch) {
 }
 
 // DELETE
-async function deleteGenre(id) {
+async function deleteGenre(id, button) {
   const result = await Swal.fire({
     title: "Delete genre?",
     text: "This genre will be permanently removed.",
@@ -92,6 +106,7 @@ async function deleteGenre(id) {
   });
 
   if (!result.isConfirmed) return;
+  if (button) button.disabled = true;
 
   try {
     const response = await fetch(`/api/admin/genres/${id}`, {
@@ -110,6 +125,8 @@ async function deleteGenre(id) {
   } catch (err) {
     console.log(err);
     showToast("Server error", "error");
+  } finally {
+    if (button) button.disabled = false;
   }
 }
 

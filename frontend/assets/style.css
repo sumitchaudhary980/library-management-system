@@ -575,6 +575,23 @@ button.menu-item:focus {
   transform: translateY(-2px);
 }
 
+.loading-placeholder {
+  display: inline-block;
+  background-color: #e9ecef;
+  border-radius: 8px;
+  color: transparent;
+  min-height: 1em;
+  vertical-align: middle;
+}
+
+.image-loading {
+  background-color: #e9ecef;
+}
+
+.loading-row td {
+  height: 72px;
+}
+
 .pagination .page-link {
   border-radius: 6px !important;
   margin: 0 3px;

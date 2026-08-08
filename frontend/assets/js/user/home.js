@@ -47,7 +47,24 @@ function updateHeader(firstName = "User") {
         `${greeting}, ${firstName}`;
 }
 
+function setHomeLoading(loading) {
+    ["borrowedBooks", "returnedBooks", "dueBooks", "fineAmount"].forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        if (loading) {
+            el.textContent = id === "fineAmount" ? "Rs. 0" : "0";
+            el.classList.add("loading-placeholder");
+            el.style.width = id === "fineAmount" ? "92px" : "64px";
+        } else {
+            el.classList.remove("loading-placeholder");
+            el.style.width = "";
+        }
+    });
+}
+
 async function loadHome() {
+    setHomeLoading(true);
 
     try {
 
@@ -81,6 +98,10 @@ async function loadHome() {
         console.error(err);
 
         showToast("Something went wrong", "error");
+
+    } finally {
+
+        setHomeLoading(false);
 
     }
 }

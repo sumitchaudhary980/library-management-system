@@ -18,8 +18,22 @@ let currentGenre = "";
 let currentPage = 1;
 let searchTimer;
 
+function showTableLoading() {
+    document.getElementById("bookTable").innerHTML = `
+        <tr class="loading-row">
+            <td colspan="6" class="text-center py-5 text-muted">
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Loading books...
+            </td>
+        </tr>
+    `;
+    document.getElementById("entryText").innerHTML = "";
+    document.getElementById("pagination").innerHTML = "";
+}
+
 async function loadBooks(page = 1) {
     currentPage = page;
+    showTableLoading();
 
     const params = new URLSearchParams({
         page,
@@ -109,7 +123,7 @@ async function loadBooks(page = 1) {
                                 type="button"
                                 class="action-btn delete-btn"
                                 title="Delete"
-                                onclick="deleteBook(${book.id});"
+                                onclick="deleteBook(${book.id}, this);"
                             >
                                 <i class="fas fa-trash"></i>
                             </button>
@@ -175,7 +189,7 @@ async function loadBooks(page = 1) {
     }
 }
 
-async function deleteBook(id) {
+async function deleteBook(id, button) {
     const result = await Swal.fire({
         title: "Delete book?",
         text: "This book will be permanently removed.",
@@ -188,6 +202,7 @@ async function deleteBook(id) {
     });
 
     if (!result.isConfirmed) return;
+    if (button) button.disabled = true;
 
     try {
         const response = await fetch(`/api/admin/books/${id}`, {
@@ -205,6 +220,8 @@ async function deleteBook(id) {
     } catch (err) {
         console.log(err);
         showToast("Something went wrong");
+    } finally {
+        if (button) button.disabled = false;
     }
 }
 

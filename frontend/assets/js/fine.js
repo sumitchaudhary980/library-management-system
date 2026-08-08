@@ -29,12 +29,26 @@ let currentStatus = "";
 let currentPage = 1;
 let searchTimer;
 
+function showUsersLoading() {
+    document.getElementById("fineTable").innerHTML = `
+        <tr class="loading-row">
+            <td colspan="5" class="text-center py-5 text-muted">
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Loading users...
+            </td>
+        </tr>
+    `;
+    document.getElementById("entryText").innerHTML = "";
+    document.getElementById("pagination").innerHTML = "";
+}
+
 
 
 async function loadUsers(page = 1) {
 
 
     currentPage = page;
+    showUsersLoading();
 
 
     const params = new URLSearchParams({

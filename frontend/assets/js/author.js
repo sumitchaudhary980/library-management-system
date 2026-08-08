@@ -1,8 +1,22 @@
 let currentSearch = "";
 let searchTimer;
 
+function showAuthorTableLoading() {
+  document.getElementById("authorTable").innerHTML = `
+    <tr class="loading-row">
+      <td colspan="3" class="text-center py-4 text-muted">
+        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        Loading authors...
+      </td>
+    </tr>
+  `;
+  document.getElementById("entryText").innerHTML = "";
+  document.getElementById("pagination").innerHTML = "";
+}
+
 async function loadAuthors(page = 1, search = currentSearch) {
   currentSearch = search;
+  showAuthorTableLoading();
 
   const response = await fetch(`/api/admin/authors?page=${page}&search=${search}`);
   const data = await response.json();
@@ -41,7 +55,7 @@ async function loadAuthors(page = 1, search = currentSearch) {
             <a href="/authors/edit/${author.id}" class="action-btn edit-btn" title="Edit">
               <i class="fas fa-pen"></i>
             </a>
-            <button onclick="deleteAuthor(${author.id})" class="action-btn delete-btn" title="Delete">
+            <button onclick="deleteAuthor(${author.id}, this)" class="action-btn delete-btn" title="Delete">
               <i class="fas fa-trash"></i>
             </button>
           </div>
@@ -79,7 +93,7 @@ async function loadAuthors(page = 1, search = currentSearch) {
   }
 }
 
-async function deleteAuthor(id) {
+async function deleteAuthor(id, button) {
   const result = await Swal.fire({
     title: "Delete author?",
     text: "This author will be permanently removed.",
@@ -92,6 +106,7 @@ async function deleteAuthor(id) {
   });
 
   if (!result.isConfirmed) return;
+  if (button) button.disabled = true;
 
   try {
     const response = await fetch(`/api/admin/authors/${id}`, { method: "DELETE" });
@@ -106,6 +121,8 @@ async function deleteAuthor(id) {
   } catch (err) {
     console.log(err);
     showToast("Something went wrong", "error");
+  } finally {
+    if (button) button.disabled = false;
   }
 }
 

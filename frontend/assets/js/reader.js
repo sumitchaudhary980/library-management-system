@@ -27,8 +27,22 @@ let currentSort = "newest";
 let currentPage = 1;
 let searchTimer;
 
+function showReaderTableLoading() {
+  document.getElementById("readerTable").innerHTML = `
+    <tr class="loading-row">
+      <td colspan="9" class="text-center py-5 text-muted">
+        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        Loading readers...
+      </td>
+    </tr>
+  `;
+  document.getElementById("entryText").innerHTML = "";
+  document.getElementById("pagination").innerHTML = "";
+}
+
 async function loadReaders(page = 1) {
   currentPage = page;
+  showReaderTableLoading();
 
   const params = new URLSearchParams({
     page,
@@ -153,7 +167,7 @@ async function loadReaders(page = 1) {
           <button
             class="action-btn ${isActive ? "delete-btn" : "edit-btn"}"
             title="${isActive ? "Deactivate Reader" : "Activate Reader"}"
-            onclick="toggleReaderStatus(${reader.id}, '${reader.status}')"
+            onclick="toggleReaderStatus(${reader.id}, '${reader.status}', this)"
           >
             <i class="fas ${isActive ? "fa-user-slash" : "fa-user-check"
         }"></i>
@@ -206,7 +220,7 @@ async function loadReaders(page = 1) {
   }
 }
 
-async function toggleReaderStatus(id, currentStatus) {
+async function toggleReaderStatus(id, currentStatus, button) {
   const activate = currentStatus === "inactive";
 
   const result = await Swal.fire({
@@ -223,6 +237,7 @@ async function toggleReaderStatus(id, currentStatus) {
   });
 
   if (!result.isConfirmed) return;
+  if (button) button.disabled = true;
 
   try {
     const response = await fetch(`/api/admin/readers/${id}/status`, {
@@ -243,6 +258,8 @@ async function toggleReaderStatus(id, currentStatus) {
   } catch (err) {
     console.log(err);
     showToast("Something went wrong");
+  } finally {
+    if (button) button.disabled = false;
   }
 }
 

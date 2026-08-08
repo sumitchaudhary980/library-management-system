@@ -1,4 +1,35 @@
+function setProfileLoading(loading) {
+  [
+    "fullName",
+    "profileEmail",
+    "roleBadge",
+    "firstName",
+    "lastName",
+    "gender",
+    "email",
+    "phone",
+    "address",
+    "role",
+    "createdAt",
+  ].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    if (loading) {
+      el.textContent = "Loading";
+      el.classList.add("loading-placeholder");
+      el.style.width = id === "address" ? "80%" : "60%";
+    } else {
+      el.classList.remove("loading-placeholder");
+      el.style.width = "";
+      if (el.textContent === "Loading") el.textContent = "";
+    }
+  });
+}
+
 async function loadProfile() {
+  setProfileLoading(true);
+
   try {
     const response = await fetch("/api/admin/profile", {
       credentials: "include",
@@ -63,6 +94,8 @@ async function loadProfile() {
   } catch (err) {
     console.error(err);
     showToast("Something went wrong", "error");
+  } finally {
+    setProfileLoading(false);
   }
 }
 

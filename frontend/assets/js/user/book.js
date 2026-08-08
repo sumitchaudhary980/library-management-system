@@ -21,8 +21,22 @@ let currentGenre = "";
 let currentPage = 1;
 let searchTimer;
 
+function showTableLoading() {
+  document.getElementById("bookTable").innerHTML = `
+    <tr class="loading-row">
+      <td colspan="6" class="text-center py-5 text-muted">
+        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        Loading books...
+      </td>
+    </tr>
+  `;
+  document.getElementById("entryText").innerHTML = "";
+  document.getElementById("pagination").innerHTML = "";
+}
+
 async function loadBooks(page = 1) {
   currentPage = page;
+  showTableLoading();
 
   const params = new URLSearchParams({
     page,
@@ -70,7 +84,7 @@ async function loadBooks(page = 1) {
           border-radius:10px;
           min-width:110px;
         "
-        onclick="borrowBook(${book.id})"
+        onclick="borrowBook(${book.id}, this)"
       >
         <i class="fas fa-book-reader me-2"></i>
         Borrow
@@ -180,7 +194,15 @@ async function loadBooks(page = 1) {
   }
 }
 
-async function borrowBook(id) {
+async function borrowBook(id, button) {
+  if (button) {
+    button.disabled = true;
+    button.innerHTML = `
+      <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+      Borrow
+    `;
+  }
+
   try {
     const response = await fetch(`/api/user/books/${id}/borrow`, {
       method: "POST",
@@ -197,6 +219,14 @@ async function borrowBook(id) {
   } catch (err) {
     console.log(err);
     showToast("Something went wrong");
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.innerHTML = `
+        <i class="fas fa-book-reader me-2"></i>
+        Borrow
+      `;
+    }
   }
 }
 

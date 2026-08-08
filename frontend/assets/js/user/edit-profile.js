@@ -11,6 +11,29 @@ function showToast(message, type = "error") {
     Toast.fire({ icon: type, title: message });
 }
 const submitBtn = document.getElementById("submitBtn");
+const profileFieldIds = ["first_name", "last_name", "gender", "phone", "address", "profileImage"];
+const profilePlaceholders = {};
+
+profileFieldIds.forEach((id) => {
+    const input = document.getElementById(id);
+    if (input) profilePlaceholders[id] = input.placeholder;
+});
+
+function setProfileFormLoading(loading) {
+    profileFieldIds.forEach((id) => {
+        const input = document.getElementById(id);
+        if (!input) return;
+
+        input.disabled = loading;
+        if (loading && input.placeholder !== undefined) {
+            input.placeholder = "Loading...";
+        } else if (input.placeholder !== undefined) {
+            input.placeholder = profilePlaceholders[id] || "";
+        }
+    });
+
+    submitBtn.disabled = loading;
+}
 
 function setError(fieldId, message) {
     const input = document.getElementById(fieldId);
@@ -91,6 +114,8 @@ function validateField(fieldId) {
 
 // LOAD PROFILE
 async function loadProfile() {
+    setProfileFormLoading(true);
+
     try {
         const res = await fetch("/api/user/profile", {
             credentials: "include"
@@ -116,6 +141,8 @@ async function loadProfile() {
 
     } catch (err) {
         showToast("Failed to load profile");
+    } finally {
+        setProfileFormLoading(false);
     }
 }
 

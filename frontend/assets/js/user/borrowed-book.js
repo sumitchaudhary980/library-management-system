@@ -25,8 +25,22 @@ const today = new Date().toISOString().split("T")[0];
 document.getElementById("borrowedFrom").max = today;
 document.getElementById("borrowedTo").max = today;
 
+function showBorrowedBooksLoading() {
+    document.getElementById("borrowedBookTable").innerHTML = `
+        <tr class="loading-row">
+            <td colspan="7" class="text-center py-5 text-muted">
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Loading borrowed books...
+            </td>
+        </tr>
+    `;
+    document.getElementById("entryText").innerHTML = "";
+    document.getElementById("pagination").innerHTML = "";
+}
+
 async function loadBorrowedBooks(page = 1) {
     currentPage = page;
+    showBorrowedBooksLoading();
 
     const params = new URLSearchParams({
         page,
@@ -127,7 +141,7 @@ async function loadBorrowedBooks(page = 1) {
             `
                             : `
                 <button class="btn btn-sm px-3 text-white"
-                        onclick="renewBook(${book.borrowed_id})"
+                        onclick="renewBook(${book.borrowed_id}, this)"
                         style="background:#c5a059; border-radius:10px; min-width:110px;">
                     <i class="fas fa-rotate me-2"></i>Renew
                 </button>
@@ -164,7 +178,7 @@ async function loadBorrowedBooks(page = 1) {
         showToast("Failed to load borrowed books");
     }
 }
-async function renewBook(id) {
+async function renewBook(id, button) {
 
     const result = await Swal.fire({
         title: "Renew book?",
@@ -178,6 +192,12 @@ async function renewBook(id) {
     });
 
     if (!result.isConfirmed) return;
+    if (button) {
+        button.disabled = true;
+        button.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Renew
+        `;
+    }
 
     try {
 
@@ -199,6 +219,11 @@ async function renewBook(id) {
         console.error(err);
         showToast("Something went wrong.");
 
+    } finally {
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = `<i class="fas fa-rotate me-2"></i>Renew`;
+        }
     }
 
 }
