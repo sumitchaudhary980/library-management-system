@@ -8,6 +8,14 @@
       "config": { "includeFiles": "frontend/**" }
     }
   ],
+  "headers": [
+    {
+      "source": "/(.*).(css|js)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
+    }
+  ],
   "routes": [
     { "src": "/(.*)", "dest": "backend/src/server.js" }
   ]
