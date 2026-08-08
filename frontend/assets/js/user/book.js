@@ -1,18 +1,18 @@
 function showToast(message, type = "error") {
-    const Toast = Swal.mixin({
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
-        showCloseButton: true,
-        timer: 4000,
-        timerProgressBar: true,
-        customClass: { popup: "small-toast" },
-    });
+  const Toast = Swal.mixin({
+    toast: true,
+    position: "top-end",
+    showConfirmButton: false,
+    showCloseButton: true,
+    timer: 4000,
+    timerProgressBar: true,
+    customClass: { popup: "small-toast" },
+  });
 
-    Toast.fire({
-        icon: type,
-        title: message,
-    });
+  Toast.fire({
+    icon: type,
+    title: message,
+  });
 }
 
 let currentTitle = "";
@@ -22,43 +22,45 @@ let currentPage = 1;
 let searchTimer;
 
 async function loadBooks(page = 1) {
-    currentPage = page;
+  currentPage = page;
 
-    const params = new URLSearchParams({
-        page,
-        title: currentTitle,
-        author: currentAuthor,
-        genre: currentGenre,
-    });
+  const params = new URLSearchParams({
+    page,
+    title: currentTitle,
+    author: currentAuthor,
+    genre: currentGenre,
+  });
 
-    try {
-        const response = await fetch(`/api/user/books?${params}`);
-        const data = await response.json();
+  try {
+    const response = await fetch(`/api/user/books?${params}`);
+    const data = await response.json();
 
-        const table = document.getElementById("bookTable");
-        table.innerHTML = "";
+    const table = document.getElementById("bookTable");
+    table.innerHTML = "";
 
-        if (data.books.length === 0) {
-            table.innerHTML = `
+    if (data.books.length === 0) {
+      table.innerHTML = `
         <tr>
           <td colspan="6" class="text-center py-5 text-muted">
             No books found
           </td>
         </tr>
       `;
-        }
+    }
 
-        data.books.forEach((book) => {
-            const available =
-                Number(book.stock_quantity) === 0
-                    ? `<span class="badge bg-danger px-3 py-2">Unavailable</span>`
-                    : Number(book.stock_quantity) < 5
-                        ? `<span class="badge bg-danger px-3 py-2">${book.stock_quantity}</span>`
-                        : `<span class="badge bg-success px-3 py-2">${book.stock_quantity} </span>`;
+    data.books.forEach((book) => {
+      const stock = Number(book.stock_quantity);
 
-            const borrowButton =
-                Number(book.stock_quantity) > 0
-                    ? `
+      const available =
+        stock === 0
+          ? `<span class="badge bg-danger px-3 py-2">Unavailable</span>`
+          : stock < 5
+            ? `<span class="badge bg-danger px-3 py-2">${stock} available</span>`
+            : `<span class="badge bg-success px-3 py-2">${stock} available</span>`;
+
+      const borrowButton =
+        stock > 0
+          ? `
       <button
         class="btn btn-sm px-3 py-2 fw-semibold shadow-sm"
         style="
@@ -68,13 +70,13 @@ async function loadBooks(page = 1) {
           border-radius:10px;
           min-width:110px;
         "
-        onclick="event.stopPropagation(); borrowBook(${book.id})"
+        onclick="borrowBook(${book.id})"
       >
         <i class="fas fa-book-reader me-2"></i>
         Borrow
       </button>
     `
-                    : `
+          : `
       <button
         class="btn btn-sm btn-secondary px-3 py-2 fw-semibold"
         disabled
@@ -88,56 +90,64 @@ async function loadBooks(page = 1) {
       </button>
     `;
 
-            table.innerHTML += `
-        <tr
-          class="book-row"
-          style="cursor:pointer;"
-          onclick="window.location.href='/books/${book.id}'"
-        >
-          <td class="py-3 px-4 text-nowrap">
-            <img
-              src="${book.cover_image}"
-              alt="${book.title} book cover"
-              loading="lazy"
-              decoding="async"
-              style="width:60px;height:80px;object-fit:cover;border-radius:8px;"
-            >
-          </td>
+      table.innerHTML += `
+      <tr class="book-row">
 
-          <td class="py-3 px-4 text-nowrap">
-            <h6 class="fw-bold mb-0 text-primary-dark">${book.title}</h6>
-          </td>
+        <td class="py-3 px-4 text-nowrap">
+          <img
+            src="${book.cover_image}"
+            alt="${book.title} book cover"
+            loading="lazy"
+            decoding="async"
+            style="
+              width:60px;
+              height:80px;
+              object-fit:cover;
+              border-radius:8px;
+            "
+          >
+        </td>
 
-          <td class="py-3 px-4 text-nowrap">
-            ${book.author}
-          </td>
+        <td class="py-3 px-4 text-nowrap">
+          <a
+            href="/books/${book.id}"
+            class="fw-bold text-primary-dark text-decoration-none"
+          >
+            ${book.title}
+          </a>
+        </td>
 
-          <td class="py-3 px-4 text-nowrap">
-            ${book.genre}
-          </td>
+        <td class="py-3 px-4 text-nowrap">
+          ${book.author}
+        </td>
 
-          <td class="py-3 px-4 text-nowrap">
-            ${available}
-          </td>
+        <td class="py-3 px-4 text-nowrap">
+          ${book.genre}
+        </td>
 
-          <td class="py-3 px-4 text-center text-nowrap">
-            ${borrowButton}
-          </td>
-        </tr>
-      `;
-        });
+        <td class="py-3 px-4 text-nowrap">
+          ${available}
+        </td>
 
-        document.getElementById(
-            "entryText"
-        ).innerHTML = `Showing ${data.total === 0 ? 0 : (page - 1) * 10 + 1
-        } to ${Math.min(page * 10, data.total)} of ${data.total
-            } entries`;
+        <td class="py-3 px-4 text-center text-nowrap">
+          ${borrowButton}
+        </td>
 
-        const pagination = document.getElementById("pagination");
-        pagination.innerHTML = "";
+      </tr>
+    `;
+    });
 
-        if (data.totalPages > 1) {
-            pagination.innerHTML += `
+    document.getElementById(
+      "entryText"
+    ).innerHTML = `Showing ${data.total === 0 ? 0 : (page - 1) * 10 + 1
+    } to ${Math.min(page * 10, data.total)} of ${data.total
+      } entries`;
+
+    const pagination = document.getElementById("pagination");
+    pagination.innerHTML = "";
+
+    if (data.totalPages > 1) {
+      pagination.innerHTML += `
         <li class="page-item ${page === 1 ? "disabled" : ""}">
           <button class="page-link" onclick="loadBooks(${page - 1})">
             Previous
@@ -145,85 +155,85 @@ async function loadBooks(page = 1) {
         </li>
       `;
 
-            for (let i = 1; i <= data.totalPages; i++) {
-                pagination.innerHTML += `
+      for (let i = 1; i <= data.totalPages; i++) {
+        pagination.innerHTML += `
           <li class="page-item ${page === i ? "active" : ""}">
             <button class="page-link" onclick="loadBooks(${i})">
               ${i}
             </button>
           </li>
         `;
-            }
+      }
 
-            pagination.innerHTML += `
+      pagination.innerHTML += `
         <li class="page-item ${page === data.totalPages ? "disabled" : ""
-                }">
+        }">
           <button class="page-link" onclick="loadBooks(${page + 1})">
             Next
           </button>
         </li>
       `;
-        }
-    } catch (err) {
-        console.log(err);
-        showToast("Failed to load books");
     }
+  } catch (err) {
+    console.log(err);
+    showToast("Failed to load books");
+  }
 }
 
 async function borrowBook(id) {
-    try {
-        const response = await fetch(`/api/user/books/${id}/borrow`, {
-            method: "POST",
-        });
+  try {
+    const response = await fetch(`/api/user/books/${id}/borrow`, {
+      method: "POST",
+    });
 
-        const data = await response.json();
+    const data = await response.json();
 
-        if (response.ok) {
-            showToast(data.message || "Book borrowed successfully", "success");
-            loadBooks(currentPage);
-        } else {
-            showToast(data.message || "Unable to borrow book");
-        }
-    } catch (err) {
-        console.log(err);
-        showToast("Something went wrong");
+    if (response.ok) {
+      showToast(data.message || "Book borrowed successfully", "success");
+      loadBooks(currentPage);
+    } else {
+      showToast(data.message || "Unable to borrow book");
     }
+  } catch (err) {
+    console.log(err);
+    showToast("Something went wrong");
+  }
 }
 
 function triggerSearch() {
-    clearTimeout(searchTimer);
+  clearTimeout(searchTimer);
 
-    searchTimer = setTimeout(() => {
-        currentTitle = document.getElementById("searchBook").value.trim();
-        currentAuthor = document.getElementById("searchAuthor").value.trim();
-        currentGenre = document.getElementById("searchGenre").value.trim();
+  searchTimer = setTimeout(() => {
+    currentTitle = document.getElementById("searchBook").value.trim();
+    currentAuthor = document.getElementById("searchAuthor").value.trim();
+    currentGenre = document.getElementById("searchGenre").value.trim();
 
-        loadBooks(1);
-    }, 500);
+    loadBooks(1);
+  }, 500);
 }
 
 document
-    .getElementById("searchBook")
-    .addEventListener("input", triggerSearch);
+  .getElementById("searchBook")
+  .addEventListener("input", triggerSearch);
 
 document
-    .getElementById("searchAuthor")
-    .addEventListener("input", triggerSearch);
+  .getElementById("searchAuthor")
+  .addEventListener("input", triggerSearch);
 
 document
-    .getElementById("searchGenre")
-    .addEventListener("input", triggerSearch);
+  .getElementById("searchGenre")
+  .addEventListener("input", triggerSearch);
 
 document.getElementById("clearFilters").addEventListener("click", () => {
-    document.getElementById("searchBook").value = "";
-    document.getElementById("searchAuthor").value = "";
-    document.getElementById("searchGenre").value = "";
+  document.getElementById("searchBook").value = "";
+  document.getElementById("searchAuthor").value = "";
+  document.getElementById("searchGenre").value = "";
 
-    currentTitle = "";
-    currentAuthor = "";
-    currentGenre = "";
+  currentTitle = "";
+  currentAuthor = "";
+  currentGenre = "";
 
-    loadBooks(1);
+  loadBooks(1);
 });
 
 loadBooks();
