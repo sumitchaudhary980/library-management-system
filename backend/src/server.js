@@ -351,24 +351,7 @@ app.use(
   )
 );
 
-app.use(
-  "/assets",
-  express.static(
-    path.join(frontendPath, "assets"),
-    {
-      etag: false,
-      maxAge: 0,
-      setHeaders: (res) => {
-        res.setHeader(
-          "Cache-Control",
-          "no-store, no-cache, must-revalidate, proxy-revalidate"
-        );
-        res.setHeader("Pragma", "no-cache");
-        res.setHeader("Expires", "0");
-      },
-    }
-  )
-);
+
 app.use(
   "/errors",
   express.static(
