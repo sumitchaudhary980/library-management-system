@@ -225,7 +225,6 @@ app.use(
         camera: [],
         microphone: [],
         geolocation: [],
-        payment: []
       }
     }
   })
