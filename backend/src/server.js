@@ -49,18 +49,31 @@ const getBaseUrl = (req) => {
 };
 
 const noindexPrivateSurfaces = (req, res, next) => {
-  const publicPaths = new Set(["/", "/robots.txt", "/sitemap.xml", "/favicon.ico"]);
+  const publicPaths = new Set([
+    "/",
+    "/robots.txt",
+    "/sitemap.xml",
+    "/favicon.ico"
+  ]);
+
   const isStaticAsset =
     req.path.startsWith("/assets/") ||
     req.path.startsWith("/errors/error.css");
 
   if (!publicPaths.has(req.path) && !isStaticAsset) {
-    res.setHeader("X-Robots-Tag", "noindex, nofollow, noarchive");
+    res.setHeader(
+      "X-Robots-Tag",
+      "noindex, nofollow, noarchive"
+    );
+
+    res.setHeader(
+      "Cache-Control",
+      "no-store"
+    );
   }
 
   next();
 };
-
 let sessionStore;
 
 if (process.env.NODE_ENV === "production") {
