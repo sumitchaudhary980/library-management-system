@@ -61,11 +61,7 @@ const noindexPrivateSurfaces = (req, res, next) => {
   next();
 };
 
-
-// ---------------- SESSION STORE ----------------
-
 let sessionStore;
-
 
 if (process.env.NODE_ENV === "production") {
 
@@ -73,10 +69,7 @@ if (process.env.NODE_ENV === "production") {
     url: process.env.TURSO_SESSION_DATABASE_URL,
     authToken: process.env.TURSO_SESSION_AUTH_TOKEN,
   });
-
-
   sessionStore = new session.Store();
-
 
   sessionStore.get = async (sid, callback) => {
     try {
@@ -174,10 +167,6 @@ if (process.env.NODE_ENV === "production") {
 
 app.use(noindexPrivateSurfaces);
 
-
-// ---------------- SECURITY ----------------
-
-
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -228,6 +217,15 @@ app.use(
           "https://rc-epay.esewa.com.np",
           "https://epay.esewa.com.np"
         ]
+      }
+    },
+
+    permissionsPolicy: {
+      features: {
+        camera: [],
+        microphone: [],
+        geolocation: [],
+        payment: []
       }
     }
   })
