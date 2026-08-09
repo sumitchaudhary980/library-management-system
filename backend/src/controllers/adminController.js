@@ -111,8 +111,9 @@ exports.createAuthor = async (req, res) => {
 
     res.status(201).json({
       message: "Author added successfully",
-      id: result.lastInsertRowid
+      id: Number(result.lastInsertRowid)
     });
+
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Failed to add author" });
