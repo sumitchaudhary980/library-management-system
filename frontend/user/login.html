@@ -69,12 +69,16 @@
                 Library Management Portal
               </span>
 
-              <h1 class="font-serif fw-bold text-primary-dark h2">User Sign In</h1>
+              <h1 class="font-serif fw-bold text-primary-dark h2">
+                User Sign In
+              </h1>
             </div>
 
             <form id="loginForm">
               <div class="mb-3">
-                <label for="email" class="form-label fw-medium"> Username or Email </label>
+                <label for="email" class="form-label fw-medium">
+                  Username or Email
+                </label>
 
                 <div class="input-group-custom">
                   <span class="input-icon">
@@ -92,7 +96,9 @@
               </div>
 
               <div class="mb-4">
-                <label for="password" class="form-label fw-medium"> Password </label>
+                <label for="password" class="form-label fw-medium">
+                  Password
+                </label>
 
                 <div class="input-group-custom">
                   <span class="input-icon">
@@ -113,15 +119,13 @@
                     style="right: 16px !important"
                   >
                     <i
-                      class="far fa-eye text-muted"
+                      class="far fa-eye text-muted password-toggle"
+                      data-target="password"
                       style="cursor: pointer"
-                      onclick="togglePassword('password', this)"
-                      onkeydown="if(event.key === 'Enter' || event.key === ' '){event.preventDefault(); togglePassword('password', this);}"
                       role="button"
                       tabindex="0"
                       aria-label="Show or hide password"
-                    >
-                    </i>
+                    ></i>
                   </span>
                 </div>
 

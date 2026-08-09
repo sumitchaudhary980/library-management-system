@@ -1,5 +1,7 @@
 const id = window.location.pathname.split("/").pop();
-
+document.getElementById("borrowBookButton")?.addEventListener("click", () => {
+    borrowBook();
+  });
 function setBookDetailsLoading(loading) {
     const coverImage = document.getElementById("coverImage");
     const placeholders = [

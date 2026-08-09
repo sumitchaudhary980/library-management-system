@@ -5,7 +5,7 @@ const session = require("express-session");
 const SQLiteStore = require("connect-sqlite3")(session);
 const cookieParser = require("cookie-parser");
 const helmet = require("helmet");
-const {startFineCron} = require("./jobs/fineCron");
+const { startFineCron } = require("./jobs/fineCron");
 const { createClient } = require("@libsql/client");
 
 require("dotenv").config({
@@ -173,6 +173,7 @@ app.use((req, res, next) => {
   );
   next();
 });
+
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -181,7 +182,6 @@ app.use(
 
         scriptSrc: [
           "'self'",
-          "'unsafe-inline'",
           "https://cdn.jsdelivr.net",
           "https://cdnjs.cloudflare.com"
         ],
@@ -192,10 +192,6 @@ app.use(
           "https://cdn.jsdelivr.net",
           "https://fonts.googleapis.com",
           "https://cdnjs.cloudflare.com"
-        ],
-
-        scriptSrcAttr: [
-          "'unsafe-inline'"
         ],
 
         fontSrc: [
@@ -227,8 +223,6 @@ app.use(
     }
   })
 );
-
-
 
 app.use(express.json());
 
