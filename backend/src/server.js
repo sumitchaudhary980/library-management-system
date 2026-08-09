@@ -166,7 +166,13 @@ if (process.env.NODE_ENV === "production") {
 
 
 app.use(noindexPrivateSurfaces);
-
+app.use((req, res, next) => {
+  res.setHeader(
+    "Permissions-Policy",
+    "camera=(), microphone=(), geolocation=()"
+  );
+  next();
+});
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -217,14 +223,6 @@ app.use(
           "https://rc-epay.esewa.com.np",
           "https://epay.esewa.com.np"
         ]
-      }
-    },
-
-    permissionsPolicy: {
-      features: {
-        camera: [],
-        microphone: [],
-        geolocation: [],
       }
     }
   })
