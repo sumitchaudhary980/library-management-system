@@ -199,6 +199,8 @@ app.use(
           "https://cdnjs.cloudflare.com"
         ],
 
+        scriptSrcAttr: ["'unsafe-inline'"],
+
         styleSrc: [
           "'self'",
           "'unsafe-inline'",
@@ -236,7 +238,6 @@ app.use(
     }
   })
 );
-
 app.use(express.json());
 
 app.use(express.urlencoded({
