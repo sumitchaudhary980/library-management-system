@@ -28,6 +28,34 @@ const submitBtn = document.getElementById("submitBtn");
 const readerId = window.location.pathname.split("/").pop();
 
 let submitted = false;
+const originalPlaceholders = {
+  firstName: firstName.placeholder,
+  lastName: lastName.placeholder,
+  email: email.placeholder,
+  phone: phone.placeholder,
+  address: address.placeholder,
+};
+
+function setReaderLoading(loading) {
+  [firstName, lastName, gender, email, phone, address, submitBtn].forEach((el) => {
+    el.disabled = loading;
+  });
+
+  if (loading) {
+    firstName.placeholder = "Loading first name...";
+    lastName.placeholder = "Loading last name...";
+    email.placeholder = "Loading email...";
+    phone.placeholder = "Loading phone...";
+    address.placeholder = "Loading address...";
+    return;
+  }
+
+  firstName.placeholder = originalPlaceholders.firstName;
+  lastName.placeholder = originalPlaceholders.lastName;
+  email.placeholder = originalPlaceholders.email;
+  phone.placeholder = originalPlaceholders.phone;
+  address.placeholder = originalPlaceholders.address;
+}
 
 function clearErrors() {
   document.querySelectorAll(".is-invalid").forEach((el) => {
@@ -157,6 +185,8 @@ email.addEventListener("blur", validateEmail);
 phone.addEventListener("input", validatePhone);
 phone.addEventListener("blur", validatePhone);
 async function loadReader() {
+  setReaderLoading(true);
+
   try {
     const response = await fetch(`/api/admin/readers/${readerId}`, {
       credentials: "include",
@@ -185,6 +215,8 @@ async function loadReader() {
   } catch (err) {
     console.error(err);
     showToast("Failed to load reader");
+  } finally {
+    setReaderLoading(false);
   }
 }
 

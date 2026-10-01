@@ -4,6 +4,25 @@ const biographyInput = document.getElementById("biography");
 const submitBtn = document.getElementById("submitBtn");
 
 let submitted = false;
+const originalPlaceholders = {
+    name: nameInput.placeholder,
+    biography: biographyInput.placeholder,
+};
+
+function setAuthorLoading(loading) {
+    [nameInput, biographyInput, submitBtn].forEach((el) => {
+        el.disabled = loading;
+    });
+
+    if (loading) {
+        nameInput.placeholder = "Loading author...";
+        biographyInput.placeholder = "Loading biography...";
+        return;
+    }
+
+    nameInput.placeholder = originalPlaceholders.name;
+    biographyInput.placeholder = originalPlaceholders.biography;
+}
 
 function sweetToast(message, type = "error") {
     const Toast = Swal.mixin({
@@ -71,6 +90,8 @@ nameInput.addEventListener("blur", () => {
 });
 
 async function loadAuthor() {
+    setAuthorLoading(true);
+
     try {
         const response = await fetch(`/api/admin/authors/${authorId}`, {
             credentials: "include"
@@ -87,6 +108,8 @@ async function loadAuthor() {
     } catch (err) {
         console.log(err);
         sweetToast("Server error", "error");
+    } finally {
+        setAuthorLoading(false);
     }
 }
 

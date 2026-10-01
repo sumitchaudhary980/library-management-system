@@ -18,6 +18,21 @@ function showToast(message, type = "error") {
   });
 }
 
+document.querySelectorAll(".password-toggle").forEach((toggle) => {
+  const togglePasswordField = () => {
+    const targetId = toggle.dataset.target;
+    togglePassword(targetId, toggle);
+  };
+
+  toggle.addEventListener("click", togglePasswordField);
+
+  toggle.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      togglePasswordField();
+    }
+  });
+});
 //Password toggle
 
 function togglePassword(id, icon) {
@@ -33,7 +48,9 @@ function togglePassword(id, icon) {
     icon.classList.replace("fa-eye-slash", "fa-eye");
   }
 }
-
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  logout();
+});
 // Logout
 async function logout() {
   await fetch("/api/auth/logout", {

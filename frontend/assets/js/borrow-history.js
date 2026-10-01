@@ -29,9 +29,23 @@ let currentSort = "";
 let currentPage = 1;
 let searchTimer;
 
+function showBorrowHistoryLoading() {
+    document.getElementById("fineTable").innerHTML = `
+        <tr class="loading-row">
+            <td colspan="8" class="text-center py-5 text-muted">
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Loading borrow history...
+            </td>
+        </tr>
+    `;
+    document.getElementById("entryText").innerHTML = "";
+    document.getElementById("pagination").innerHTML = "";
+}
+
 async function loadFineDetails(page = 1) {
 
     currentPage = page;
+    showBorrowHistoryLoading();
 
     const params = new URLSearchParams({
         page,
@@ -99,6 +113,9 @@ async function loadFineDetails(page = 1) {
                 <td class="py-3 px-4">
                     <img
                         src="${book.cover_image || "/assets/images/default-book.png"}"
+                        alt="${book.title} book cover"
+                        loading="lazy"
+                        decoding="async"
                         style="width:60px;height:80px;object-fit:cover;border-radius:8px;">
                 </td>
 
@@ -179,7 +196,7 @@ No Fine
             <button
                 class="btn btn-sm text-white"
                 style="background:#002147;border-radius:8px;"
-                onclick="collectCash(${book.id})">
+                onclick="collectCash(${book.id}, this)">
 
                 <i class="fas fa-money-bill-wave me-1"></i>
                 Collect Cash
@@ -190,7 +207,7 @@ No Fine
             <button
                 class="btn btn-sm text-white"
                 style="background:#002147;border-radius:8px;"
-                onclick="returnBook(${book.id})">
+                onclick="returnBook(${book.id}, this)">
 
                 <i class="fas fa-rotate-left me-1"></i>
                 Return
@@ -256,7 +273,7 @@ No Fine
 
     }
 }
-async function collectCash(id) {
+async function collectCash(id, button) {
 
     const result = await Swal.fire({
         title: "Collect Cash?",
@@ -270,6 +287,7 @@ async function collectCash(id) {
     });
 
     if (!result.isConfirmed) return;
+    if (button) button.disabled = true;
 
     try {
 
@@ -297,11 +315,13 @@ async function collectCash(id) {
         console.log(err);
         showToast("Failed to collect cash.");
 
+    } finally {
+        if (button) button.disabled = false;
     }
 
 }
 
-async function returnBook(id) {
+async function returnBook(id, button) {
 
     const result = await Swal.fire({
 
@@ -320,6 +340,7 @@ async function returnBook(id) {
     });
 
     if (!result.isConfirmed) return;
+    if (button) button.disabled = true;
 
     try {
 
@@ -351,6 +372,8 @@ async function returnBook(id) {
 
         showToast("Failed to return book");
 
+    } finally {
+        if (button) button.disabled = false;
     }
 
 }

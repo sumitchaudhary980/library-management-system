@@ -33,6 +33,18 @@ const today = new Date().toISOString().split("T")[0];
 document.getElementById("returnedFrom").max = today;
 document.getElementById("returnedTo").max = today;
 
+function showFinesLoading() {
+    document.getElementById("fineTable").innerHTML = `
+        <tr class="loading-row">
+            <td colspan="6" class="text-center py-5 text-muted">
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Loading fines...
+            </td>
+        </tr>
+    `;
+    document.getElementById("entryText").innerHTML = "";
+    document.getElementById("pagination").innerHTML = "";
+}
 
 // Show payment result toast based on eSewa redirect query param
 (function handlePaymentRedirect() {
@@ -73,6 +85,7 @@ document.getElementById("returnedTo").max = today;
 async function loadFines(page = 1) {
 
     currentPage = page;
+    showFinesLoading();
 
     const params = new URLSearchParams({
         page,
@@ -118,6 +131,9 @@ async function loadFines(page = 1) {
 
                 <td class="py-3 px-4">
                     <img src="${fine.cover_image}"
+                    alt="${fine.title} book cover"
+                    loading="lazy"
+                    decoding="async"
                     style="width:60px;height:80px;object-fit:cover;border-radius:8px;">
                 </td>
 
@@ -303,7 +319,15 @@ ${fine.fine_amount > 0
 
 
 
-async function payFine(id) {
+async function payFine(id, button) {
+
+    if (button) {
+        button.disabled = true;
+        button.innerHTML = `
+            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            Pay
+        `;
+    }
 
     try {
 
@@ -365,6 +389,17 @@ async function payFine(id) {
         console.log(err);
 
         showToast("Failed to start payment.");
+
+    }
+    finally {
+
+        if (button) {
+            button.disabled = false;
+            button.innerHTML = `
+                <i class="fas fa-credit-card me-2"></i>
+                Pay
+            `;
+        }
 
     }
 
@@ -502,7 +537,7 @@ document.addEventListener("click", (e) => {
 
     if (payBtn) {
 
-        payFine(payBtn.dataset.id);
+        payFine(payBtn.dataset.id, payBtn);
 
         return;
 

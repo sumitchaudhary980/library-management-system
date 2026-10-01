@@ -4,6 +4,16 @@ const nameInput = document.getElementById("name");
 const submitBtn = document.getElementById("submitBtn");
 
 let submitted = false;
+const originalNamePlaceholder = nameInput.placeholder;
+
+function setGenreLoading(loading) {
+  nameInput.disabled = loading;
+  submitBtn.disabled = loading;
+
+  nameInput.placeholder = loading
+    ? "Loading genre..."
+    : originalNamePlaceholder;
+}
 
 function sweetToast(message, type = "error") {
   const Toast = Swal.mixin({
@@ -90,6 +100,7 @@ nameInput.addEventListener("blur", () => {
 /* ---------- Load Genre ---------- */
 
 async function loadGenre() {
+  setGenreLoading(true);
 
   try {
 
@@ -122,6 +133,10 @@ async function loadGenre() {
       "Server error",
       "error"
     );
+
+  } finally {
+
+    setGenreLoading(false);
 
   }
 }

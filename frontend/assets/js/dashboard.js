@@ -29,8 +29,25 @@ function updateHeader() {
 
 updateHeader();
 
+function setDashboardLoading(loading) {
+  ["totalBooks", "totalAuthors", "totalGenres", "totalReaders"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    if (loading) {
+      el.textContent = "0";
+      el.classList.add("loading-placeholder");
+      el.style.width = "64px";
+    } else {
+      el.classList.remove("loading-placeholder");
+      el.style.width = "";
+    }
+  });
+}
 
 async function loadDashboard() {
+  setDashboardLoading(true);
+
   try {
     const response = await fetch("/api/admin/dashboard", {
       credentials: "include",
@@ -58,6 +75,8 @@ async function loadDashboard() {
   } catch (err) {
     console.error(err);
     showToast("Something went wrong", "error");
+  } finally {
+    setDashboardLoading(false);
   }
 }
 

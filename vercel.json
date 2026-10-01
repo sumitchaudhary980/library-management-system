@@ -1,10 +1,19 @@
 {
   "version": 2,
+  "regions": ["bom1"],
   "builds": [
     {
       "src": "backend/src/server.js",
       "use": "@vercel/node",
       "config": { "includeFiles": "frontend/**" }
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*).(css|js)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
     }
   ],
   "routes": [

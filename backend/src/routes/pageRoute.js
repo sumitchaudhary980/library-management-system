@@ -1,13 +1,35 @@
 const express = require("express");
 const path = require("path");
+const fs = require("fs");
 const { requireAdmin, requireReader } = require("../middleware/authMiddleware");
 // const deviceGate = require("../middleware/deviceGate");
 const router = express.Router();
 const frontendPath = path.join(__dirname, "../../../frontend");
 const db = require("../config/db");
 const crypto = require("crypto");
+
+const getBaseUrl = (req) => {
+  const configuredUrl = process.env.APP_URL || "";
+
+  if (configuredUrl && !configuredUrl.includes("localhost")) {
+    return configuredUrl.replace(/\/$/, "");
+  }
+
+  return `${req.protocol}://${req.get("host")}`;
+};
+
 router.get("/", (req, res) => {
-  res.sendFile(path.join(frontendPath, "index.html"));
+  const baseUrl = getBaseUrl(req);
+  const indexPath = path.join(frontendPath, "index.html");
+
+  fs.readFile(indexPath, "utf8", (err, html) => {
+    if (err) {
+      return res.status(500).sendFile(path.join(frontendPath, "errors", "500.html"));
+    }
+
+    res.setHeader("Cache-Control", "no-cache");
+    res.send(html.replaceAll("__SITE_URL__", baseUrl));
+  });
 });
 //User Pages — protected, live at root level URLs
 router.get("/home", requireReader, (req, res) => {

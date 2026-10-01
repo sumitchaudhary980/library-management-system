@@ -111,8 +111,9 @@ exports.createAuthor = async (req, res) => {
 
     res.status(201).json({
       message: "Author added successfully",
-      id: result.lastInsertRowid
+      id: Number(result.lastInsertRowid)
     });
+
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Failed to add author" });
@@ -248,8 +249,9 @@ exports.createGenre = async (req, res) => {
 
     res.status(201).json({
       message: "Genre added successfully",
-      id: result.lastInsertRowid,
+      id: Number(result.lastInsertRowid),
     });
+
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Failed to add genre" });
@@ -438,7 +440,7 @@ exports.createBook = async (req, res) => {
         SELECT id, name
         FROM authors
         WHERE id = ?
-      `
+        `
       )
       .get(authorId);
 
@@ -457,7 +459,7 @@ exports.createBook = async (req, res) => {
         SELECT id
         FROM genres
         WHERE id = ?
-      `
+        `
       )
       .get(genreId);
 
@@ -477,7 +479,7 @@ exports.createBook = async (req, res) => {
         FROM books
         WHERE LOWER(title) = LOWER(?)
         AND author_id = ?
-      `
+        `
       )
       .get(title.trim(), authorId);
 
@@ -525,7 +527,9 @@ exports.createBook = async (req, res) => {
         }
       );
 
-      streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
+      streamifier
+        .createReadStream(req.file.buffer)
+        .pipe(uploadStream);
     });
 
     // Insert book
@@ -541,7 +545,7 @@ exports.createBook = async (req, res) => {
           cover_image,
           cover_public_id
         ) VALUES (?, ?, ?, ?, ?, ?, ?)
-      `
+        `
       )
       .run(
         title.trim(),
@@ -555,7 +559,7 @@ exports.createBook = async (req, res) => {
 
     return res.status(201).json({
       message: "Book added successfully",
-      id: result.lastInsertRowid,
+      id: Number(result.lastInsertRowid),
     });
   } catch (err) {
     console.log(err);
@@ -2103,7 +2107,7 @@ exports.createReader = async (req, res) => {
                 "
               >
 
-                
+                <a
                   href="${APP_URL}/login"
                   style="
                     background:#123458;
@@ -2132,7 +2136,7 @@ exports.createReader = async (req, res) => {
               </p>
 
               <p style="word-break:break-word;">
-                
+                <a
                   href="${APP_URL}/login"
                   style="
                     color:#123458;

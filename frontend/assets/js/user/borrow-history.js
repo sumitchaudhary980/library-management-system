@@ -27,8 +27,22 @@ let currentSort = "returned_desc";
 let currentPage = 1;
 let searchTimer;
 
+function showBorrowHistoryLoading() {
+    document.getElementById("borrowHistoryTable").innerHTML = `
+        <tr class="loading-row">
+            <td colspan="7" class="text-center py-5 text-muted">
+                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Loading borrow history...
+            </td>
+        </tr>
+    `;
+    document.getElementById("entryText").innerHTML = "";
+    document.getElementById("pagination").innerHTML = "";
+}
+
 async function loadBorrowHistory(page = 1) {
     currentPage = page;
+    showBorrowHistoryLoading();
 
     const params = new URLSearchParams({
         page,
@@ -62,6 +76,9 @@ async function loadBorrowHistory(page = 1) {
                 <tr>
                     <td class="py-3 px-4">
                         <img src="${book.cover_image}"
+                             alt="${book.title} book cover"
+                             loading="lazy"
+                             decoding="async"
                              style="width:60px; height:80px; object-fit:cover; border-radius:8px;">
                     </td>
                     <td class="py-3 px-4 text-nowrap">
